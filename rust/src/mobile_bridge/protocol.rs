@@ -215,6 +215,25 @@ mod tests {
     }
 
     #[test]
+    fn request_matches_the_android_and_node_interop_vector() {
+        let pairing = Pairing {
+            companion_id: "5b017391-6dc4-4ab7-b0ad-2255dada62d7".into(),
+            shared_key_base64_url: URL_SAFE_NO_PAD.encode(std::array::from_fn::<_, 32, _>(
+                |index| u8::try_from(index).unwrap(),
+            )),
+        };
+        let request = Request {
+            protocol_version: 1,
+            companion_id: pairing.companion_id.clone(),
+            requested_at_epoch_seconds: 1700000000,
+            nonce: URL_SAFE_NO_PAD.encode([1_u8; 16]),
+            signature: "EcBHhL1ayalXOhEJMO2C1tWFeqcBHsdjugdzUJBNVdQ".into(),
+        };
+        assert!(request.authenticate(&pairing, 1700000000));
+        assert!(!request.authenticate(&pairing, 1700000121));
+    }
+
+    #[test]
     fn pairing_and_private_addresses_are_bounded() {
         let pairing = Pairing::generate();
         assert!(pairing.validate());
