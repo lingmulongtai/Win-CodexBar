@@ -20,6 +20,7 @@ pub mod logging;
 pub mod login;
 #[cfg(windows)]
 pub mod managed_process;
+pub mod mobile_bridge;
 pub mod notifications;
 pub mod power_assertion;
 pub mod process_environment;

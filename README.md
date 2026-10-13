@@ -1,3 +1,4 @@
+> **Win-CodexBar Mobile fork** — This owned fork adds encrypted usage sharing to [CodexBar Android](https://github.com/lingmulongtai/CodexBar-android). Start with the [Android sharing setup guide](docs/android-sharing.md). The Windows portable preview is unsigned; Android releases use the Android project's existing signature. Provider collection is inherited from [nesszer/Win-CodexBar](https://github.com/nesszer/Win-CodexBar). Gemini here means Gemini CLI, not the Google Gemini Windows app.
 # Win-CodexBar
 
 [English](./README.md) | [简体中文](./README.zh-CN.md) | [繁體中文（臺灣）](./README.zh-TW.md) | [日本語](./README.ja-JP.md) | [한국어](./README.ko-KR.md) | [Español mexicano](./README.es-MX.md) | [Português (Brasil)](./README.pt-BR.md) | [Türkçe](./README.tr-TR.md)

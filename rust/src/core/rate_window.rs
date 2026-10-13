@@ -204,7 +204,8 @@ impl RateWindow {
         self
     }
 
-    pub(crate) fn usage_known(&self) -> bool {
+    /// Whether the provider explicitly reported usage for this window.
+    pub fn usage_known(&self) -> bool {
         self.usage_known
     }
 

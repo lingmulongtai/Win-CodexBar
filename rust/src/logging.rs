@@ -21,7 +21,7 @@ pub fn safe_error_message(err: impl std::fmt::Display) -> String {
 
 /// Canonical application config root that hosts the settings file and logs.
 pub fn config_root() -> Option<PathBuf> {
-    dirs::config_dir().map(|p| p.join("CodexBar"))
+    dirs::config_dir().map(|p| p.join("Win-CodexBar-Mobile"))
 }
 
 /// Settings directory that hosts the app settings file (also the log root).

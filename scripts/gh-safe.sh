@@ -13,9 +13,8 @@ Usage:
   bash scripts/gh-safe.sh --repo owner/repo --verify-kind repo|pr|issue|release [--target id-or-tag] [--allow-upstream-write] [--what-if] -- <gh args...>
 
 Examples:
-  bash scripts/gh-safe.sh --repo nesszer/Win-CodexBar --verify-kind pr --target 361 --what-if -- pr comment 361 --body-file .review/comment.md
-  bash scripts/gh-safe.sh --repo nesszer/Win-CodexBar --verify-kind repo --what-if -- pr create --title "..." --body-file body.md
-  bash scripts/gh-safe.sh --repo microsoft/winget-pkgs --verify-kind repo --what-if -- pr create --head Finesssee:branch --title "..." --body-file body.md
+  bash scripts/gh-safe.sh --repo lingmulongtai/Win-CodexBar --verify-kind pr --target 1 --what-if -- pr comment 1 --body-file .review/comment.md
+  bash scripts/gh-safe.sh --repo lingmulongtai/Win-CodexBar --verify-kind repo --what-if -- pr create --title "..." --body-file body.md
 EOF
 }
 
@@ -38,13 +37,12 @@ gh_args=("$@")
 case "$verify_kind" in repo|pr|issue|release) ;; *) echo "Invalid --verify-kind '$verify_kind'." >&2; exit 2 ;; esac
 ((${#gh_args[@]} > 0)) || { echo 'No gh command supplied after --.' >&2; exit 2; }
 
-if [[ "${repo,,}" == "steipete/codexbar" ]]; then
-  ((allow_upstream_write == 1)) || { echo 'Writes to steipete/CodexBar are blocked by default. Explicit current-turn authorization is required.' >&2; exit 3; }
+if [[ "${repo,,}" == "steipete/codexbar" || "${repo,,}" == "nesszer/win-codexbar" ]]; then
+  ((allow_upstream_write == 1)) || { echo 'Upstream writes are blocked by default. Explicit current-turn authorization is required.' >&2; exit 3; }
 else
-  # Winget release step: the fork receives the manifest branch, and the PR opens on microsoft/winget-pkgs.
   case "${repo,,}" in
-    nesszer/win-codexbar|finesssee/winget-pkgs|microsoft/winget-pkgs) ;;
-    *) echo "GitHub writes are not allowlisted for '$repo'. Expected nesszer/Win-CodexBar, Finesssee/winget-pkgs or microsoft/winget-pkgs." >&2; exit 3 ;;
+    lingmulongtai/win-codexbar) ;;
+    *) echo "GitHub writes are not allowlisted for '$repo'. Expected lingmulongtai/Win-CodexBar." >&2; exit 3 ;;
   esac
 fi
 

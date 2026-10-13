@@ -4,8 +4,11 @@
 //! metadata flows through the bridge. Active-account selection is clamped
 //! against the current list size before each response.
 
+use crate::state::AppState;
 use codexbar::core::{ProviderId, TokenAccount, TokenAccountStore, TokenAccountSupport};
 use serde::Serialize;
+use std::sync::Mutex;
+use tauri::Manager;
 
 /// Bridge-friendly token account support descriptor for a provider.
 #[derive(Debug, Clone, Serialize)]
@@ -130,6 +133,9 @@ pub fn add_token_account(
     data.add_account(TokenAccount::new(label, token.trim()));
     store.save_provider(id, &data).map_err(|e| e.to_string())?;
     crate::auto_resume::clear(&app, id);
+    if let Ok(mut state) = app.state::<Mutex<AppState>>().lock() {
+        super::providers::invalidate_account_usage(&mut state, id);
+    }
     let active = data.clamped_active_index();
     Ok(build_provider_token_accounts(
         id,
@@ -155,6 +161,9 @@ pub fn remove_token_account(
     data.remove_account(uuid);
     store.save_provider(id, &data).map_err(|e| e.to_string())?;
     crate::auto_resume::clear(&app, id);
+    if let Ok(mut state) = app.state::<Mutex<AppState>>().lock() {
+        super::providers::invalidate_account_usage(&mut state, id);
+    }
     let active = data.clamped_active_index();
     Ok(build_provider_token_accounts(
         id,
@@ -180,6 +189,9 @@ pub fn set_active_token_account(
     data.set_active_by_id(uuid);
     store.save_provider(id, &data).map_err(|e| e.to_string())?;
     crate::auto_resume::clear(&app, id);
+    if let Ok(mut state) = app.state::<Mutex<AppState>>().lock() {
+        super::providers::invalidate_account_usage(&mut state, id);
+    }
     let active = data.clamped_active_index();
     Ok(build_provider_token_accounts(
         id,

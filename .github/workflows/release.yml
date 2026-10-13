@@ -14,6 +14,7 @@ concurrency:
 jobs:
   sign:
     name: Build and sign
+    if: github.repository == 'nesszer/Win-CodexBar'
     runs-on: windows-latest
     timeout-minutes: 240
     permissions:
@@ -197,6 +198,7 @@ jobs:
 
   publish:
     name: Publish verified assets to draft
+    if: github.repository == 'nesszer/Win-CodexBar'
     needs: sign
     runs-on: windows-latest
     timeout-minutes: 30

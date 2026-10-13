@@ -568,7 +568,7 @@ impl NotificationManager {
         use std::sync::Once;
 
         // Register our AUMID (App User Model ID) exactly once per process so that
-        // CreateToastNotifier("CodexBar") finds a valid registration rather than
+        // CreateToastNotifier("com.lingmulongtai.wincodexbar.mobile") finds a valid registration rather than
         // silently returning a null notifier.
         static AUMID_INIT: Once = Once::new();
         AUMID_INIT.call_once(ensure_aumid_registered);
@@ -599,14 +599,14 @@ impl NotificationManager {
     $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
     $xml.LoadXml($template)
     $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
-    $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("CodexBar")
+    $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("{}")
     if ($null -eq $notifier) {{ throw "CreateToastNotifier returned null" }}
     $notifier.Show($toast)
 }} catch {{
     [System.Console]::Error.WriteLine("CodexBar toast failed: $_")
     exit 1
 }}"#,
-            safe_title, safe_body
+            safe_title, safe_body, WINDOWS_AUMID
         );
 
         match Command::new("powershell")
@@ -682,9 +682,12 @@ impl Default for NotificationManager {
 }
 
 /// Register the CodexBar App User Model ID (AUMID) in the Windows registry so that
-/// `CreateToastNotifier("CodexBar")` resolves to a valid notifier instead of returning
+/// `CreateToastNotifier("com.lingmulongtai.wincodexbar.mobile")` resolves to a valid notifier instead of returning
 /// null.  Must be called at least once before the first toast.  Safe to call multiple
 /// times (idempotent registry write).
+#[cfg(target_os = "windows")]
+const WINDOWS_AUMID: &str = "com.lingmulongtai.wincodexbar.mobile";
+
 #[cfg(target_os = "windows")]
 fn ensure_aumid_registered() {
     use winreg::RegKey;
@@ -694,8 +697,8 @@ fn ensure_aumid_registered() {
     // HKCU\SOFTWARE\Classes\AppUserModelId\<AUMID> is the documented path for
     // registering Win32 desktop app AUMIDs without a COM server or Start Menu shortcut.
     let result = hkcu
-        .create_subkey(r"SOFTWARE\Classes\AppUserModelId\CodexBar")
-        .and_then(|(key, _)| key.set_value("DisplayName", &"CodexBar"));
+        .create_subkey(format!(r"SOFTWARE\Classes\AppUserModelId\{WINDOWS_AUMID}"))
+        .and_then(|(key, _)| key.set_value("DisplayName", &"Win-CodexBar Mobile"));
 
     match result {
         Ok(()) => tracing::debug!("CodexBar AUMID registered for Windows toast notifications"),

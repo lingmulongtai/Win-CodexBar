@@ -1020,10 +1020,10 @@ impl Settings {
         if enabled {
             let exe_path = std::env::current_exe()?;
             let command = Self::start_at_login_command(&exe_path);
-            run_key.set_value("CodexBar", &command)?;
+            run_key.set_value("Win-CodexBar-Mobile", &command)?;
         } else {
             // Best-effort removal; a missing value means the desired state already.
-            let _removed_value = run_key.delete_value("CodexBar");
+            let _removed_value = run_key.delete_value("Win-CodexBar-Mobile");
         }
 
         Ok(())
@@ -1042,14 +1042,14 @@ impl Settings {
             return false;
         };
 
-        let Ok(existing) = run_key.get_value::<String, _>("CodexBar") else {
+        let Ok(existing) = run_key.get_value::<String, _>("Win-CodexBar-Mobile") else {
             return false;
         };
 
         match std::env::current_exe() {
             Ok(exe_path) if Self::start_at_login_command_needs_repair(&existing, &exe_path) => {
                 let command = Self::start_at_login_command(&exe_path);
-                if let Err(error) = run_key.set_value("CodexBar", &command) {
+                if let Err(error) = run_key.set_value("Win-CodexBar-Mobile", &command) {
                     tracing::warn!("Failed to repair CodexBar start-at-login command: {error}");
                 }
             }

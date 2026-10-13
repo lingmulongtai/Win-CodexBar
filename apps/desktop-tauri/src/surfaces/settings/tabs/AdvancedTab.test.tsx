@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const tauriMocks = vi.hoisted(() => ({
   getSafeDiagnostics: vi.fn(),
+  getMobileSharingStatus: vi.fn().mockResolvedValue({ enabled: false, running: false, address: "127.0.0.1", port: 43825, error: null }),
   registerGlobalShortcut: vi.fn().mockResolvedValue(undefined),
   unregisterGlobalShortcut: vi.fn().mockResolvedValue(undefined),
 }));
@@ -202,6 +203,7 @@ describe("AdvancedTab Mac grouped layout", () => {
       "PrivacyTitle",
       "CodexLocalLogsTitle",
       "SectionLocalIntegrations",
+      "MobileSharingTitle",
       "NetworkProxyTitle",
       "DiagnosticsSectionHeading",
     ]);
