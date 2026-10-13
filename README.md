@@ -1,223 +1,69 @@
-> **Win-CodexBar Mobile fork** — This owned fork adds encrypted usage sharing to [CodexBar Android](https://github.com/lingmulongtai/CodexBar-android). Start with the [Android sharing setup guide](docs/android-sharing.md). The Windows portable preview is unsigned; Android releases use the Android project's existing signature. Provider collection is inherited from [nesszer/Win-CodexBar](https://github.com/nesszer/Win-CodexBar). Gemini here means Gemini CLI, not the Google Gemini Windows app.
-# Win-CodexBar
+# Win-CodexBar + Mobile Connect
 
-[English](./README.md) | [简体中文](./README.zh-CN.md) | [繁體中文（臺灣）](./README.zh-TW.md) | [日本語](./README.ja-JP.md) | [한국어](./README.ko-KR.md) | [Español mexicano](./README.es-MX.md) | [Português (Brasil)](./README.pt-BR.md) | [Türkçe](./README.tr-TR.md)
+Windows AI usage monitoring with encrypted sharing to **CodexBar for Android**. An independently maintained fork of [nesszer/Win-CodexBar](https://github.com/nesszer/Win-CodexBar), originally based on [steipete/CodexBar](https://github.com/steipete/CodexBar).
 
-Win-CodexBar is a Windows system-tray app for keeping AI coding-tool usage visible without opening a dozen dashboards. It ports the spirit of [CodexBar](https://github.com/steipete/CodexBar) to a Tauri + React desktop shell backed by shared Rust provider logic.
+[日本語](README.ja-JP.md) · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md)
 
-<table>
-  <tr>
-    <td width="36%" align="center">
-      <img src="docs/images/tray-panel.png" alt="Win-CodexBar tray panel showing provider usage cards"/>
-    </td>
-    <td width="64%" align="center">
-      <img src="docs/images/settings-providers.png" alt="Win-CodexBar Providers settings page"/>
-    </td>
-  </tr>
-</table>
+## Download
 
-## Highlights
+**[Download Windows EXE directly](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [Stable release and checksums](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · **[Signed Android APK](https://github.com/lingmulongtai/CodexBar-android/releases/latest/download/app-release.apk)**
 
-- **56 providers** including Codex, Claude, Copilot, OpenRouter, Cursor, Gemini, DeepSeek, MiniMax, Kiro, Antigravity, Groq, Qoder, Sakana AI, CrossModel, and more.
-- **Tray-first workflow** with a compact provider grid, usage cards, refresh action, settings shortcut, and quit control.
-- **Provider settings** for source selection, credentials, cookie import, token accounts, API keys, regions, and tray-display preferences.
-- **Windows credential protection** for app-managed API keys, manual cookies, and token accounts, using user-scoped DPAPI where available.
-- **Browser cookie import** for Chrome Stable, Beta, Dev, Canary, Chrome for Testing, Chromium, Edge, Brave, and Firefox, kept opt-in per provider.
-- **Installed local CLI** for scripting usage, cost, config, diagnostics, and loopback integrations.
-- **Installer + portable builds** with WebView2 runtime bootstrap, VC++ runtime bootstrap, and SHA-256 checksum files.
+Save the EXE in a permanent folder and run it. No ZIP extraction or Node.js installation is required. Windows 10/11 x64 and [Microsoft WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) are required. The EXE includes the C runtime and WebView2 loader; the WebView2 Runtime itself is separate.
 
-## Install
+This fork's Windows EXE is **unsigned** and uses no upstream signing certificate or installer. Check `SHA256SUMS`. To update, quit the app and replace the EXE. The app's update screen opens this fork's releases. Android APKs retain the established production signing identity; install over the existing app to preserve connections.
 
-Install with Windows Package Manager:
+## What this fork adds
 
-```powershell
-winget install Finesssee.Win-CodexBar
-```
+| Feature | Behavior |
+| --- | --- |
+| Android sharing | Windows collects once; the phone receives sanitized encrypted snapshots. Provider credentials stay on the PC. |
+| Tailscale selection | Detect/select the PC's Tailscale IPv4 address. Same tailnet required; no exit node needed. LAN is also supported. |
+| Android acquisition modes | Phone collection or Windows collection, with optional per-service phone exceptions. Pairing, choices and separate histories survive switching. |
+| PC token/cost totals | Cached local-log totals for today, 30 days and the selected history period, where available, with their own aggregation timestamp. USD costs are estimates. |
+| Owned distribution | Direct EXE, stable releases, correct support/update links and independent app identity. Existing Mobile Preview settings/pairings are retained. |
 
-Or download the latest installer/portable build from [GitHub Releases](https://github.com/nesszer/Win-CodexBar/releases).
+The original collectors, tray, history, notifications, themes and provider settings remain the foundation. This integration does not start a second collector.
 
-- Installer: `CodexBar-<version>-Setup.exe`
-- Portable: `CodexBar-<version>-portable.exe`
-- Checksums: each release includes `.sha256` files
+## Connect
 
-Winget distribution is approved through [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs/tree/master/manifests/f/Finesssee/Win-CodexBar). New versions can take a little time to appear because every Winget update is pinned to a specific release URL and installer hash.
+1. Connect and enable the desired providers on Windows.
+2. Open **Advanced → Android sharing**. Select **Tailscale (no exit node)** or **LAN**, then enable sharing. Default TCP port: **43825**.
+3. Copy the private pairing code into Android **Connections → Usage source & Windows connection**, then connect. Pairing selects Windows mode.
+4. Choose **Collect on this phone** or **Collect on Windows**. Advanced phone exceptions select individual services to keep on their saved phone connection.
 
-## Code signing
+Both devices can use the same tailnet with the phone's exit node set to **None**. Select the PC's `100.x.x.x` address; ordinary internet traffic need not pass through home. Tailscale access rules and Windows Firewall must permit the app's port. The app does not change VPN or firewall settings. [Setup and troubleshooting](docs/android-sharing.md)
 
-> **Code signing:** SignPath.io is wired into the GitHub Actions release path, but production signing remains fail-closed until the Release certificate 2026 is issued and the `release-signing` policy becomes valid. See [docs/CODE_SIGNING.md](docs/CODE_SIGNING.md) for the signing policy.
-> The v0.60.3 release is immutable and unsigned; verify its SHA-256 files. The first signed release will be the next normal version after SignPath onboarding.
+Windows must remain running. Android polls during dashboard/background refreshes; delivery is not instant push. Offline Windows never silently switches to another phone account. New known Windows services are discovered at refresh, including authentication-required providers. Legacy source selections migrate to phone exceptions; **Use Windows for all services** explicitly clears them.
 
-## First Run
+## Actual screens
 
-1. Launch **CodexBar** from the Start Menu or portable executable.
-2. Click the tray icon to open the usage panel.
-3. Open **Settings -> Providers**.
-4. Enable the providers you use.
-5. Add the matching credential type: OAuth/device login, API key, browser cookies, local CLI login, or token account.
+Native Windows and Android emulator captures use synthetic data. Loopback/host addresses shown here are validation endpoints; use LAN or Tailscale for a physical phone.
 
-For Claude, browser cookies/sessionKey are preferred because they match Claude's settings-page usage. OAuth and CLI stay available as fallbacks. For CLI-based providers such as Codex and Gemini, sign in with the provider CLI first.
+![Japanese Windows sharing settings](docs/images/mobile-connect/windows-sharing-ja.jpg)
 
-## Latest Release
+<p>
+  <img src="docs/images/mobile-connect/android-windows-mode.png" width="280" alt="Android Windows acquisition mode" />
+  <img src="docs/images/mobile-connect/android-pc-local-usage.png" width="280" alt="PC tokens and estimated costs on Android" />
+</p>
 
-**v0.33.2** fixes tray-panel dismissal so the popover closes on focus loss or Escape, without immediately reopening from the same tray click.
+## Data and limits
 
-See the full history in [CHANGELOG.md](CHANGELOG.md).
+Quota windows, reset times, observation timestamps, optional budgets/balances and known Codex reset credits are shared. Local-log totals may cover multiple accounts and are separate from the current quota account and billed charges. Unknown numbers remain unknown. Quota observations over 35 minutes old are stale; over two hours old are unavailable. Local totals have their own PC calendar date and timestamp.
 
-## Supported Providers
+Pairing uses Windows DPAPI and Android Keystore. HMAC-SHA256 requests have clock/replay checks; responses use AES-256-GCM. Provider secrets, emails, account names, local paths, prompts and transcripts are excluded. Keep pairing codes private; **Revoke paired phones** invalidates old codes.
 
-<details>
-<summary>Provider matrix</summary>
+**Gemini means Gemini CLI; Google Gemini Apps / the Windows Gemini app's usage display is not collected.** There is no cloud relay or phone discovery. Physical-phone, live-account, launcher and Samsung Now Bar acceptance are separate from emulator tests. [Validation evidence](docs/mobile-validation.md) · [v0.70.1 changes](docs/releases/v0.70.1.md)
 
-| Provider | Auth | Tracks |
-|---|---|---|
-| Codex | OAuth / CLI | Session, Weekly, Credits |
-| Claude | Cookies / OAuth fallback / CLI fallback | Session (5h), Weekly |
-| Cursor | Cookies | Plan, Usage, Billing |
-| Factory | Cookies | Usage |
-| Gemini | gcloud OAuth | Quota |
-| Copilot | GitHub Device Flow / gh CLI / legacy token | Plan usage, Chat |
-| Antigravity | Local LSP | Usage, Per-model quotas |
-| z.ai | API Token | Quota |
-| MiniMax | API / Cookies | Usage, Billing Summary |
-| Kiro | Cookies / CLI | Monthly Credits, Overage |
-| Vertex AI | gcloud OAuth | Cost |
-| v0 | API Key | Billing quota, API rate limits, on-demand balance |
-| Vercel AI Gateway | API Key | Team credit balance, lifetime spend |
-| Augment | Cookies | Credits |
-| OpenCode | Local Config | Usage |
-| Kimi | Cookies | 5h Rate, Weekly |
-| Kimi K2 | API Key | Credits |
-| Amp | Cookies | Usage |
-| Warp | Local Config | Usage |
-| Ollama | Cookies / API Key | Usage, Cloud Models, Pace windows |
-| Azure OpenAI | API Key | Deployment |
-| T3 Chat | Cookies / cURL | Base, Overage |
-| TypeSafe | Browser cookies / manual Cookie header | Billing-cycle spend, balance, expiring credits |
-| OpenRouter | API Key | Credits |
-| JetBrains AI | Local Config | Usage |
-| Alibaba | Cookies | Usage |
-| Alibaba Token Plan | Cookies | Token Plan Credits, Reset date |
-| NanoGPT | API Key | Credits |
-| Infini | API Key | Session, Weekly, Quota |
-| Perplexity | Cookies | Credits, Plan |
-| Abacus AI | Cookies | Credits |
-| Mistral | Cookies | Billing, Usage |
-| OpenCode Go | Cookies | Usage, Zen Balance |
-| Kilo | API Key / CLI | Usage |
-| Codebuff | API Key / Local Config | Credits, Weekly |
-| DeepSeek | API Key | Balance, Usage summaries, Cost |
-| Windsurf | Local Cache | Daily, Weekly |
-| Manus | Cookies | Credits, Refresh Credits |
-| Xiaomi MiMo | Cookies | Balance, Token Plan |
-| Doubao | API Key | Request Limits |
-| Command Code | Cookies | Monthly Credits, Purchased Credits |
-| StepFun | Oasis Token | 5h, Weekly, Token refresh |
-| Venice | API Key / Web session | USD / DIEM Balance, Bundled credits (web session expires in about 60 s) |
-| OpenAI | Admin API / API Key | Usage, Requests, Project-scoped cost, Credit Balance |
-| Grok | Cookies / auth.json | Billing |
-| Helmcode (also NaN Builders) | Browser cookies / manual Cookie header | Per-model token quotas, reset windows, Helmcode prepaid balance |
-| Raycast | Cookies (Chrome auto or manual) | Monthly AI credits, plan, renewal |
-| Replicate | Cookies / token accounts | Monthly spend, credit balance |
-| Aixy | API Key / token accounts | Applicable budget balances, 7-day key usage |
-| ClawRouter | API Key | Monthly budget, requests, tokens, routed-provider spend |
-| ElevenLabs | API Key | Subscription Credits, Voice Slots |
-| Deepgram | API Key | Project Usage |
-| Groq | API Key | Enterprise Metrics |
-| LLM Proxy | API Key | Quota Stats |
-| llmman | Local daemon / optional API Key | Memory in use, loaded and stored models |
-| DevPass | API Key | Plan credits, Premium weekly, API-key spend |
-| IBM Bob | API Key / token accounts | Monthly Bobcoins, per-team budgets |
-| xKiro | API Key | Daily free tokens |
-| Synthetic | API Key | Five-hour quota, Weekly tokens, Hourly search, Plan |
-| Sail Research | API Key | Organization credit balance, spend for the reported range (up to 30 days) |
-| Linkup | API Key | Account credit balance |
-| Langdock | Browser cookies / manual Cookie header | Session (5h), Weekly |
-| LithosAI | Browser cookies / manual Cookie header | Prepaid balance, UTC spend today and this month |
-| Muse (muse.ai) | Browser cookies / manual Cookie header | Weekly usage, tokens left, top-up tokens |
-| WorkBuddy | Browser cookies / manual Cookie header | Monthly credits left, plan, cycle reset |
-
-</details>
-
-## Supported Languages
-
-The UI and contributor reporting currently support:
-
-- English
-- 简体中文
-- 繁體中文（臺灣）
-- 日本語
-- 한국어
-- Español mexicano
-- Português (Brasil)
-- Türkçe
-- Українська
-
-## Build From Source
+## Development
 
 ```powershell
-# Prerequisites: Node.js + pnpm. Rust and MinGW are installed by the script when needed.
-git clone https://github.com/nesszer/Win-CodexBar.git
-cd Win-CodexBar
-.\scripts\dev.ps1
+git clone https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect.git
+cd Win-CodexBar-Mobile-Connect
+. .\scripts\worktree-env.ps1
+pnpm --dir apps/desktop-tauri install --frozen-lockfile
+pnpm --dir apps/desktop-tauri run tauri:dev
 ```
 
-Useful dev flags:
+Development requires Rust, Windows build tools and the pinned pnpm version. Run `cargo test --locked --workspace`, `cargo fmt --all -- --check`, frontend `pnpm test`, `pnpm run lint` and `pnpm run build`. Build using `pnpm run tauri:build`; raw Cargo can embed the development URL. [Repository rules](AGENTS.md)
 
-```powershell
-.\scripts\dev.ps1 -Release      # optimized build
-.\scripts\dev.ps1 -SkipBuild    # relaunch the last build
-```
-
-CLI examples:
-
-```bash
-codexbar-cli --help
-codexbar-cli diagnose --pretty
-codexbar-cli usage -p claude
-codexbar-cli usage -p all
-codexbar-cli cost -p codex
-```
-
-Installer builds include `codexbar.exe` as the tray app and `codexbar-cli.exe` as the console CLI. Start Menu shortcuts launch the desktop app; terminal commands use `codexbar-cli.exe`. `codexbar-desktop.exe` is still installed as a compatibility alias for older shortcuts and autostart entries.
-
-## Release Builds
-
-For local Windows release builds, use the cached release builder:
-
-```powershell
-.\scripts\windows-release-build.ps1 -Ref v0.33.2 -SmokeInstall
-```
-
-The script builds the real Tauri release binary plus the console CLI, verifies signed installer dependencies, packages with Inno Setup, writes installer/portable assets, writes SHA-256 sidecars, and can run a silent install/uninstall smoke test.
-
-More release automation notes live in [docs/release/ci-cd.md](docs/release/ci-cd.md).
-
-## Privacy
-
-- **On-device by default**: provider data is read from known local paths or provider APIs you configure.
-- **Opt-in cookies**: browser-cookie extraction only runs for providers you enable.
-- **Protected secrets**: API keys, manual cookies, and token accounts use the secure-file layer; Windows uses user-scoped DPAPI where available.
-- **Safe diagnostics**: diagnostics expose provider/source/status metadata only, never raw cookies, API keys, bearer tokens, or OAuth values.
-- **Verified updates**: installer downloads require a GitHub SHA-256 digest and are re-verified immediately before apply.
-
-## Docs
-
-| Topic | Link |
-|---|---|
-| Building from source | [docs/BUILDING.md](docs/BUILDING.md) |
-| WSL setup and auth tips | [docs/WSL.md](docs/WSL.md) |
-| Browser cookie details | [docs/COOKIES.md](docs/COOKIES.md) |
-
-## Local integrations
-
-- [AI Usage Limits](https://github.com/lenadweb/stream-deck-ai-limits) — Elgato Stream Deck integration that can consume the local `codexbar serve` dashboard/API to show provider, account, quota, or payload metrics.
-- [AI Monitor](https://github.com/tobymarks/esp32-ai-monitor) — ESP32 desk display (Cheap Yellow Display) with a Windows companion app (beta) that calls the installed CLI (`codexbar-cli usage -p <provider> --json`) and streams Claude, Codex, Copilot, Cursor, Gemini, or Antigravity limits to the display over USB serial.
-
-## Credits
-
-- Original macOS app: [steipete/CodexBar](https://github.com/steipete/CodexBar) by Peter Steinberger
-- Inspired by [ccusage](https://github.com/ryoppippi/ccusage) for cost tracking
-
-## License
-
-MIT, same as the original CodexBar.
+[MIT license](LICENSE). Original collector/UI work belongs to the Win-CodexBar/CodexBar contributors. This fork has its own [issues](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues) and releases.
