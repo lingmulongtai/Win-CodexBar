@@ -18,7 +18,7 @@ const ABOUT_LINKS: ReadonlyArray<{ labelKey: LocaleKey; url: string }> = [
   },
   {
     labelKey: "AboutLinkWebsite",
-    url: "https://codexbar.app",
+    url: `${REPO_URL}#readme`,
   },
   {
     labelKey: "AboutLinkOriginalProject",

@@ -143,7 +143,7 @@ describe("AboutTab", () => {
     );
     expect(tauriMocks.openExternalUrl).toHaveBeenNthCalledWith(
       2,
-      "https://codexbar.app",
+      "https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect#readme",
     );
     expect(tauriMocks.openExternalUrl).toHaveBeenNthCalledWith(
       3,
