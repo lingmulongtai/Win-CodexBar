@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "CodexBar Desktop",
+  "productName": "Win-CodexBar Mobile",
   "version": "0.70.0",
-  "identifier": "com.codexbar.desktop",
+  "identifier": "com.lingmulongtai.wincodexbar.mobile",
   "build": {
     "beforeDevCommand": "pnpm run dev",
     "beforeBuildCommand": "pnpm run build",
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "CodexBar Desktop",
+        "title": "Win-CodexBar Mobile",
         "width": 496,
         "height": 800,
         "minWidth": 320,
