@@ -61,6 +61,14 @@ export type Language =
   | "turkish"
   | "ukrainian";
 
+export interface MobileSharingStatus {
+  enabled: boolean;
+  running: boolean;
+  address: string;
+  port: number;
+  error: string | null;
+}
+
 /** Language catalog entry from the Rust backend. */
 export type LanguageOption = {
   /** Stable bridge/settings value (e.g. "english") */

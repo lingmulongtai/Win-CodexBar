@@ -1587,3 +1587,17 @@ ProviderCodexBatterySaver = OpenAI 网页省电
 ProviderCodexBatterySaverHelp = 限制 chatgpt.com 后台刷新，以减少电池和网络消耗。仪表板附加信息可能在手动刷新前保持旧数据。
 ProviderOptionNotUsedOnWindows = Windows 上尚未使用；该选择会保存，待支持后生效。
 ClaudeSwapExecutablePathHelp = cswap 可执行文件的路径 (github.com/realiti4/claude-swap)。
+
+MobileSharingTitle = Android sharing
+MobileSharingHelper = Share usage with CodexBar Android on the same LAN or Tailscale network. Enable sharing, copy the pairing code, then paste it in Android Connections. Allow this app through Windows Firewall on your private network if needed. The code grants usage access; keep it private. Provider credentials stay on this PC. Gemini refers to Gemini CLI usage.
+MobileSharingEnable = Share usage with Android
+MobileSharingAddress = This PC's private IPv4 address
+MobileSharingPort = Port (1024–65535)
+MobileSharingSave = Apply address
+MobileSharingCopy = Copy pairing code
+MobileSharingCopied = Pairing code copied. Paste it in Android Connections.
+MobileSharingRevoke = Revoke paired phones
+MobileSharingRevoked = Previous pairing codes are invalid. Pair again with the new code.
+MobileSharingRunning = Sharing is running
+MobileSharingStopped = Sharing is stopped
+MobileSharingFailed = Mobile sharing failed.
