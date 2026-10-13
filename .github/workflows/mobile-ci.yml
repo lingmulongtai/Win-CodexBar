@@ -51,6 +51,7 @@ jobs:
           $env:TMP = $testTemp
           cargo fmt --all -- --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./scripts/release-pipeline.tests.ps1
           cargo clippy --locked --workspace --all-targets -- -D warnings
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cargo test --locked --workspace

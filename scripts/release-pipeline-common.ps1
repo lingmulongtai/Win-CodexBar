@@ -168,3 +168,13 @@ function Get-DynamicCrtImports {
 
     return @($DllNames | Where-Object { $_ -match '^(vcruntime\d+(_\d+)?d?|msvcp\d+(_[a-z0-9]+)?d?|ucrtbased?|api-ms-win-crt-[\w-]+)\.dll$' })
 }
+
+function Get-Windows10MobileExternalRuntimeImports {
+    param([AllowEmptyCollection()][string[]]$DllNames)
+
+    # UCRT and its API sets ship with the supported Windows 10/11 baseline.
+    # https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment
+    return @($DllNames | Where-Object {
+        ($_ -match '^(vcruntime\d+(_[a-z0-9]+)*d?|msvcp\d+(_[a-z0-9]+)*d?|msvcr\d+d?|ucrtbased|WebView2Loader)\.dll$')
+    })
+}

@@ -1,6 +1,6 @@
 # Android sharing — Win-CodexBar + Mobile Connect
 
-This independent fork adds an optional encrypted Windows-to-Android feed to the existing Win-CodexBar collectors. Windows v0.70.1 and [CodexBar Android v0.9.7](https://github.com/lingmulongtai/CodexBar-android/releases/latest) add explicit acquisition modes and PC log totals. Android v0.9.6 can still read basic quota snapshots; update to v0.9.7 for the new features.
+This independent fork adds an optional encrypted Windows-to-Android feed to the existing Win-CodexBar collectors. Windows v0.70.2 and [CodexBar Android v0.9.7](https://github.com/lingmulongtai/CodexBar-android/releases/latest) add explicit acquisition modes and PC log totals. Android v0.9.6 can still read basic quota snapshots; update to v0.9.7 for the new features.
 
 ## Setup
 

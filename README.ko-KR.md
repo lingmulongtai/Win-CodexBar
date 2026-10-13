@@ -14,6 +14,6 @@ PC의 로컬 로그에서 확인되는 오늘, 최근 30일 및 선택 기간의
 
 ![실제 Windows 공유 설정](docs/images/mobile-connect/windows-sharing-ja.jpg)
 
-[연결 안내](docs/android-sharing.md) · [v0.70.1 변경 사항](docs/releases/v0.70.1.md) · [검증 및 제한](docs/mobile-validation.md) · [영문 전체 README](README.md) · [이 포크에 문제 보고](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues)
+[연결 안내](docs/android-sharing.md) · [v0.70.2 변경 사항](docs/releases/v0.70.2.md) · [검증 및 제한](docs/mobile-validation.md) · [영문 전체 README](README.md) · [이 포크에 문제 보고](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues)
 
 네이티브 Windows와 Android 에뮬레이터에서 합성 데이터로 촬영했습니다. 실제 휴대전화와 실제 계정 검증은 아직 완료되지 않았습니다. [MIT 라이선스](LICENSE).

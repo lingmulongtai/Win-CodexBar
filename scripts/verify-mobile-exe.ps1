@@ -12,7 +12,7 @@ if ([BitConverter]::ToUInt32($bytes, $pe) -ne 0x4550 -or
 if ($file.VersionInfo.ProductVersion -ne $Version -or
     $file.VersionInfo.ProductName -ne 'Win-CodexBar + Mobile Connect') { throw 'EXE product name or version does not match the release.' }
 $imports = @(Get-PeImportedDllNames -Path $file.FullName)
-if (@(Get-DynamicCrtImports $imports).Count -gt 0 -or $imports -contains 'WebView2Loader.dll') {
-    throw 'Standalone EXE must statically include the CRT and WebView2 loader.'
+if (@(Get-Windows10MobileExternalRuntimeImports $imports).Count -gt 0) {
+    throw 'Standalone Windows 10/11 EXE must not require external VC++ runtime or WebView2 loader DLLs.'
 }
-Write-Host "Verified $($file.Name): x64 GUI, $Version, static CRT and WebView2 loader."
+Write-Host "Verified $($file.Name): x64 GUI, $Version, no external VC++ runtime or WebView2 loader DLLs."

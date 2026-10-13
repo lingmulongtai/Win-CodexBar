@@ -1,4 +1,4 @@
-# Mobile Connect v0.70.1 validation
+# Mobile Connect v0.70.2 validation
 
 ## Current local checks
 
@@ -14,16 +14,23 @@ CUA Driver is unavailable on this host. The bundled Computer Use capture uses Wi
 
 ![Current native Windows sharing settings](images/mobile-connect/windows-sharing-ja.jpg)
 
+## Portable EXE gate correction
+
+The downloaded PR EXE passed x64 GUI/product/version inspection and uses only Windows 10/11 OS UCRT API sets. It has no VCRUNTIME/MSVCP/WebView2Loader imports. The original v0.70.1 gate incorrectly rejected these OS components; v0.70.2 distinguishes them from redistributable and debug DLLs. Dependency-free allow/reject tests and inspection of that actual EXE passed. +crt-static stays enabled, while documentation avoids claiming that every OS CRT API is embedded. [Microsoft UCRT deployment](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment).
+
 ## Limits and release checks
 
 Synthetic fixtures prove projection, encryption, receiver interoperability and presentation. They do not prove live-account collection, off-LAN physical-phone Tailscale connectivity, physical launchers, tray-menu pixels or Samsung Now Bar. Google Gemini Apps is unsupported; the inherited collector is Gemini CLI. Tailscale access rules and Windows Firewall must allow the selected endpoint. No system routing or firewall settings were changed.
 
-The stable workflow binds the tag to the exact owned-main commit, checks versions, builds a static-CRT x64 GUI EXE, verifies product/version/imports and hashes, then publishes a normal latest release. Windows is unsigned and updates are manual. Android keeps the pinned production certificate. Hosted release results and downloaded assets require independent verification; local debug builds are not release artifacts.
+The stable workflow binds the tag to the exact owned-main commit, checks versions, builds an x64 GUI EXE without external VC++ runtime or WebView2 loader DLL dependencies, verifies product/version/imports and hashes, then publishes a normal latest release. Windows is unsigned and updates are manual. Android keeps the pinned production certificate. Hosted release results and downloaded assets require independent verification; local debug builds are not release artifacts.
 
 ## Implementation commits and purposes
 
 | Commit | Purpose |
 | --- | --- |
+| `8b984a94d` | fix: permit Windows system UCRT in portable EXE verification |
+| `b86a096cd` | chore: prepare the verified portable release as version 0.70.2 |
+| `427c912b` | docs: publish Mobile Connect setup and native screen evidence |
 | `034a8fa9` | feat: discover Tailscale sharing addresses without exit nodes |
 | `064abfac` | feat: select Tailscale or LAN sharing endpoints in settings |
 | `a342b1c0` | chore: identify the Mobile Connect fork and owned links |

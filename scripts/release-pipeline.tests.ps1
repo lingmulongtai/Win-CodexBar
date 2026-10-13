@@ -126,6 +126,10 @@ $verifierText = Get-Content -Raw -LiteralPath (Join-Path $scriptRoot 'verify-win
 Assert-True ($verifierText -match 'Get-DynamicCrtImports \(Get-PeImportedDllNames') 'executable verifier rejects dynamic CRT imports'
 Assert-Equal (@(Get-DynamicCrtImports @('KERNEL32.dll', 'VCRUNTIME140.dll', 'vcruntime140_1.dll', 'MSVCP140.dll', 'api-ms-win-crt-runtime-l1-1-0.dll', 'ucrtbase.dll', 'WS2_32.dll', 'api-ms-win-core-synch-l1-2-0.dll', 'msvcrt.dll', 'VCRUNTIME140D.dll', 'ucrtbased.dll')) -join ',') 'VCRUNTIME140.dll,vcruntime140_1.dll,MSVCP140.dll,api-ms-win-crt-runtime-l1-1-0.dll,ucrtbase.dll,VCRUNTIME140D.dll,ucrtbased.dll' 'dynamic CRT import classification'
 Assert-Equal (@(Get-DynamicCrtImports @()).Count) 0 'no imports means no dynamic CRT'
+Assert-Equal (@(Get-Windows10MobileExternalRuntimeImports @('KERNEL32.dll', 'ucrtbase.dll', 'api-ms-win-crt-runtime-l1-1-0.dll', 'api-ms-win-crt-math-l1-1-0.dll', 'msvcrt.dll')).Count) 0 'Windows 10/11 OS UCRT does not need redistribution'
+$externalMobileRuntimeDlls = @('VCRUNTIME140.dll', 'vcruntime140_1.dll', 'MSVCP140.dll', 'MSVCP140_ATOMIC_WAIT.dll', 'msvcr120.dll', 'VCRUNTIME140D.dll', 'ucrtbased.dll', 'WebView2Loader.dll')
+Assert-Equal (@(Get-Windows10MobileExternalRuntimeImports $externalMobileRuntimeDlls) -join ',') ($externalMobileRuntimeDlls -join ',') 'mobile EXE rejects external VC++ debug and WebView2 loader runtimes'
+Assert-Equal (@(Get-Windows10MobileExternalRuntimeImports @()).Count) 0 'mobile EXE handles empty imports'
 $systemExe = Join-Path $env:SystemRoot 'System32\where.exe'
 $systemImports = @(Get-PeImportedDllNames $systemExe)
 Assert-True ($systemImports.Count -gt 0 -and ($systemImports | Where-Object { $_ -ieq 'KERNEL32.dll' -or $_ -like 'api-ms-win-core-*' })) "PE import reader lists the imports of $systemExe"
