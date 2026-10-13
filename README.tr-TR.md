@@ -14,6 +14,6 @@ Ayrıntılar, mevcutsa PC'nin yerel günlüklerinden bugün, son 30 gün ve seç
 
 ![Gerçek Windows paylaşım ayarları](docs/images/mobile-connect/windows-sharing-ja.jpg)
 
-[Bağlantı rehberi](docs/android-sharing.md) · [v0.70.1 değişiklikleri](docs/releases/v0.70.1.md) · [Doğrulama ve sınırlar](docs/mobile-validation.md) · [Tam İngilizce README](README.md) · [Bu fork için sorun bildir](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues)
+[Bağlantı rehberi](docs/android-sharing.md) · [v0.70.2 değişiklikleri](docs/releases/v0.70.2.md) · [Doğrulama ve sınırlar](docs/mobile-validation.md) · [Tam İngilizce README](README.md) · [Bu fork için sorun bildir](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues)
 
 Görüntüler yerel Windows ve Android emülatöründe sentetik verilerle alınmıştır. Fiziksel telefon ve gerçek hesap doğrulaması henüz tamamlanmamıştır. [MIT lisansı](LICENSE).

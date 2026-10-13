@@ -8,7 +8,7 @@ Windows AI usage monitoring with encrypted sharing to **CodexBar for Android**. 
 
 **[Download Windows EXE directly](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [Stable release and checksums](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · **[Signed Android APK](https://github.com/lingmulongtai/CodexBar-android/releases/latest/download/app-release.apk)**
 
-Save the EXE in a permanent folder and run it. No ZIP extraction or Node.js installation is required. Windows 10/11 x64 and [Microsoft WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) are required. The EXE includes the C runtime and WebView2 loader; the WebView2 Runtime itself is separate.
+Save the EXE in a permanent folder and run it. No ZIP extraction or Node.js installation is required. Windows 10/11 x64 and [Microsoft WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) are required. No separate VC++ Redistributable or WebView2 loader DLL is needed. The Universal CRT is included in Windows 10/11; the WebView2 Runtime itself is separate.
 
 This fork's Windows EXE is **unsigned** and uses no upstream signing certificate or installer. Check `SHA256SUMS`. To update, quit the app and replace the EXE. The app's update screen opens this fork's releases. Android APKs retain the established production signing identity; install over the existing app to preserve connections.
 
@@ -52,7 +52,7 @@ Quota windows, reset times, observation timestamps, optional budgets/balances an
 
 Pairing uses Windows DPAPI and Android Keystore. HMAC-SHA256 requests have clock/replay checks; responses use AES-256-GCM. Provider secrets, emails, account names, local paths, prompts and transcripts are excluded. Keep pairing codes private; **Revoke paired phones** invalidates old codes.
 
-**Gemini means Gemini CLI; Google Gemini Apps / the Windows Gemini app's usage display is not collected.** There is no cloud relay or phone discovery. Physical-phone, live-account, launcher and Samsung Now Bar acceptance are separate from emulator tests. [Validation evidence](docs/mobile-validation.md) · [v0.70.1 changes](docs/releases/v0.70.1.md)
+**Gemini means Gemini CLI; Google Gemini Apps / the Windows Gemini app's usage display is not collected.** There is no cloud relay or phone discovery. Physical-phone, live-account, launcher and Samsung Now Bar acceptance are separate from emulator tests. [Validation evidence](docs/mobile-validation.md) · [v0.70.2 changes](docs/releases/v0.70.2.md)
 
 ## Development
 

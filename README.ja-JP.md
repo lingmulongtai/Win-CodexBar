@@ -6,7 +6,7 @@ WindowsでAIサービスの使用量を取得し、**CodexBar for Android**へ�
 
 **[Windows用EXEを直接ダウンロード](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [正式リリース・チェックサム](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · **[署名付きAndroid APK](https://github.com/lingmulongtai/CodexBar-android/releases/latest/download/app-release.apk)**
 
-EXEを保存して起動します。ZIP展開やNode.jsの導入は不要です。Windows 10/11 x64と[Microsoft WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)が必要です。EXEにはCランタイムとWebView2ローダーを組み込んでいます。WebView2 Runtime本体は別途必要です。
+EXEを保存して起動します。ZIP展開やNode.jsの導入は不要です。Windows 10/11 x64と[Microsoft WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)が必要です。追加のVC++再頒布パッケージやWebView2ローダーDLLは不要です。Universal CRTはWindows 10/11に標準搭載されています。WebView2 Runtime本体は別途必要です。
 
 Windows版は**署名なし**です。元プロジェクトの署名証明書やインストーラーは使用しません。`SHA256SUMS`で照合できます。更新時は終了してEXEを置き換えてください。アプリ内の更新・Webサイト・問い合わせ先もこのフォークを参照します。Android APKは既存の署名を保持しており、上書きインストールで接続情報を引き継げます。
 
@@ -50,6 +50,6 @@ PCは起動したままにします。スマホが通常の更新タイミング
 
 コードはWindows DPAPI／Android Keystoreで保護し、HMAC-SHA256で要求を認証、AES-256-GCMで応答を暗号化します。メール、名前、パス、プロンプト、会話内容、サービスのトークンは送信しません。コードは私的に保管し、無効化には**ペアリングを取り消す**を使います。
 
-**GeminiはGemini CLIの使用量です。Google Gemini Windowsアプリ／Gemini Appsの使用量は自動取得しません。** 実アカウント・実機スマホ・ランチャー・Samsung Now Barの確認は、エミュレーターの検証とは別です。[検証記録](docs/mobile-validation.md) · [v0.70.1の変更](docs/releases/v0.70.1.md)
+**GeminiはGemini CLIの使用量です。Google Gemini Windowsアプリ／Gemini Appsの使用量は自動取得しません。** 実アカウント・実機スマホ・ランチャー・Samsung Now Barの確認は、エミュレーターの検証とは別です。[検証記録](docs/mobile-validation.md) · [v0.70.2の変更](docs/releases/v0.70.2.md)
 
 開発方法は[English README](README.md#development)、ライセンスは[MIT](LICENSE)です。元となった[CodexBar](https://github.com/steipete/CodexBar)とWin-CodexBarの貢献者に謝意を表します。

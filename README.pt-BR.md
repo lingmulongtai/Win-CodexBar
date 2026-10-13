@@ -14,6 +14,6 @@ Os detalhes mostram tokens e custos estimados em USD dos logs locais do PC, quan
 
 ![Configuração real do Windows](docs/images/mobile-connect/windows-sharing-ja.jpg)
 
-[Guia de conexão](docs/android-sharing.md) · [Mudanças v0.70.1](docs/releases/v0.70.1.md) · [Validação e limites](docs/mobile-validation.md) · [README completo em inglês](README.md) · [Problemas deste fork](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues)
+[Guia de conexão](docs/android-sharing.md) · [Mudanças v0.70.2](docs/releases/v0.70.2.md) · [Validação e limites](docs/mobile-validation.md) · [README completo em inglês](README.md) · [Problemas deste fork](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues)
 
 Capturas do Windows nativo e do emulador Android usam dados sintéticos. A validação em telefone físico e com contas reais permanece pendente. [Licença MIT](LICENSE).
