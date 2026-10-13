@@ -8,7 +8,7 @@ import type { LocaleKey } from "../../../i18n/keys";
 import type { TabProps } from "../settingsTabs";
 import codexbarIcon from "../../../assets/codexbar-icon.png";
 
-const REPO_URL = "https://github.com/lingmulongtai/Win-CodexBar";
+const REPO_URL = "https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect";
 const SUBMIT_ISSUE_URL = `${REPO_URL}/issues/new?labels=bug&template=bug_report.yml`;
 
 const ABOUT_LINKS: ReadonlyArray<{ labelKey: LocaleKey; url: string }> = [
@@ -18,7 +18,7 @@ const ABOUT_LINKS: ReadonlyArray<{ labelKey: LocaleKey; url: string }> = [
   },
   {
     labelKey: "AboutLinkWebsite",
-    url: "https://codexbar.app",
+    url: `${REPO_URL}#readme`,
   },
   {
     labelKey: "AboutLinkOriginalProject",

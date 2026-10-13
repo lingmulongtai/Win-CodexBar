@@ -761,7 +761,10 @@ fn store_scanned_local_usage_summary(
     store_local_usage_summary(provider_id, summary);
 }
 
-fn store_local_usage_summary(provider_id: &str, summary: Option<ProviderLocalUsageSummary>) {
+pub(crate) fn store_local_usage_summary(
+    provider_id: &str,
+    summary: Option<ProviderLocalUsageSummary>,
+) {
     let period_identity = match summary.as_ref() {
         Some(summary) => {
             let Some(period_identity) = local_usage_summary_period_identity(summary) else {

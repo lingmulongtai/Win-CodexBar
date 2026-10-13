@@ -54,6 +54,7 @@ impl MobileServer {
                     _ = clients.join_next(), if !clients.is_empty() => {}
                 }
             }
+            drop(listener);
             clients.abort_all();
             while clients.join_next().await.is_some() {}
         });

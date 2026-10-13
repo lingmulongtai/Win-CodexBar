@@ -69,6 +69,11 @@ export interface MobileSharingStatus {
   error: string | null;
 }
 
+export interface MobileNetworkAddresses {
+  tailscaleAddress: string | null;
+  lanAddress: string | null;
+}
+
 /** Language catalog entry from the Rust backend. */
 export type LanguageOption = {
   /** Stable bridge/settings value (e.g. "english") */

@@ -139,11 +139,11 @@ describe("AboutTab", () => {
 
     expect(tauriMocks.openExternalUrl).toHaveBeenNthCalledWith(
       1,
-      "https://github.com/lingmulongtai/Win-CodexBar",
+      "https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect",
     );
     expect(tauriMocks.openExternalUrl).toHaveBeenNthCalledWith(
       2,
-      "https://codexbar.app",
+      "https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect#readme",
     );
     expect(tauriMocks.openExternalUrl).toHaveBeenNthCalledWith(
       3,
@@ -151,7 +151,7 @@ describe("AboutTab", () => {
     );
     expect(tauriMocks.openExternalUrl).toHaveBeenNthCalledWith(
       4,
-      "https://github.com/lingmulongtai/Win-CodexBar/issues/new?labels=bug&template=bug_report.yml",
+      "https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues/new?labels=bug&template=bug_report.yml",
     );
   });
 

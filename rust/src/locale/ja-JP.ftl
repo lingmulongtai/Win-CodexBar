@@ -1589,6 +1589,11 @@ ProviderOptionNotUsedOnWindows = Windows ではまだ使われません。選択
 ClaudeSwapExecutablePathHelp = cswap 実行ファイルのパス (github.com/realiti4/claude-swap)。
 
 MobileSharingTitle = Androidへの共有
+MobileSharingTailscale = Tailscaleを使う（exit node不要）
+MobileSharingLan = LANを使う
+MobileSharingDiscover = アドレスを再検出
+MobileSharingTailscaleHelper = 外出先でも使う場合は、PCとスマホを同じTailscaleネットワークに接続し、PCのTailscaleアドレスを選んでください。スマホのexit nodeは「なし」で使えます。アドレスを変えたら、新しいペアリングコードをAndroidに貼り付けてください。PCへ送るのはこのアプリの使用量取得通信だけです。
+MobileSharingTailscaleUnavailable = TailscaleのIPv4アドレスを検出できませんでした。PCでTailscaleをインストール・接続して再検出するか、アドレスを手動で入力してください。
 MobileSharingHelper = 同じLANまたはTailscale上のCodexBar Androidへ使用量を共有します。共有を有効にしてコードをコピーし、Androidの「接続」に貼り付けてください。必要に応じてWindowsファイアウォールでプライベートネットワークの通信を許可してください。コードは使用量へのアクセスを許可するため、大切に扱ってください。各サービスの認証情報はPC内に保存されます。GeminiはGemini CLIの使用量です。
 MobileSharingEnable = Androidへ使用量を共有
 MobileSharingAddress = このPCのプライベートIPv4アドレス

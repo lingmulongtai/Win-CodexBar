@@ -31,6 +31,25 @@ pub struct MobileProvider {
     pub budget: Option<MobileBudget>,
     pub balance: Option<MobileBalance>,
     pub reset_credits: Option<MobileResetCredits>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_usage: Option<MobileLocalUsage>,
+}
+
+/// Provider-wide PC log totals; independent from the signed-in quota account.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MobileLocalUsage {
+    pub updated_at_epoch_seconds: i64,
+    pub today_date: String,
+    pub today_tokens: Option<u64>,
+    pub thirty_day_tokens: Option<u64>,
+    pub period_tokens: Option<u64>,
+    pub today_cost_usd: Option<f64>,
+    pub thirty_day_cost_usd: Option<f64>,
+    pub period_cost_usd: Option<f64>,
+    pub reporting_period: Option<String>,
+    pub top_model: Option<String>,
+    pub incomplete_request_count: Option<u32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -325,6 +325,9 @@ pub fn seed_usage_snapshots_from_env(
     };
     match parse_seed_usage_snapshots(&raw, proof_config) {
         Ok(mut snapshots) => {
+            for (id, summary) in parse_seed_local_summaries(&raw, proof_config) {
+                crate::commands::store_local_usage_summary(&id, Some(summary));
+            }
             let now = chrono::Utc::now();
             for snapshot in &mut snapshots {
                 fill_seed_pace(snapshot, now, pace_work_days);
@@ -336,6 +339,31 @@ pub fn seed_usage_snapshots_from_env(
             None
         }
     }
+}
+
+/// Optional synthetic log totals use the same validated proof-only provider array.
+fn parse_seed_local_summaries(
+    raw: &str,
+    proof_config: Option<&ProofConfig>,
+) -> Vec<(String, crate::commands::ProviderLocalUsageSummary)> {
+    if !proof_config.is_some_and(is_valid_proof_config)
+        || parse_seed_usage_snapshots(raw, proof_config).is_err()
+    {
+        return Vec::new();
+    }
+    let Ok(value) = serde_json::from_str::<serde_json::Value>(raw) else {
+        return Vec::new();
+    };
+    value
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|item| {
+            let id = item.get("providerId")?.as_str()?.to_string();
+            let summary = serde_json::from_value(item.get("localUsageSummary")?.clone()).ok()?;
+            Some((id, summary))
+        })
+        .collect()
 }
 
 /// Parse a seed-usage JSON string directly into a canonical
@@ -537,6 +565,19 @@ fn proof_payload_is_supported(surface_mode: SurfaceMode, payload: Option<&str>) 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn local_summary_seed_requires_valid_proof_and_provider_array() {
+        let raw = r#"[{"providerId":"codex","primary":{"usedPercent":25},"localUsageSummary":{"todayCost":0.25,"thirtyDayCost":1.0,"thirtyDayTokens":1000,"periodCost":1.0,"periodTokens":1000,"reportingPeriod":"rolling:30","latestTokens":200,"topModel":"gpt-5","estimateNote":"synthetic","tokenCostUpdatedAtMs":1750000000000}}]"#;
+        assert!(parse_seed_local_summaries(raw, None).is_empty());
+        let config = valid_proof_config();
+        let summaries = parse_seed_local_summaries(raw, Some(&config));
+        assert_eq!(summaries.len(), 1);
+        assert_eq!(summaries[0].0, "codex");
+        assert_eq!(summaries[0].1.latest_tokens, Some(200));
+        assert!(
+            parse_seed_local_summaries(&raw.replace("codex", "unknown"), Some(&config)).is_empty()
+        );
+    }
     use std::sync::LazyLock;
 
     static ENV_LOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));

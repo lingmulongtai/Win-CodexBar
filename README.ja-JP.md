@@ -1,104 +1,55 @@
-# Win-CodexBar
+# Win-CodexBar + Mobile Connect
 
-[English](./README.md) | [简体中文](./README.zh-CN.md) | [繁體中文（臺灣）](./README.zh-TW.md) | [日本語](./README.ja-JP.md) | [한국어](./README.ko-KR.md) | [Español mexicano](./README.es-MX.md) | [Português (Brasil)](./README.pt-BR.md) | [Türkçe](./README.tr-TR.md)
+WindowsでAIサービスの使用量を取得し、**CodexBar for Android**へ暗号化して共有するアプリです。[nesszer/Win-CodexBar](https://github.com/nesszer/Win-CodexBar)にモバイル接続機能を加えた独立したフォークです。
 
-Win-CodexBar は、複数の AI コーディングツールの使用量を Windows のシステムトレイから確認できるデスクトップアプリです。[CodexBar](https://github.com/steipete/CodexBar) の考え方を、Tauri + React のデスクトップシェルと共有 Rust バックエンドで Windows 向けに移植しています。
+## ダウンロード
 
-<table>
-  <tr>
-    <td width="36%" align="center">
-      <img src="docs/images/tray-panel.png" alt="プロバイダー使用量カードを表示する Win-CodexBar のトレイパネル"/>
-    </td>
-    <td width="64%" align="center">
-      <img src="docs/images/settings-providers.png" alt="Win-CodexBar のプロバイダー設定画面"/>
-    </td>
-  </tr>
-</table>
+**[Windows用EXEを直接ダウンロード](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [正式リリース・チェックサム](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · **[署名付きAndroid APK](https://github.com/lingmulongtai/CodexBar-android/releases/latest/download/app-release.apk)**
 
-## 主な機能
+EXEを保存して起動します。ZIP展開やNode.jsの導入は不要です。Windows 10/11 x64と[Microsoft WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)が必要です。EXEにはCランタイムとWebView2ローダーを組み込んでいます。WebView2 Runtime本体は別途必要です。
 
-- **56 プロバイダー**: Codex、Claude、Copilot、OpenRouter、Cursor、Gemini、DeepSeek、MiniMax、Kiro、Antigravity、Groq、Qoder、Sakana AI、CrossModel など。
-- **トレイ中心のワークフロー**: コンパクトなプロバイダー一覧、使用量カード、更新、設定、終了操作。
-- **プロバイダー設定**: ソース選択、認証情報、Cookie インポート、トークンアカウント、API キー、リージョン、トレイ表示設定。
-- **Windows 認証情報保護**: アプリ管理の API キー、手動 Cookie、トークンアカウントを、利用可能な場合はユーザー単位の DPAPI で保護。
-- **ブラウザー Cookie インポート**: Chrome、Edge、Brave、Firefox に対応。プロバイダーごとに明示的に有効化します。
-- **ローカル CLI**: 使用量、コスト、設定、診断、ローカル連携をスクリプトから利用できます。
-- **インストーラー / ポータブルビルド**: WebView2 Runtime、VC++ Runtime、SHA-256 チェックサムを含みます。
+Windows版は**署名なし**です。元プロジェクトの署名証明書やインストーラーは使用しません。`SHA256SUMS`で照合できます。更新時は終了してEXEを置き換えてください。アプリ内の更新・Webサイト・問い合わせ先もこのフォークを参照します。Android APKは既存の署名を保持しており、上書きインストールで接続情報を引き継げます。
 
-## インストール
+## このフォークの変更点
 
-Windows Package Manager でインストールできます。
+| 機能 | できること |
+| --- | --- |
+| Androidへの共有 | PCで取得済みの使用量をスマホで確認。認証情報はPCに保持。 |
+| LAN・Tailscale選択 | PCのTailscaleアドレスを検出して選択。スマホのexit nodeは不要。 |
+| 取得モード | スマホで取得／Windowsでまとめて取得を選択。一部サービスだけスマホにする例外も設定。 |
+| PCのトークン・推定費用 | 今日・直近30日・選択期間の集計を、取得できた範囲で表示。集計日時も確認。 |
+| このアプリ用の配布 | EXE直接配布、正式リリース、独立した更新先・識別子。旧Mobile Previewの設定とペアリングは保持。 |
 
-```powershell
-winget install Finesssee.Win-CodexBar
-```
+元アプリの取得処理、トレイ、履歴、通知、テーマ、サービス設定を引き継ぎます。追加の取得プログラムを二重に動かす仕組みではありません。
 
-または [GitHub Releases](https://github.com/Finesssee/Win-CodexBar/releases) から最新のインストーラー / ポータブル版をダウンロードしてください。
+## スマホとの接続
 
-- インストーラー: `CodexBar-<version>-Setup.exe`
-- ポータブル: `CodexBar-<version>-portable.exe`
-- チェックサム: 各リリースに `.sha256` ファイルが含まれます
+1. Windows側で使うサービスを接続・有効化します。
+2. **設定 → 詳細設定 → Androidへの共有**で**Tailscale（exit node不要）**または**LAN**を選び、共有を有効にします。標準ポートはTCP **43825**です。
+3. コードをAndroidの**接続 → 取得方法とWindows接続**に貼り付けて接続します。接続するとWindowsモードになります。
+4. **スマホで取得**／**Windowsでまとめて取得**を選べます。認証情報、ペアリング、サービス別の例外、取得先別の履歴はモードを往復しても保持します。
 
-## 初回起動
+外出先ではPCとスマホを同じTailscaleネットワークに接続し、共有先にPCの`100.x.x.x`アドレスを使います。スマホのexit nodeは**None／未選択**で利用でき、普段のインターネットまで自宅経由にする必要はありません。TailscaleのアクセスルールとWindows Firewallでアプリのポートへの通信が許可されている必要があります。VPNやFirewallの設定をアプリが変更することはありません。[設定ガイド](docs/android-sharing.md)
 
-1. スタートメニューまたはポータブル exe から **CodexBar** を起動します。
-2. トレイアイコンをクリックして使用量パネルを開きます。
-3. **Settings -> Providers** を開きます。
-4. 使うプロバイダーを有効化します。
-5. OAuth / デバイスログイン、API キー、ブラウザー Cookie、ローカル CLI ログイン、トークンアカウントなど、必要な認証情報を追加します。
+PCは起動したままにします。スマホが通常の更新タイミングでデータを取りに行くため即時プッシュではありません。PCがオフラインでもスマホの別アカウントへ自動で切り替わりません。PCで有効にした対応サービスは認証待ちのものも含めて更新時に反映します。旧版の取得先選択はスマホ例外として移行します。全取得をPCへ移すには詳細設定の**すべてWindowsから取得する**を選びます。
 
-Claude では、Claude の設定ページと同じ使用量に近づけるため、ブラウザー Cookie / sessionKey が優先です。OAuth と CLI はフォールバックとして利用できます。Codex や Gemini など CLI ベースのプロバイダーは、先に各プロバイダーの CLI でログインしてください。
+## 実際の画面
 
-## 最新リリース
+新しいネイティブWindowsアプリとAndroidエミュレーターで撮影しています。表示値は検証用の架空データです。画像のループバック／ホストアドレスはエミュレーター用で、実際のスマホではLANまたはTailscaleを選びます。
 
-現在の変更履歴は [CHANGELOG.md](CHANGELOG.md) を参照してください。対応プロバイダーの一覧は [English README](./README.md#supported-providers) にあります。
+![Windowsの共有設定](docs/images/mobile-connect/windows-sharing-ja.jpg)
 
-## ソースからビルド
+<p>
+  <img src="docs/images/mobile-connect/android-windows-mode.png" width="280" alt="Androidの取得モード選択" />
+  <img src="docs/images/mobile-connect/android-pc-local-usage.png" width="280" alt="PCのトークン数と推定費用をAndroidで確認" />
+</p>
 
-```powershell
-# 前提: Node.js + pnpm。Rust と MinGW は必要に応じてスクリプトがインストールします。
-git clone https://github.com/Finesssee/Win-CodexBar.git
-cd Win-CodexBar
-.\scripts\dev.ps1
-```
+## データについて
 
-便利な開発フラグ:
+使用枠、リセット時刻、取得日時、取得できた予算・残高・Codexリセットクレジットを共有します。PCログの集計はPCでの日付・集計日時を持ち、複数アカウントを含む場合があります。現在の使用枠や請求額とは別で、USD費用は推定値です。不明な値を0として表示しません。使用枠の観測が35分以上前なら古いデータ、2時間を超えれば利用不可とします。
 
-```powershell
-.\scripts\dev.ps1 -Release      # 最適化ビルド
-.\scripts\dev.ps1 -SkipBuild    # 直前のビルドを再起動
-```
+コードはWindows DPAPI／Android Keystoreで保護し、HMAC-SHA256で要求を認証、AES-256-GCMで応答を暗号化します。メール、名前、パス、プロンプト、会話内容、サービスのトークンは送信しません。コードは私的に保管し、無効化には**ペアリングを取り消す**を使います。
 
-CLI 例:
+**GeminiはGemini CLIの使用量です。Google Gemini Windowsアプリ／Gemini Appsの使用量は自動取得しません。** 実アカウント・実機スマホ・ランチャー・Samsung Now Barの確認は、エミュレーターの検証とは別です。[検証記録](docs/mobile-validation.md) · [v0.70.1の変更](docs/releases/v0.70.1.md)
 
-```bash
-codexbar-cli --help
-codexbar-cli diagnose --pretty
-codexbar-cli usage -p claude
-codexbar-cli usage -p all
-codexbar-cli cost -p codex
-```
-
-## プライバシー
-
-- **基本はローカル**: プロバイダーデータは既知のローカルパス、または設定したプロバイダー API から読み取ります。
-- **Cookie は任意**: ブラウザー Cookie 抽出は、有効化したプロバイダーに対してのみ実行されます。
-- **シークレット保護**: API キー、手動 Cookie、トークンアカウントはセキュアファイル層で保存され、Windows では利用可能な場合 DPAPI を使います。
-- **安全な診断**: 診断はプロバイダー、ソース、状態のメタデータのみを表示し、Cookie、API キー、Bearer トークン、OAuth 値は表示しません。
-
-## ドキュメント
-
-| トピック | リンク |
-|---|---|
-| ソースからビルド | [docs/BUILDING.md](docs/BUILDING.md) |
-| WSL セットアップと認証 Tips | [docs/WSL.md](docs/WSL.md) |
-| ブラウザー Cookie の詳細 | [docs/COOKIES.md](docs/COOKIES.md) |
-
-## クレジット
-
-- 元の macOS アプリ: Peter Steinberger 氏の [steipete/CodexBar](https://github.com/steipete/CodexBar)
-- コスト追跡は [ccusage](https://github.com/ryoppippi/ccusage) から着想を得ています
-
-## ライセンス
-
-元の CodexBar と同じ MIT ライセンスです。
+開発方法は[English README](README.md#development)、ライセンスは[MIT](LICENSE)です。元となった[CodexBar](https://github.com/steipete/CodexBar)とWin-CodexBarの貢献者に謝意を表します。

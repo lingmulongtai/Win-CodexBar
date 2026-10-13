@@ -1,10 +1,10 @@
 //! Android sharing reads the same generation-checked cache as the tray.
-use crate::commands::{ProviderUsageSnapshot, RateWindowSnapshot};
+use crate::commands::{ProviderLocalUsageSummary, ProviderUsageSnapshot, RateWindowSnapshot};
 use crate::state::AppState;
 use codexbar::core::{ProviderFetchResult, ProviderId, ProviderStateKind, ResetCreditsObservation};
 use codexbar::mobile_bridge::{
-    self, MobileBalance, MobileBudget, MobileProvider, MobileResetCredits, MobileServer,
-    MobileSnapshot, MobileWindow, Pairing,
+    self, MobileBalance, MobileBudget, MobileLocalUsage, MobileProvider, MobileResetCredits,
+    MobileServer, MobileSnapshot, MobileWindow, Pairing,
 };
 use codexbar::{secure_file, settings::Settings};
 use serde::{Deserialize, Serialize};
@@ -362,7 +362,26 @@ fn snapshot(app: &tauri::AppHandle, pairing: &Pairing) -> MobileSnapshot {
                 .map(|usage| {
                     let observation = ProviderId::from_cli_name(&usage.provider_id)
                         .and_then(|id| guard.mobile_observations.get(&id));
-                    project(usage, observation, pairing)
+                    let mut provider = project(usage, observation, pairing);
+                    let now = chrono::Utc::now().timestamp();
+                    if observation.is_some_and(|item| {
+                        item.fresh && item.credential_stamp == credential_stamp()
+                    }) && usage.error.is_none()
+                        && !usage.error_state.is_problem()
+                        && (now - 7200..=now + 120).contains(&provider.updated_at_epoch_seconds)
+                    {
+                        provider.local_usage =
+                            crate::commands::cached_provider_local_usage_summary(
+                                &usage.provider_id,
+                            )
+                            .and_then(|summary| {
+                                project_local_usage(summary, chrono::Utc::now().timestamp())
+                            });
+                        if provider.local_usage.is_some() && provider.status == "unavailable" {
+                            provider.status = "ready".into();
+                        }
+                    }
+                    provider
                 })
                 .collect()
         })
@@ -509,6 +528,7 @@ fn project(
         windows,
         budget,
         balance,
+        local_usage: None,
         reset_credits: if fresh {
             observation
                 .and_then(|metadata| metadata.reset_credits)
@@ -537,6 +557,62 @@ fn project(
     provider
 }
 
+fn project_local_usage(summary: ProviderLocalUsageSummary, now: i64) -> Option<MobileLocalUsage> {
+    use chrono::TimeZone;
+    let updated_at = summary.token_cost_updated_at_ms / 1000;
+    if !(now - 7200..=now + 120).contains(&updated_at) {
+        return None;
+    }
+    let today = chrono::Local.timestamp_opt(updated_at, 0).single()?;
+    let reporting_period = match summary.reporting_period.as_str() {
+        "month-to-date" | "all" => Some(summary.reporting_period.clone()),
+        raw if raw
+            .strip_prefix("rolling:")
+            .and_then(|days| days.parse::<u16>().ok())
+            .is_some_and(|days| (1..=365).contains(&days)) =>
+        {
+            Some(summary.reporting_period.clone())
+        }
+        _ => None,
+    };
+    let tokens = |value: Option<u64>| value.filter(|value| *value <= i64::MAX as u64);
+    let cost = |value: Option<f64>| {
+        value.filter(|value| value.is_finite() && (0.0..=1e12).contains(value))
+    };
+    let usage = MobileLocalUsage {
+        updated_at_epoch_seconds: updated_at,
+        today_date: today.format("%Y-%m-%d").to_string(),
+        today_tokens: tokens(summary.latest_tokens),
+        thirty_day_tokens: tokens(summary.thirty_day_tokens),
+        period_tokens: reporting_period
+            .as_ref()
+            .and_then(|_| tokens(summary.period_tokens)),
+        today_cost_usd: cost(summary.today_cost),
+        thirty_day_cost_usd: cost(summary.thirty_day_cost),
+        period_cost_usd: reporting_period
+            .as_ref()
+            .and_then(|_| cost(summary.period_cost)),
+        reporting_period,
+        top_model: summary.top_model.filter(|model| {
+            !model.is_empty()
+                && model.len() <= 64
+                && model
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || "_.:-".contains(c))
+        }),
+        incomplete_request_count: summary
+            .incomplete_request_count
+            .filter(|count| *count <= i32::MAX as u32),
+    };
+    (usage.today_tokens.is_some()
+        || usage.thirty_day_tokens.is_some()
+        || usage.period_tokens.is_some()
+        || usage.today_cost_usd.is_some()
+        || usage.thirty_day_cost_usd.is_some()
+        || usage.period_cost_usd.is_some())
+    .then_some(usage)
+}
+
 fn parse_time(value: &str) -> Option<i64> {
     chrono::DateTime::parse_from_rfc3339(value)
         .ok()
@@ -546,6 +622,42 @@ fn parse_time(value: &str) -> Option<i64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn local_totals_keep_their_own_clock_and_sanitize_optional_values() {
+        let now = chrono::Utc::now().timestamp();
+        let summary = ProviderLocalUsageSummary {
+            today_cost: Some(f64::NAN),
+            thirty_day_cost: Some(5.0),
+            thirty_day_tokens: Some(1234),
+            period_cost: Some(-1.0),
+            period_tokens: Some(u64::MAX),
+            reporting_period: "rolling:30".into(),
+            latest_tokens: Some(100),
+            top_model: Some("private@example.com".into()),
+            estimate_note: "private file path".into(),
+            token_cost_updated_at_ms: (now - 60) * 1000,
+            incomplete_request_count: Some(2),
+        };
+        let usage = project_local_usage(summary.clone(), now).unwrap();
+        assert_eq!(usage.updated_at_epoch_seconds, now - 60);
+        assert_eq!(usage.today_tokens, Some(100));
+        assert!(usage.today_cost_usd.is_none());
+        assert!(usage.period_cost_usd.is_none());
+        assert!(usage.period_tokens.is_none());
+        assert!(usage.top_model.is_none());
+        assert_eq!(usage.thirty_day_cost_usd, Some(5.0));
+        assert!(!serde_json::to_string(&usage).unwrap().contains("private"));
+        assert!(
+            project_local_usage(
+                ProviderLocalUsageSummary {
+                    token_cost_updated_at_ms: (now - 7201) * 1000,
+                    ..summary
+                },
+                now
+            )
+            .is_none()
+        );
+    }
     #[test]
     fn exported_providers_use_canonical_cache_ids() {
         for id in ANDROID_PROVIDERS {

@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tokio::sync::watch;
 
-const GITHUB_REPO: &str = "lingmulongtai/Win-CodexBar";
+const GITHUB_REPO: &str = "lingmulongtai/Win-CodexBar-Mobile-Connect";
 const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// State of the update download process
@@ -720,8 +720,9 @@ mod tests {
     fn prefers_installer_asset_for_auto_update() {
         let release = GitHubRelease {
             tag_name: "v1.2.6".to_string(),
-            html_url: "https://github.com/lingmulongtai/Win-CodexBar/releases/tag/v1.2.6"
-                .to_string(),
+            html_url:
+                "https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/tag/v1.2.6"
+                    .to_string(),
             body: None,
             assets: vec![
                 GitHubAsset {
@@ -757,8 +758,9 @@ mod tests {
     fn falls_back_to_manual_release_when_only_portable_exe_exists() {
         let release = GitHubRelease {
             tag_name: "v1.2.6".to_string(),
-            html_url: "https://github.com/lingmulongtai/Win-CodexBar/releases/tag/v1.2.6"
-                .to_string(),
+            html_url:
+                "https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/tag/v1.2.6"
+                    .to_string(),
             body: None,
             assets: vec![GitHubAsset {
                 name: "codexbar.exe".to_string(),
@@ -773,7 +775,7 @@ mod tests {
 
         assert_eq!(
             update.download_url,
-            "https://github.com/lingmulongtai/Win-CodexBar/releases/tag/v1.2.6"
+            "https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/tag/v1.2.6"
         );
         assert!(!update.supports_auto_apply());
     }
