@@ -20,6 +20,7 @@ permissions:
 jobs:
   signpath-test:
     name: Build, sign, and retain test bundle
+    if: github.repository == 'nesszer/Win-CodexBar'
     runs-on: windows-latest
     timeout-minutes: 240
 
