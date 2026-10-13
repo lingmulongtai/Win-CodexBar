@@ -260,7 +260,7 @@ pub fn current_version() -> &'static str {
 
 /// Get the download directory for updates
 fn get_download_dir() -> Option<PathBuf> {
-    dirs::cache_dir().map(|p| p.join("CodexBar").join("updates"))
+    dirs::cache_dir().map(|p| p.join("Win-CodexBar-Mobile").join("updates"))
 }
 
 /// Download an update with progress reporting
