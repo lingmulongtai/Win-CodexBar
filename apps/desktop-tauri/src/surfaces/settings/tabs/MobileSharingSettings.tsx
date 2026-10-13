@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Field, SettingsGroup, Toggle } from "../../../components/FormControls";
 import { useLocale } from "../../../hooks/useLocale";
-import { configureMobileSharing, getMobilePairingCode, getMobileSharingStatus, revokeMobilePairing } from "../../../lib/tauri";
-import type { MobileSharingStatus } from "../../../types/bridge";
+import { configureMobileSharing, getMobilePairingCode, getMobileSharingStatus, getMobileNetworkAddresses, revokeMobilePairing } from "../../../lib/tauri";
+import type { MobileNetworkAddresses, MobileSharingStatus } from "../../../types/bridge";
 
 export default function MobileSharingSettings() {
   const { t } = useLocale();
@@ -11,12 +11,18 @@ export default function MobileSharingSettings() {
   const [port, setPort] = useState("43825");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [addresses, setAddresses] = useState<MobileNetworkAddresses | null>(null);
+  const [discovering, setDiscovering] = useState(true);
   useEffect(() => {
     let cancelled = false;
     getMobileSharingStatus().then((next) => {
       if (cancelled) return;
       setStatus(next); setAddress(next.address); setPort(String(next.port));
     }).catch(() => { if (!cancelled) setMessage(t("MobileSharingFailed")); });
+    getMobileNetworkAddresses().then((next) => {
+      if (!cancelled) setAddresses(next);
+    }).catch(() => { /* Manual numeric addresses remain available. */ })
+      .finally(() => { if (!cancelled) setDiscovering(false); });
     return () => { cancelled = true; };
   }, [t]);
   async function run(action: () => Promise<void>) {
@@ -25,10 +31,11 @@ export default function MobileSharingSettings() {
     try { await action(); } catch (error) { setMessage(`${t("MobileSharingFailed")} ${String(error)}`); }
     finally { setBusy(false); }
   }
-  async function save(enabled: boolean) {
+  async function save(enabled: boolean, endpoint = address) {
     const parsedPort = Number(port);
     if (!Number.isInteger(parsedPort) || parsedPort < 1024 || parsedPort > 65535) throw new Error(t("MobileSharingPort"));
-    setStatus(await configureMobileSharing(enabled, address, parsedPort));
+    const next = await configureMobileSharing(enabled, endpoint, parsedPort);
+    setStatus(next); setAddress(next.address); setPort(String(next.port));
   }
   return <SettingsGroup title={t("MobileSharingTitle")} footer={<p>{t("MobileSharingHelper")}</p>}>
     <Field label={t("MobileSharingEnable")}>
@@ -37,6 +44,22 @@ export default function MobileSharingSettings() {
         else await save(enabled);
       })} />
     </Field>
+    <div className="settings-group__row">
+      <button className="credential-btn" disabled={busy || discovering || !status || !addresses?.tailscaleAddress}
+        onClick={() => void run(() => save(status?.enabled ?? false, addresses?.tailscaleAddress ?? address))}>
+        {t("MobileSharingTailscale")}{addresses?.tailscaleAddress ? ` · ${addresses.tailscaleAddress}` : ""}
+      </button>
+      <button className="credential-btn" disabled={busy || discovering || !status || !addresses?.lanAddress}
+        onClick={() => void run(() => save(status?.enabled ?? false, addresses?.lanAddress ?? address))}>
+        {t("MobileSharingLan")}{addresses?.lanAddress ? ` · ${addresses.lanAddress}` : ""}
+      </button>
+      <button className="credential-btn" disabled={busy || discovering} onClick={() => void run(async () => {
+        setDiscovering(true);
+        try { setAddresses(await getMobileNetworkAddresses()); } finally { setDiscovering(false); }
+      })}>{t("MobileSharingDiscover")}</button>
+    </div>
+    <p className="settings-group__helper">{t("MobileSharingTailscaleHelper")}</p>
+    {!discovering && !addresses?.tailscaleAddress && <p>{t("MobileSharingTailscaleUnavailable")}</p>}
     <Field label={t("MobileSharingAddress")}>
       <input className="text-input" aria-label={t("MobileSharingAddress")} value={address} disabled={busy || !status} onChange={(event) => setAddress(event.target.value)} autoComplete="off" spellCheck={false} placeholder="192.168.1.10" />
     </Field>
