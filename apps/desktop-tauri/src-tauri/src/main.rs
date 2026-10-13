@@ -9,6 +9,7 @@ mod commands;
 mod events;
 mod floatbar;
 mod geometry_store;
+mod mobile_bridge;
 mod powertoys;
 mod proof_harness;
 mod shell;
@@ -143,6 +144,9 @@ fn main() {
 
     let proof_config = proof_harness::ProofConfig::from_env();
     let is_proof_mode = proof_config.is_some();
+    if is_proof_mode {
+        let _proof_config_path = codexbar::settings::apply_config_path_env();
+    }
     let force_start_visible = std::env::var_os("CODEXBAR_START_VISIBLE").is_some();
     let mut settings = codexbar::settings::Settings::load();
     settings.apply_display_mode_fold_migration();
@@ -172,6 +176,9 @@ fn main() {
                 initial_state
                     .provider_cache_updated_at_by_provider
                     .insert(provider, seeded_at);
+                initial_state
+                    .mobile_observations
+                    .insert(provider, mobile_bridge::MobileObservation::seeded(snapshot));
             }
         }
         initial_state.provider_cache.extend(snapshots);
@@ -192,6 +199,7 @@ fn main() {
     tauri::Builder::default()
         .manage(Mutex::new(initial_state))
         .manage(commands::CurrencyRateCache::default())
+        .manage(mobile_bridge::MobileSharing::default())
         .plugin(shortcut_bridge::plugin())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
@@ -201,6 +209,10 @@ fn main() {
         }))
         .invoke_handler(tauri::generate_handler![
             commands::get_bootstrap_state,
+            mobile_bridge::get_mobile_sharing_status,
+            mobile_bridge::configure_mobile_sharing,
+            mobile_bridge::get_mobile_pairing_code,
+            mobile_bridge::revoke_mobile_pairing,
             commands::get_provider_catalog,
             status_poller::get_provider_statuses,
             commands::get_settings_snapshot,
@@ -343,6 +355,7 @@ fn main() {
             floatbar::install(app.handle());
             auto_refresh::install(app.handle().clone());
             stay_awake::install(app.handle().clone());
+            mobile_bridge::install(app.handle().clone());
             if settings.powertoys_status_pipe_enabled {
                 powertoys::install(app.handle().clone());
             }

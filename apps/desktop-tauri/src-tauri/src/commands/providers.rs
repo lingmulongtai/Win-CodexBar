@@ -51,6 +51,7 @@ pub(crate) fn invalidate_account_usage(
     state.provider_refresh_started_at = None;
     state.transient_provider_failure_counts.remove(&id);
     state.last_good_owners.remove(&id);
+    state.mobile_observations.remove(&id);
     state.auto_resume.clear_provider(id);
     state
         .provider_cache
@@ -561,6 +562,9 @@ pub(crate) fn invalidate_provider_refresh_and_prune_disabled(
     guard.is_refreshing = false;
     guard.provider_refresh_started_at = None;
     prune_provider_cache_to_enabled(&mut guard.provider_cache, enabled_ids);
+    guard
+        .mobile_observations
+        .retain(|id, _| enabled_ids.contains(id));
     // Drop transient-failure counters for providers that left the enabled set.
     guard
         .transient_provider_failure_counts
@@ -651,6 +655,9 @@ async fn do_refresh_providers_with_policy(
         && is_current_provider_refresh_generation(&guard, generation)
     {
         prune_provider_cache_to_enabled(&mut guard.provider_cache, &inputs.enabled_ids);
+        guard
+            .mobile_observations
+            .retain(|id, _| inputs.enabled_ids.contains(id));
     }
 
     events::emit_refresh_started(
@@ -706,6 +713,7 @@ fn begin_provider_refresh(
 }
 
 struct ProviderRefreshInputs {
+    mobile_credential_stamp: crate::mobile_bridge::CredentialStamp,
     settings: Settings,
     enabled_ids: Vec<ProviderId>,
     manual_cookies: ManualCookies,
@@ -715,6 +723,7 @@ struct ProviderRefreshInputs {
 
 impl ProviderRefreshInputs {
     fn load(settings: Settings, enabled_ids: Vec<ProviderId>) -> Self {
+        let mobile_credential_stamp = crate::mobile_bridge::credential_stamp();
         let manual_cookies = ManualCookies::load();
         let api_keys = ApiKeys::load();
         let token_accounts = TokenAccountStore::new().load().unwrap_or_else(|e| {
@@ -723,6 +732,7 @@ impl ProviderRefreshInputs {
         });
 
         Self {
+            mobile_credential_stamp,
             settings,
             enabled_ids,
             manual_cookies,
@@ -763,6 +773,7 @@ fn spawn_provider_refreshes(
         let token_account_label = active_account.and_then(|account| header_label(&account.label));
         let hooks_enabled = inputs.settings.hooks_enabled;
         let pace_work_days = inputs.settings.weekly_progress_work_days;
+        let mobile_credential_stamp = inputs.mobile_credential_stamp.clone();
 
         handles.push(tokio::spawn(async move {
             let Ok(_permit) = fetch_permits.acquire_owned().await else {
@@ -776,6 +787,7 @@ fn spawn_provider_refreshes(
                 ActiveTokenAccount {
                     id: token_account_id,
                     label: token_account_label,
+                    mobile_credential_stamp,
                 },
                 hooks_enabled,
                 pace_work_days,
@@ -818,6 +830,7 @@ fn spawn_provider_refreshes(
 struct ActiveTokenAccount {
     id: Option<uuid::Uuid>,
     label: Option<String>,
+    mobile_credential_stamp: crate::mobile_bridge::CredentialStamp,
 }
 
 /// A token-account label fit for the card header, or `None` when blank.
@@ -835,8 +848,14 @@ async fn refresh_provider(
     hooks_enabled: bool,
     pace_work_days: Option<u8>,
 ) {
-    let (mut snapshot, account_identity, retention) =
-        fetch_provider_snapshot(id, ctx, token_account.id, pace_work_days).await;
+    let (mut snapshot, account_identity, retention) = fetch_provider_snapshot(
+        id,
+        ctx,
+        token_account.id,
+        pace_work_days,
+        token_account.mobile_credential_stamp,
+    )
+    .await;
     snapshot.account_label = token_account.label;
     let token_account_id = token_account.id;
     let fresh_snapshot = snapshot.error.is_none();
@@ -863,6 +882,11 @@ async fn refresh_provider(
             );
             if fresh_snapshot {
                 record_last_good_owner(&mut guard, id, retention.fresh_owner);
+                if let Some(observation) = retention.mobile_observation {
+                    guard.mobile_observations.insert(id, observation);
+                }
+            } else if let Some(observation) = guard.mobile_observations.get_mut(&id) {
+                observation.fresh = false;
             }
             // F6 (upstream 0.48.0): backfill missing reset timestamps from the
             // cached snapshot before persisting and publishing.
@@ -1100,6 +1124,7 @@ struct RefreshRetention {
     failure_ownership: codexbar::core::FailureOwnership,
     /// Session that produced a fresh snapshot.
     fresh_owner: Option<codexbar::core::LastGoodOwner>,
+    mobile_observation: Option<crate::mobile_bridge::MobileObservation>,
 }
 
 async fn fetch_provider_snapshot(
@@ -1107,6 +1132,7 @@ async fn fetch_provider_snapshot(
     ctx: FetchContext,
     token_account_id: Option<uuid::Uuid>,
     pace_work_days: Option<u8>,
+    mobile_credential_stamp: crate::mobile_bridge::CredentialStamp,
 ) -> (ProviderUsageSnapshot, Option<String>, RefreshRetention) {
     let provider = instantiate_provider(id);
     let metadata = provider.metadata().clone();
@@ -1129,6 +1155,14 @@ async fn fetch_provider_snapshot(
                     account_identity,
                     RefreshRetention {
                         fresh_owner: result.last_good_owner.clone(),
+                        mobile_observation: Some(
+                            crate::mobile_bridge::MobileObservation::from_result(
+                                id,
+                                &result,
+                                token_account_id,
+                                mobile_credential_stamp,
+                            ),
+                        ),
                         ..RefreshRetention::default()
                     },
                 )
@@ -1147,6 +1181,7 @@ async fn fetch_provider_snapshot(
                         policy: Some(policy),
                         failure_ownership: e.failure_ownership(),
                         fresh_owner: None,
+                        mobile_observation: None,
                     },
                 )
             }
@@ -1165,6 +1200,7 @@ async fn fetch_provider_snapshot(
                         policy: Some(policy),
                         failure_ownership: error.failure_ownership(),
                         fresh_owner: None,
+                        mobile_observation: None,
                     },
                 )
             }

@@ -123,6 +123,7 @@ pub struct AppState {
     /// Cursor location captured for a desktop launch; cleared by tray/other opens.
     pub flyout_cursor_anchor: Option<(f64, f64)>,
     pub provider_cache: Vec<ProviderUsageSnapshot>,
+    pub(crate) mobile_observations: HashMap<ProviderId, crate::mobile_bridge::MobileObservation>,
     pub claude_account_usage: HashMap<String, crate::commands::ClaudeAccountUsageState>,
     pub codex_account_needs_authentication: HashMap<uuid::Uuid, bool>,
     pub transient_provider_failure_counts: HashMap<ProviderId, u8>,
@@ -210,6 +211,7 @@ impl AppState {
             codex_account_needs_authentication: HashMap::new(),
             transient_provider_failure_counts: HashMap::new(),
             last_good_owners: HashMap::new(),
+            mobile_observations: HashMap::new(),
             provider_cache_updated_at: None,
             provider_cache_updated_at_by_provider: HashMap::new(),
             provider_refresh_started_at: None,
