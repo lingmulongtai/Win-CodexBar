@@ -10,6 +10,7 @@ mod events;
 mod floatbar;
 mod geometry_store;
 mod mobile_bridge;
+mod mobile_network;
 mod powertoys;
 mod proof_harness;
 mod shell;
@@ -210,6 +211,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             commands::get_bootstrap_state,
             mobile_bridge::get_mobile_sharing_status,
+            mobile_network::get_mobile_network_addresses,
             mobile_bridge::configure_mobile_sharing,
             mobile_bridge::get_mobile_pairing_code,
             mobile_bridge::revoke_mobile_pairing,
