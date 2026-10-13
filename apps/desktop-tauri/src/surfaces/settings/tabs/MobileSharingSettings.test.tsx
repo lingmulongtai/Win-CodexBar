@@ -11,7 +11,7 @@ describe("Android sharing", () => {
   it("selects the PC's Tailscale endpoint without changing the port or pairing key", async () => {
     api.configureMobileSharing.mockResolvedValue({ ...running, address: "100.74.102.71" });
     render(<MobileSharingSettings />);
-    const button = await screen.findByRole("button", { name: /MobileSharingTailscale · 100/ });
+    const button = await screen.findByRole("button", { name: "MobileSharingTailscale" });
     await waitFor(() => expect(button).toBeEnabled());
     expect(api.configureMobileSharing).not.toHaveBeenCalled();
     fireEvent.click(button);

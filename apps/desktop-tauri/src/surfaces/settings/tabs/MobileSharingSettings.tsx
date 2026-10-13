@@ -47,11 +47,11 @@ export default function MobileSharingSettings() {
     <div className="settings-group__row">
       <button className="credential-btn" disabled={busy || discovering || !status || !addresses?.tailscaleAddress}
         onClick={() => void run(() => save(status?.enabled ?? false, addresses?.tailscaleAddress ?? address))}>
-        {t("MobileSharingTailscale")}{addresses?.tailscaleAddress ? ` · ${addresses.tailscaleAddress}` : ""}
+        {t("MobileSharingTailscale")}
       </button>
       <button className="credential-btn" disabled={busy || discovering || !status || !addresses?.lanAddress}
         onClick={() => void run(() => save(status?.enabled ?? false, addresses?.lanAddress ?? address))}>
-        {t("MobileSharingLan")}{addresses?.lanAddress ? ` · ${addresses.lanAddress}` : ""}
+        {t("MobileSharingLan")}
       </button>
       <button className="credential-btn" disabled={busy || discovering} onClick={() => void run(async () => {
         setDiscovering(true);
