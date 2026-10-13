@@ -341,8 +341,8 @@ const ANDROID_PROVIDERS: &[&str] = &[
     "chutes",
     "deepseek",
     "venice",
-    "moonshot",
-    "cline",
+    "kimik2",
+    "clinepass",
     "ibmbob",
     "fireworks",
     "devin",
@@ -546,6 +546,13 @@ fn parse_time(value: &str) -> Option<i64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn exported_providers_use_canonical_cache_ids() {
+        for id in ANDROID_PROVIDERS {
+            let provider = ProviderId::from_cli_name(id).expect("supported provider");
+            assert_eq!(provider.cli_name(), *id);
+        }
+    }
     #[test]
     fn unknown_windows_are_omitted_and_utf16_and_optional_bounds_match_android() {
         let mut usage: ProviderUsageSnapshot = serde_json::from_value(serde_json::json!({ "providerId":"codex", "primary":{"usedPercent":0.0,"windowMinutes":0}, "errorState":"ready", "updatedAt":chrono::Utc::now().to_rfc3339(), "extraRateWindows":[{"id":"missing", "title":"Missing", "window":{"usedPercent":0.0}}] })).unwrap();
