@@ -13,8 +13,8 @@ Usage:
   bash scripts/gh-safe.sh --repo owner/repo --verify-kind repo|pr|issue|release [--target id-or-tag] [--allow-upstream-write] [--what-if] -- <gh args...>
 
 Examples:
-  bash scripts/gh-safe.sh --repo lingmulongtai/Win-CodexBar --verify-kind pr --target 1 --what-if -- pr comment 1 --body-file .review/comment.md
-  bash scripts/gh-safe.sh --repo lingmulongtai/Win-CodexBar --verify-kind repo --what-if -- pr create --title "..." --body-file body.md
+  bash scripts/gh-safe.sh --repo lingmulongtai/Win-CodexBar-Mobile-Connect --verify-kind pr --target 1 --what-if -- pr comment 1 --body-file .review/comment.md
+  bash scripts/gh-safe.sh --repo lingmulongtai/Win-CodexBar-Mobile-Connect --verify-kind repo --what-if -- pr create --title "..." --body-file body.md
 EOF
 }
 
@@ -41,8 +41,8 @@ if [[ "${repo,,}" == "steipete/codexbar" || "${repo,,}" == "nesszer/win-codexbar
   ((allow_upstream_write == 1)) || { echo 'Upstream writes are blocked by default. Explicit current-turn authorization is required.' >&2; exit 3; }
 else
   case "${repo,,}" in
-    lingmulongtai/win-codexbar) ;;
-    *) echo "GitHub writes are not allowlisted for '$repo'. Expected lingmulongtai/Win-CodexBar." >&2; exit 3 ;;
+    lingmulongtai/win-codexbar|lingmulongtai/win-codexbar-mobile-connect) ;;
+    *) echo "GitHub writes are not allowlisted for '$repo'. Expected lingmulongtai/Win-CodexBar-Mobile-Connect." >&2; exit 3 ;;
   esac
 fi
 
@@ -57,6 +57,11 @@ if [[ "$verify_kind" != repo ]]; then
   [[ "${gh_args[2]}" == "$target" ]] || { echo "Forwarded command object '${gh_args[2]:-}' is not the verified target '$target'." >&2; exit 3; }
 fi
 api_passthrough=0
+if [[ "$verify_kind" == repo && "${gh_args[0]}" == repo && "${gh_args[1]:-}" == edit ]]; then
+  [[ "${gh_args[2]:-}" == "$repo" ]] || { echo 'gh repo edit must carry the verified repository as its positional target.' >&2; exit 3; }
+  # gh repo edit does not accept --repo. Its positional target is bound above.
+  api_passthrough=1
+fi
 if [[ "$verify_kind" == repo && "${gh_args[0]}" == api ]]; then
   ((${#gh_args[@]} >= 2)) || { echo 'gh api requires a repository-scoped REST path.' >&2; exit 3; }
   api_path="${gh_args[1]}"

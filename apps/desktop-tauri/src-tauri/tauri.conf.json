@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Win-CodexBar Mobile",
+  "productName": "Win-CodexBar + Mobile Connect",
   "version": "0.70.0",
   "identifier": "com.lingmulongtai.wincodexbar.mobile",
   "build": {
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Win-CodexBar Mobile",
+        "title": "Win-CodexBar + Mobile Connect",
         "width": 496,
         "height": 800,
         "minWidth": 320,

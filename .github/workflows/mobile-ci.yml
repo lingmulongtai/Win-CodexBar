@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   windows:
-    if: github.repository == 'lingmulongtai/Win-CodexBar'
+    if: github.repository == 'lingmulongtai/Win-CodexBar-Mobile-Connect'
     runs-on: windows-latest
     timeout-minutes: 60
     steps:

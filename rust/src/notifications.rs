@@ -698,7 +698,7 @@ fn ensure_aumid_registered() {
     // registering Win32 desktop app AUMIDs without a COM server or Start Menu shortcut.
     let result = hkcu
         .create_subkey(format!(r"SOFTWARE\Classes\AppUserModelId\{WINDOWS_AUMID}"))
-        .and_then(|(key, _)| key.set_value("DisplayName", &"Win-CodexBar Mobile"));
+        .and_then(|(key, _)| key.set_value("DisplayName", &"Win-CodexBar + Mobile Connect"));
 
     match result {
         Ok(()) => tracing::debug!("CodexBar AUMID registered for Windows toast notifications"),

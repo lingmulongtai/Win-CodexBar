@@ -2,7 +2,7 @@
 
 ## Android companion fork
 
-- This fork is `lingmulongtai/Win-CodexBar`. Bind all GitHub writes to that repository through `scripts/gh-safe.sh`.
+- This fork is `lingmulongtai/Win-CodexBar-Mobile-Connect`. Bind all GitHub writes to that repository through `scripts/gh-safe.sh`.
 - `nesszer/Win-CodexBar` and `steipete/CodexBar` are read-only upstreams unless the user explicitly authorizes a particular upstream write.
 - The upstream release/signing/Winget scripts and their canonical repository assumptions do not authorize publishing from this fork to upstream repositories.
 - Preserve the existing provider collectors. The Android bridge shares sanitized cached usage; it never transfers provider credentials or starts a second collector.
@@ -198,5 +198,5 @@ Then follow post-install instructions (permissions / accessibility as prompted).
 - Before opening a Winget PR, verify the release installer URL resolves and recompute the SHA-256 from the downloaded asset. On Windows, run `winget validate` when available.
 - The first Winget package submission was approved in `microsoft/winget-pkgs#366653`; the v0.23.5 update was approved in `microsoft/winget-pkgs#366794`. Future updates should be faster, but still expect Microsoft validation/review.
 - Agents must route GitHub mutations through `scripts/gh-safe.sh` instead of calling mutating `gh` subcommands directly. This is the sole supported mutation wrapper. It owns repo binding, performs read-back verification, blocks repo overrides, and fails closed on target mismatch.
-- In this fork, `gh-safe.sh` allowlists `lingmulongtai/Win-CodexBar`; upstream and Winget publication require separate explicit authorization.
+- In this fork, `gh-safe.sh` allowlists `lingmulongtai/Win-CodexBar-Mobile-Connect`; upstream and Winget publication require separate explicit authorization.
 - For object mutations (PR/issue/release), bind both the exact `owner/repo` and exact object number/tag. Use repo-only verification only for creates where the target object does not exist yet.

@@ -4,7 +4,7 @@ use super::*;
 pub fn get_app_info() -> AppInfoBridge {
     let settings = Settings::load();
     AppInfoBridge {
-        name: "Win-CodexBar Mobile".to_string(),
+        name: "Win-CodexBar + Mobile Connect".to_string(),
         version: env!("CARGO_PKG_VERSION").to_string(),
         build_number: option_env!("BUILD_NUMBER").unwrap_or("dev").to_string(),
         build_date: option_env!("CODEXBAR_BUILD_DATE").map(str::to_string),
