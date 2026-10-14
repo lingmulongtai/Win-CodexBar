@@ -1600,6 +1600,48 @@ mod refresh_scope_tests {
 }
 
 #[cfg(test)]
+mod gemini_apps_tests {
+    use super::*;
+    #[test]
+    fn saved_apps_session_is_used_but_off_never_imports() {
+        let mut settings = Settings::default();
+        let mut cookies = ManualCookies::default();
+        cookies.set("geminiapps", "SID=synthetic-session");
+        cookies.set("gemini", "SID=other-provider");
+        let context = build_fetch_context(
+            ProviderId::GeminiApps,
+            &settings,
+            &cookies,
+            &ApiKeys::default(),
+            &HashMap::new(),
+        );
+        assert_eq!(context.source_mode, SourceMode::Web);
+        assert_eq!(
+            context.manual_cookie_header.as_deref(),
+            Some("SID=synthetic-session")
+        );
+        settings.set_cookie_source(ProviderId::GeminiApps, "off");
+        let off = build_fetch_context(
+            ProviderId::GeminiApps,
+            &settings,
+            &cookies,
+            &ApiKeys::default(),
+            &HashMap::new(),
+        );
+        assert!(off.manual_cookie_header.is_none());
+        let missing = build_fetch_context(
+            ProviderId::GeminiApps,
+            &Settings::default(),
+            &ManualCookies::default(),
+            &ApiKeys::default(),
+            &HashMap::new(),
+        );
+        assert!(missing.manual_cookie_header.is_none());
+        assert!(!missing.browser_cookie_import);
+    }
+}
+
+#[cfg(test)]
 mod predictive_warning_tests {
     use super::*;
 

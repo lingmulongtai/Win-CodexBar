@@ -19,6 +19,7 @@ pub enum ProviderId {
     Cursor,
     Factory,
     Gemini,
+    GeminiApps,
     Antigravity,
     Copilot,
     Zai,
@@ -124,6 +125,7 @@ impl ProviderId {
             ProviderId::Cursor,
             ProviderId::Factory,
             ProviderId::Gemini,
+            ProviderId::GeminiApps,
             ProviderId::Antigravity,
             ProviderId::Copilot,
             ProviderId::Zai,
@@ -228,6 +230,7 @@ impl ProviderId {
             ProviderId::Cursor => "cursor",
             ProviderId::Factory => "factory",
             ProviderId::Gemini => "gemini",
+            ProviderId::GeminiApps => "geminiapps",
             ProviderId::Antigravity => "antigravity",
             ProviderId::Copilot => "copilot",
             ProviderId::Zai => "zai",
@@ -331,7 +334,8 @@ impl ProviderId {
             ProviderId::Pi => "Pi",
             ProviderId::Cursor => "Cursor",
             ProviderId::Factory => "Factory",
-            ProviderId::Gemini => "Gemini",
+            ProviderId::Gemini => "Gemini CLI",
+            ProviderId::GeminiApps => "Gemini Apps",
             ProviderId::Antigravity => "Antigravity",
             ProviderId::Copilot => "Copilot",
             ProviderId::Zai => "z.ai",
@@ -440,6 +444,8 @@ impl ProviderId {
             ProviderId::Codex => Some("chatgpt.com"),
             ProviderId::Pi => None,
             ProviderId::Gemini => Some("aistudio.google.com"),
+            // Imported by an explicit, provider-scoped desktop connection.
+            ProviderId::GeminiApps => None,
             ProviderId::Kiro => Some("kiro.dev"),
             ProviderId::Kimi => Some("kimi.moonshot.cn"),
             ProviderId::KimiK2 => Some("platform.moonshot.cn"),
@@ -564,7 +570,8 @@ impl ProviderId {
             "pi" | "pi-mono" => Some(ProviderId::Pi),
             "cursor" => Some(ProviderId::Cursor),
             "factory" | "droid" => Some(ProviderId::Factory),
-            "gemini" | "google" => Some(ProviderId::Gemini),
+            "gemini" | "google" | "gemini cli" | "gemini-cli" => Some(ProviderId::Gemini),
+            "geminiapps" | "gemini-apps" | "gemini apps" => Some(ProviderId::GeminiApps),
             "antigravity" | "agy" => Some(ProviderId::Antigravity),
             "copilot" | "github" => Some(ProviderId::Copilot),
             "zai" | "z.ai" => Some(ProviderId::Zai),
@@ -1299,6 +1306,7 @@ pub fn brand_color(id: ProviderId) -> &'static str {
         ProviderId::Cursor => "#F54E00",
         ProviderId::Factory => "#FF6B35",
         ProviderId::Gemini => "#AB87EA",
+        ProviderId::GeminiApps => "#AB87EA",
         ProviderId::Antigravity => "#60BA7E",
         ProviderId::Copilot => "#A855F7",
         ProviderId::Zai => "#E85A6A",
@@ -1408,7 +1416,7 @@ mod tests {
     #[test]
     fn test_provider_id_all() {
         let all = ProviderId::all();
-        assert_eq!(all.len(), 98);
+        assert_eq!(all.len(), 99);
         assert!(all.contains(&ProviderId::Claude));
         assert!(all.contains(&ProviderId::Codex));
         assert!(all.contains(&ProviderId::Pi));

@@ -1606,3 +1606,11 @@ MobileSharingRevoked = 以前のコードを無効にしました。新しいコ
 MobileSharingRunning = 共有中
 MobileSharingStopped = 共有停止中
 MobileSharingFailed = Androidへの共有に失敗しました。
+
+# Gemini Apps desktop connection
+GeminiAppsTitle = Geminiデスクトップ連携
+GeminiAppsHelp = Google公式Geminiアプリを閉じてから接続し、接続後にGeminiを開き直してください。ログイン情報はこのWindowsユーザーで暗号化してPC内に保存します。現在（5時間）・週間の使用枠はGemini CLIとは別です。Googleのメインアカウントのみ対応しています。ログインが失効したら再接続してください。
+GeminiAppsConnect = Geminiアプリから接続
+GeminiAppsDisconnect = Gemini Appsの接続解除
+GeminiAppsSaved = 接続情報の保存日時：
+GeminiAppsNotConnected = 未接続

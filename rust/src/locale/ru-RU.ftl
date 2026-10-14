@@ -1606,3 +1606,11 @@ MobileSharingLan = Использовать LAN
 MobileSharingDiscover = Найти адреса снова
 MobileSharingTailscaleHelper = Подключите ПК и телефон к одной сети Tailscale и выберите адрес Tailscale компьютера. Exit node телефона можно оставить в состоянии None. После смены адреса вставьте новый код сопряжения в Android. Только запросам использования этого приложения нужен доступ к ПК.
 MobileSharingTailscaleUnavailable = IPv4-адрес Tailscale не найден. Установите или подключите Tailscale на этом ПК и повторите поиск. Адрес также можно ввести вручную.
+
+# Gemini Apps desktop connection
+GeminiAppsTitle = Подключение Gemini для Windows
+GeminiAppsHelp = Закройте официальное приложение Google Gemini, подключитесь здесь и откройте Gemini снова. Сеанс шифруется для текущего пользователя Windows и остаётся на ПК. Текущая (5 часов) и недельная квоты отличаются от Gemini CLI. Поддерживается только основной аккаунт Google. Если сеанс истечёт, подключитесь заново.
+GeminiAppsConnect = Подключить приложение Gemini
+GeminiAppsDisconnect = Отключить Gemini Apps
+GeminiAppsSaved = Сеанс сохранён:
+GeminiAppsNotConnected = Не подключено

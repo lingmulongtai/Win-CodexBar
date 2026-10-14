@@ -10,7 +10,7 @@ Em **Avançado → Compartilhar com Android**, selecione LAN ou Tailscale, ative
 
 O Android oferece coleta no telefone ou recepção dos dados coletados no Windows, com exceções por serviço. A troca preserva credenciais, pareamento e históricos por conta e origem. Serviços conhecidos do PC são sincronizados ao atualizar. Se o PC estiver offline, não há troca automática para outra conta do telefone.
 
-Os detalhes mostram tokens e custos estimados em USD dos logs locais do PC, quando disponíveis: hoje, 30 dias e período selecionado. Podem incluir várias contas e não representam cobranças. A data e hora da agregação são exibidas. **Gemini significa Gemini CLI; o uso do Google Gemini Apps não é coletado.**
+Os detalhes mostram tokens e custos estimados em USD dos logs locais do PC, quando disponíveis: hoje, 30 dias e período selecionado. Podem incluir várias contas e não representam cobranças. A data e hora da agregação são exibidas. **Gemini Apps tem conexão própria para uso atual/semanal e redefinições. Gemini CLI permanece separado. A exibição móvel requer Android v0.9.8.** [Gemini Apps connection](docs/gemini-apps.md)
 
 Desde a v0.70.3, o Vivaldi aparece como uma opção própria para importar cookies dos perfis padrão do Windows. [Configuração e limites de criptografia](docs/COOKIES.md).
 
@@ -23,3 +23,5 @@ Desde a v0.70.3, o Vivaldi aparece como uma opção própria para importar cooki
 [Guia de conexão](docs/android-sharing.md) · [Mudanças v0.70.2](docs/releases/v0.70.2.md) · [Validação e limites](docs/mobile-validation.md) · [README completo em inglês](README.md) · [Problemas deste fork](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues)
 
 Capturas do Windows nativo e do emulador Android usam dados sintéticos. A validação em telefone físico e com contas reais permanece pendente. [Licença MIT](LICENSE).
+
+![Gemini Apps connection in Windows (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.4-gemini-apps-ja.jpg)

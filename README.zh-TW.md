@@ -8,7 +8,7 @@
 
 在Advanced → Android sharing選擇LAN或Tailscale，啟用共用，將配對碼貼到Android的Connections。兩部裝置在同一Tailscale網路即可，手機不需exit node。預設TCP連接埠43825，存取規則與防火牆需允許通訊。
 
-Android 0.9.7可選手機收集或Windows收集，並設定個別服務的手機例外。配對、憑證、選擇和分別儲存的歷史記錄在切換後保留。PC離線時不自動改用手機的另一個帳號。新增PC本機記錄的今日、30天與所選期間Token數和USD估算費用，可能包含多個帳號，並非實際帳單。**Gemini指Gemini CLI，並非Gemini Apps。**
+Android 0.9.7可選手機收集或Windows收集，並設定個別服務的手機例外。配對、憑證、選擇和分別儲存的歷史記錄在切換後保留。PC離線時不自動改用手機的另一個帳號。新增PC本機記錄的今日、30天與所選期間Token數和USD估算費用，可能包含多個帳號，並非實際帳單。**Gemini Apps現在獨立顯示目前、每週使用率和重設時間，與Gemini CLI分開。手機顯示需要Android v0.9.8或更新版本。** [Gemini Apps connection](docs/gemini-apps.md)
 
 從v0.70.3起，可單獨選擇Vivaldi，匯入Windows標準設定檔中的Cookie。[設定與加密限制](docs/COOKIES.md)。
 
@@ -19,3 +19,5 @@ Android 0.9.7可選手機收集或Windows收集，並設定個別服務的手機
 ![已發布v0.70.2的應用程式資訊與更新檢查](docs/images/mobile-connect/windows-release-v0.70.2-about-ja.jpg)
 
 完整說明、Android截圖與開發步驟見[English README](README.md)、[日本語](README.ja-JP.md)和[設定指南](docs/android-sharing.md)。截圖使用測試資料；驗證範圍見[記錄](docs/mobile-validation.md)。[MIT](LICENSE)；原始專案來自[CodexBar](https://github.com/steipete/CodexBar)。
+
+![Gemini Apps connection in Windows (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.4-gemini-apps-ja.jpg)

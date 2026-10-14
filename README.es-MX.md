@@ -10,7 +10,7 @@ En **Avanzado → Compartir con Android**, selecciona LAN o Tailscale, activa la
 
 Android permite recopilar en el teléfono o recibir los datos de Windows, con excepciones por servicio. Cambiar de modo conserva credenciales, emparejamiento e historiales por cuenta y origen. Los proveedores conocidos del PC se sincronizan al actualizar. Si Windows está desconectado, no se cambia automáticamente a otra cuenta del teléfono.
 
-Los detalles muestran tokens y costos estimados en USD de los registros locales del PC, cuando están disponibles, para hoy, 30 días y el período elegido. Pueden incluir varias cuentas; no son cargos facturados. Se muestra la fecha y hora de la agregación. **Gemini corresponde a Gemini CLI; el uso de Google Gemini Apps no se recopila.**
+Los detalles muestran tokens y costos estimados en USD de los registros locales del PC, cuando están disponibles, para hoy, 30 días y el período elegido. Pueden incluir varias cuentas; no son cargos facturados. Se muestra la fecha y hora de la agregación. **Gemini Apps tiene su propia conexión para uso actual/semanal y reinicios. Gemini CLI permanece separado. La vista móvil requiere Android v0.9.8.** [Gemini Apps connection](docs/gemini-apps.md)
 
 Desde v0.70.3, Vivaldi aparece como opción propia para importar cookies desde sus perfiles estándar de Windows. [Configuración y límites de cifrado](docs/COOKIES.md).
 
@@ -23,3 +23,5 @@ Desde v0.70.3, Vivaldi aparece como opción propia para importar cookies desde s
 [Guía de conexión](docs/android-sharing.md) · [Cambios v0.70.2](docs/releases/v0.70.2.md) · [Validación y límites](docs/mobile-validation.md) · [README completo en inglés](README.md) · [Reportar problemas en este fork](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues)
 
 Capturas de Windows nativo y emulador Android con datos sintéticos. La aceptación en teléfonos físicos y con cuentas reales está pendiente. [Licencia MIT](LICENSE).
+
+![Gemini Apps connection in Windows (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.4-gemini-apps-ja.jpg)

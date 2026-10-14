@@ -10,7 +10,7 @@ Windows 10/11 x64와 Microsoft WebView2 Runtime이 필요합니다. EXE를 저�
 
 Android는 휴대전화에서 직접 수집하거나 Windows에서 수집한 데이터를 받는 모드를 제공합니다. 서비스별 휴대전화 예외도 설정할 수 있습니다. 모드 전환 시 인증 정보, 페어링 및 계정과 수집 원본별 기록을 유지합니다. PC의 알려진 서비스는 새로 고칠 때 동기화됩니다. PC가 오프라인이면 다른 휴대전화 계정으로 자동 전환하지 않습니다.
 
-PC의 로컬 로그에서 확인되는 오늘, 최근 30일 및 선택 기간의 토큰 수와 추정 USD 비용을 상세 화면에 표시합니다. 여러 계정이 포함될 수 있으며 청구 금액과는 다릅니다. 집계 날짜와 시각을 표시합니다. **Gemini는 Gemini CLI입니다. Google Gemini Apps 사용량은 수집하지 않습니다.**
+PC의 로컬 로그에서 확인되는 오늘, 최근 30일 및 선택 기간의 토큰 수와 추정 USD 비용을 상세 화면에 표시합니다. 여러 계정이 포함될 수 있으며 청구 금액과는 다릅니다. 집계 날짜와 시각을 표시합니다. **Gemini Apps는 현재·주간 사용량과 초기화 시각을 별도 연결로 가져옵니다. Gemini CLI와 구분되며 모바일 표시는 Android v0.9.8 이상이 필요합니다.** [Gemini Apps connection](docs/gemini-apps.md)
 
 v0.70.3부터 기본 Windows 프로필의 쿠키를 가져올 때 Vivaldi를 별도로 선택할 수 있습니다. [설정 및 암호화 제한](docs/COOKIES.md).
 
@@ -23,3 +23,5 @@ v0.70.3부터 기본 Windows 프로필의 쿠키를 가져올 때 Vivaldi를 별
 [연결 안내](docs/android-sharing.md) · [v0.70.2 변경 사항](docs/releases/v0.70.2.md) · [검증 및 제한](docs/mobile-validation.md) · [영문 전체 README](README.md) · [이 포크에 문제 보고](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues)
 
 네이티브 Windows와 Android 에뮬레이터에서 합성 데이터로 촬영했습니다. 실제 휴대전화와 실제 계정 검증은 아직 완료되지 않았습니다. [MIT 라이선스](LICENSE).
+
+![Gemini Apps connection in Windows (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.4-gemini-apps-ja.jpg)

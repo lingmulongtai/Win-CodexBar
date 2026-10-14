@@ -1,5 +1,9 @@
 # Mobile Connect v0.70.2 validation
 
+## Gemini Apps update (v0.70.4 / Android v0.9.8)
+
+Gemini Apps now has its own Windows collector and Android provider identity. The earlier unsupported-Gemini statements below describe older releases. See [Gemini Apps setup](gemini-apps.md) and [v0.70.4 validation and limits](releases/v0.70.4.md) for current behavior. The native connection screen uses the existing styled credential buttons and does not offer an unsupported account switch action.
+
 ## Current local checks
 
 - Locked Rust workspace tests: 4,178 core tests passed, one ignored; one CLI test and 715 Tauri tests passed. Rust formatting and workspace clippy with warnings denied passed.

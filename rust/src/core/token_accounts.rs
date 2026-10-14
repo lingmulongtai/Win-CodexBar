@@ -394,6 +394,7 @@ impl TokenAccountSupport {
             ProviderId::Codex
             | ProviderId::Pi
             | ProviderId::Gemini
+            | ProviderId::GeminiApps
             | ProviderId::Antigravity
             | ProviderId::Kiro
             | ProviderId::VertexAI

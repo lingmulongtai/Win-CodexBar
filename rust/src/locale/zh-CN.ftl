@@ -1606,3 +1606,11 @@ MobileSharingLan = 使用局域网
 MobileSharingDiscover = 重新检测地址
 MobileSharingTailscaleHelper = 外出时，将电脑和手机连接到同一Tailscale网络，并选择电脑的Tailscale地址。手机的exit node可保持None。更改地址后，请将新的配对码粘贴到Android。只有此应用的使用量请求需要连接到电脑。
 MobileSharingTailscaleUnavailable = 未检测到Tailscale IPv4地址。请在此电脑上安装或连接Tailscale并重新检测，也可手动输入地址。
+
+# Gemini Apps desktop connection
+GeminiAppsTitle = Gemini 桌面连接
+GeminiAppsHelp = 关闭 Google 官方 Gemini 应用后在此连接，再重新打开 Gemini。会话使用当前 Windows 用户加密并保留在电脑上。当前（5 小时）和每周限额与 Gemini CLI 分开。仅支持主要 Google 账号；会话过期后请重新连接。
+GeminiAppsConnect = 从 Gemini 桌面应用连接
+GeminiAppsDisconnect = 断开 Gemini Apps
+GeminiAppsSaved = 会话保存时间：
+GeminiAppsNotConnected = 未连接

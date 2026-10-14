@@ -28,9 +28,9 @@ Sanitized supported-provider snapshots include quota windows, reset times, obser
 
 Optional **Local usage on this PC** totals come from completed cached Windows log scans: today/30-day/selected-period tokens and estimated USD costs, PC calendar date, aggregation time, a sanitized model label and incomplete-request count where known. They may include multiple accounts and are separate from the signed-in quota account and billed charges. Local aggregation has its own stale label. Sharing never starts a scan; enable local usage/cost features on Windows when needed. This does not reproduce every desktop-only field or layout.
 
-Supported IDs are Codex, Claude, Gemini CLI, Copilot, Cursor, z.ai, ZenMux, Kimi Coding, ElevenLabs, OpenRouter, Synthetic, Chutes, DeepSeek, Venice, Moonshot API, ClinePass, IBM Bob, Fireworks, Devin and Antigravity. Authentication-required/unavailable PC providers remain PC-sourced with an actionable status. This does not add collectors.
+Supported IDs are Codex, Claude, Gemini CLI, Gemini Apps, Copilot, Cursor, z.ai, ZenMux, Kimi Coding, ElevenLabs, OpenRouter, Synthetic, Chutes, DeepSeek, Venice, Moonshot API, ClinePass, IBM Bob, Fireworks, Devin and Antigravity. Authentication-required/unavailable PC providers remain PC-sourced with an actionable status. This does not add collectors.
 
-**Gemini means Gemini CLI quotas. Google Gemini Apps / the Gemini Windows app's usage display is not collected by this integration.** Desktop and Android views do not have identical layouts or every desktop-specific field.
+**Gemini CLI and Gemini Apps are separate providers.** [Connect Gemini Apps](gemini-apps.md) for current/weekly usage and reset times; Android v0.9.8 or later is required. Desktop and Android views do not have identical layouts or every desktop-specific field.
 
 The feed does not contain provider credentials, email addresses, account names, local paths, prompts, session transcripts or raw errors. Pairing secrets are protected using Windows DPAPI and Android Keystore. Requests use HMAC-SHA256 authentication, timestamp checks and single-use nonces; responses use AES-256-GCM with the request identity as authenticated data. The local transport is TCP with newline-delimited JSON, bounded requests/responses, timeouts and a concurrent-client limit.
 
@@ -44,4 +44,6 @@ The product identifier, settings directory, auto-start identity, toast identity,
 
 Native Windows proof used an isolated configuration with synthetic quota data, the actual Tauri app, and Android's actual Kotlin receiver. The downloaded, published v0.70.2 EXE also passed GUI checks for sharing on/off, Tailscale/LAN selection and persistence, and updates, with native screenshots. It is evidence for transport interoperability and the published GUI, not a real-account or physical-phone acceptance test. Unit tests cover authentication vectors, malformed messages, replay rejection, listener shutdown, canonical provider IDs, unknown values, source changes, stale observations and account-scoped history. See the [validation report](mobile-validation.md) for exact results.
 
-There is no cloud relay, phone discovery, QR scanner, automatic firewall change or Google Gemini Apps collector. Pairing includes the endpoint; no provider token must be re-entered on the phone. Off-LAN physical-phone acceptance remains separate from local native/emulator checks.
+There is no cloud relay, phone discovery, QR scanner, automatic firewall change. Pairing includes the endpoint; no provider token must be re-entered on the phone. Off-LAN physical-phone acceptance remains separate from local native/emulator checks.
+
+Multiple Android devices can use the same pairing code concurrently. Each retains its own acquisition mode and phone exceptions. Revoking pairing rotates the shared key for all devices.

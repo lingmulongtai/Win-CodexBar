@@ -4,7 +4,7 @@ import type { LocaleKey } from "../../../../i18n/keys";
 interface Props {
   provider: Pick<ProviderDetail, "dashboardUrl" | "statusPageUrl" | "buyCreditsUrl">;
   busy: boolean;
-  onSwitchAccount: () => void;
+  onSwitchAccount?: () => void;
   onOpenDashboard: () => void;
   onOpenStatusPage: () => void;
   onBuyCredits: () => void;
@@ -27,7 +27,7 @@ export function QuickActionsSection({
 }: Props) {
   const links: { key: string; label: LocaleKey; onClick: () => void; disabled?: boolean }[] = [];
   if (provider.dashboardUrl) {
-    links.push({ key: "switch", label: "ActionSwitchAccount", onClick: onSwitchAccount, disabled: busy });
+    if (onSwitchAccount) links.push({ key: "switch", label: "ActionSwitchAccount", onClick: onSwitchAccount, disabled: busy });
     links.push({ key: "dashboard", label: "ActionUsageDashboard", onClick: onOpenDashboard });
   }
   if (provider.statusPageUrl) {

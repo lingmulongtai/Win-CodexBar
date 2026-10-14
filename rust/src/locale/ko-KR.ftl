@@ -1605,3 +1605,11 @@ MobileSharingLan = LAN 사용
 MobileSharingDiscover = 주소 다시 감지
 MobileSharingTailscaleHelper = PC와 휴대폰을 같은 Tailscale 네트워크에 연결하고 PC의 Tailscale 주소를 선택하세요. 휴대폰의 exit node는 None으로 유지해도 됩니다. 주소를 변경한 뒤 새 페어링 코드를 Android에 붙여 넣으세요. 이 앱의 사용량 요청만 PC에 연결하면 됩니다.
 MobileSharingTailscaleUnavailable = Tailscale IPv4 주소를 찾지 못했습니다. 이 PC에서 Tailscale을 설치하거나 연결한 뒤 다시 감지하세요. 주소를 직접 입력할 수도 있습니다.
+
+# Gemini Apps desktop connection
+GeminiAppsTitle = Gemini 데스크톱 연결
+GeminiAppsHelp = Google 공식 Gemini 앱을 닫고 여기에서 연결한 뒤 Gemini를 다시 여세요. 세션은 현재 Windows 사용자로 암호화되어 PC에 저장됩니다. 현재(5시간) 및 주간 한도는 Gemini CLI와 별개입니다. 기본 Google 계정만 지원하며 세션 만료 시 다시 연결하세요.
+GeminiAppsConnect = Gemini 데스크톱 앱으로 연결
+GeminiAppsDisconnect = Gemini Apps 연결 해제
+GeminiAppsSaved = 세션 저장:
+GeminiAppsNotConnected = 연결되지 않음
