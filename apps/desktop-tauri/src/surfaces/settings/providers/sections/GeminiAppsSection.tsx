@@ -34,10 +34,10 @@ export function GeminiAppsSection({ disabled, t, onChanged }: {
     <h3>{t("GeminiAppsTitle")}</h3>
     <p className="provider-detail-helper">{t("GeminiAppsHelp")}</p>
     <p>{savedAt ? `${t("GeminiAppsSaved")} ${savedAt}` : t("GeminiAppsNotConnected")}</p>
-    <button className="btn btn-primary" disabled={disabled || busy} onClick={() => void change(true)}>
+    <button className="credential-btn credential-btn--primary" disabled={disabled || busy} onClick={() => void change(true)}>
       {t("GeminiAppsConnect")}
     </button>{" "}
-    {savedAt && <button className="btn" disabled={disabled || busy} onClick={() => void change(false)}>
+    {savedAt && <button className="credential-btn credential-btn--danger" disabled={disabled || busy} onClick={() => void change(false)}>
       {t("GeminiAppsDisconnect")}
     </button>}
     {error && <p role="alert" className="provider-detail-error">{error}</p>}

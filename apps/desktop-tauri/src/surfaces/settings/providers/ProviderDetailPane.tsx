@@ -405,7 +405,7 @@ export function ProviderDetailPane({
         <QuickActionsSection
           provider={detail}
           busy={busy}
-          onSwitchAccount={handleSwitchAccount}
+          onSwitchAccount={detail.id === "geminiapps" ? undefined : handleSwitchAccount}
           onOpenDashboard={handleOpenDashboard}
           onOpenStatusPage={handleOpenStatusPage}
           onBuyCredits={handleBuyCredits}
