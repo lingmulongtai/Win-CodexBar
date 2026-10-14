@@ -27,6 +27,16 @@ Windows版は**署名なし**です。元プロジェクトの署名証明書や
 
 ![公開EXE v0.70.3でVivaldiを選択](docs/images/mobile-connect/windows-v0.70.3-vivaldi-ja.jpg)
 
+## Gemini Appsの使用量
+
+**v0.70.5以降**で、GoogleのGeminiデスクトップアプリと接続できます。現在・週間の使用率とリセット日時を、Gemini CLI・Antigravityとは別に表示します。接続後はGeminiを起動したまま更新でき、Android **v0.9.8以降**にも同じ使用枠を送れます。Googleのログイン情報はWindows内に暗号化保存します。[接続手順](docs/gemini-apps.md) · [v0.70.5の変更・検証記録](docs/releases/v0.70.5.md)
+
+画像は、公開された**v0.70.5 EXEをダウンロードして起動・撮影**した実際のWindows画面です。専用のデモ設定を使っています。
+
+![公開EXE v0.70.5でGemini Appsの使用量を表示（デモデータ）](docs/images/mobile-connect/windows-v0.70.5-gemini-usage-ja.jpg)
+
+![公開EXE v0.70.5のGemini Apps接続設定](docs/images/mobile-connect/windows-v0.70.5-gemini-connection-ja.jpg)
+
 ## スマホとの接続
 
 1. Windows側で使うサービスを接続・有効化します。
@@ -60,5 +70,3 @@ Windows画像は、公開済みの**v0.70.2 EXEをダウンロードして起動
 **Gemini Appsの現在・週間の使用率とリセット日時を独立した接続で取得できます。Gemini CLIとは別表示です。スマホでの表示はAndroid v0.9.8以降に対応します。** [Gemini Apps connection](docs/gemini-apps.md) 実アカウント・実機スマホ・ランチャー・Samsung Now Barの確認は、エミュレーターの検証とは別です。[検証記録](docs/mobile-validation.md) · [v0.70.2の変更](docs/releases/v0.70.2.md)
 
 開発方法は[English README](README.md#development)、ライセンスは[MIT](LICENSE)です。元となった[CodexBar](https://github.com/steipete/CodexBar)とWin-CodexBarの貢献者に謝意を表します。
-
-![Gemini Apps connection in Windows (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.4-gemini-apps-ja.jpg)

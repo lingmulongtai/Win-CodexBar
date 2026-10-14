@@ -29,6 +29,16 @@ The original collectors, tray, history, notifications, themes and provider setti
 
 ![Vivaldi selected in the published v0.70.3 Windows EXE](docs/images/mobile-connect/windows-v0.70.3-vivaldi-ja.jpg)
 
+## Gemini Apps
+
+Use **v0.70.5 or later** to connect the usage limits from Google's Gemini desktop app. Current/weekly quotas and reset times are separate from Gemini CLI and Antigravity. Later refreshes reuse the encrypted login while Gemini is running; Android **v0.9.8 or later** displays the same sanitized quotas. [Connection guide](docs/gemini-apps.md) · [v0.70.5 changes and verification](docs/releases/v0.70.5.md)
+
+The following native Windows captures use the downloaded, published **v0.70.5 EXE** with an isolated demo profile.
+
+![Published v0.70.5 Gemini Apps usage (demo data)](docs/images/mobile-connect/windows-v0.70.5-gemini-usage-ja.jpg)
+
+![Published v0.70.5 Gemini Apps connection controls](docs/images/mobile-connect/windows-v0.70.5-gemini-connection-ja.jpg)
+
 ## Connect
 
 1. Connect and enable the desired providers on Windows.
@@ -74,5 +84,3 @@ pnpm --dir apps/desktop-tauri run tauri:dev
 Development requires Rust, Windows build tools and the pinned pnpm version. Run `cargo test --locked --workspace`, `cargo fmt --all -- --check`, frontend `pnpm test`, `pnpm run lint` and `pnpm run build`. Build using `pnpm run tauri:build`; raw Cargo can embed the development URL. [Repository rules](AGENTS.md)
 
 [MIT license](LICENSE). Original collector/UI work belongs to the Win-CodexBar/CodexBar contributors. This fork has its own [issues](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues) and releases.
-
-![Gemini Apps connection in Windows (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.4-gemini-apps-ja.jpg)
