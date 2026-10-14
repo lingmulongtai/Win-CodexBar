@@ -1,6 +1,6 @@
 # Google Gemini Apps quota investigation
 
-Status on 2026-10-14: authenticated Web Usage Limits data was observed and its quota RPC identified. A production collector and Android projection are not implemented yet. This is distinct from the existing `gemini` (Gemini CLI) and `antigravity` collectors.
+Status on 2026-10-15: authenticated Web and native-app sessions both retrieved Usage Limits data. The production integration uses the separate `geminiapps` provider and Android `GEMINI_APPS` service; `gemini` remains Gemini CLI and `antigravity` remains independent. See [connection instructions](gemini-apps.md).
 
 ## Verified acquisition evidence
 
@@ -8,7 +8,7 @@ Status on 2026-10-14: authenticated Web Usage Limits data was observed and its q
 - The packaged native bridge exposes app/window/device operations, but no quota method was found. Production startup explicitly rejects remote debugging and inspector arguments; these protections were preserved.
 - One user-approved restart with Chromium's `--force-renderer-accessibility` flag completed. The available native reader still exposed no readable quota text.
 - In a logged-in Vivaldi Web tab for the same Google account, Settings → Usage limits displayed current and weekly percentages and reset times. Opening that view requested the RPC `jSf9Qc`; its fraction values and Unix reset timestamps matched the visible values.
-- The app's running `Network/Cookies` database rejects ordinary read access with a Windows sharing violation. No lock, process-debugging restriction or encryption boundary was bypassed. Reading the closed app's session is pending a second explicit restart confirmation.
+- The app's running `Network/Cookies` database rejects ordinary read access with a Windows sharing violation. A second user-approved close/read/restart succeeded. Gemini was restarted normally before HTTPS requests. Its DPAPI-protected Local State key decrypted the AES-GCM session cookies, and the app session returned the same current/weekly quota fields. No lock, process-debugging restriction or encryption boundary was bypassed; the experiment did not persist decrypted credentials.
 
 ## Observed Web protocol
 
@@ -40,7 +40,7 @@ Use a new `geminiapps` provider and an explicit Android `GEMINI_APPS` service. K
 
 Google authentication includes parent-domain cookies. A `gemini.google.com` child-domain extraction alone misses those; broad collection of every Google subdomain is also inappropriate. A provider-local reader must restrict the permitted cookie hosts and paths to the requests being made, preserve App-Bound Encryption limits and fail without switching to another account or browser.
 
-Bootstrap and quota requests must use the same explicitly selected Google account route. An `authuser` index is not a stable account identity. Changing an account index must invalidate cached/mobile usage and reject results from old in-flight requests. If a stable source account identity cannot be established, omit the mobile subject ID and skip identity-dependent reset-history tracking.
+Bootstrap and quota requests use the same default `/app` account route and reject redirects. Multi-account/index selection is deliberately not offered. Import and disconnect invalidate cached/mobile usage and supersede old in-flight requests. No stable source account identity is established, so the mobile subject ID and identity-dependent reset-history tracking are omitted.
 
 The Web RPC is undocumented and may change. A collector needs deterministic framing/schema fixtures, a real authenticated fetch matching the screen, login/expiry errors and account-isolation checks before release.
 

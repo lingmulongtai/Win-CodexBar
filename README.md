@@ -59,7 +59,7 @@ Quota windows, reset times, observation timestamps, optional budgets/balances an
 
 Pairing uses Windows DPAPI and Android Keystore. HMAC-SHA256 requests have clock/replay checks; responses use AES-256-GCM. Provider secrets, emails, account names, local paths, prompts and transcripts are excluded. Keep pairing codes private; **Revoke paired phones** invalidates old codes.
 
-**Gemini means Gemini CLI; Google Gemini Apps / the Windows Gemini app's usage display is not collected.** There is no cloud relay or phone discovery. Physical-phone, live-account, launcher and Samsung Now Bar acceptance are separate from emulator tests. [Validation evidence](docs/mobile-validation.md) · [v0.70.2 changes](docs/releases/v0.70.2.md)
+**Gemini Apps now has its own connection for current/weekly usage and reset times. Gemini CLI remains separate. Requires Android v0.9.8 for mobile display.** [Gemini Apps connection](docs/gemini-apps.md) There is no cloud relay or phone discovery. Physical-phone, live-account, launcher and Samsung Now Bar acceptance are separate from emulator tests. [Validation evidence](docs/mobile-validation.md) · [v0.70.2 changes](docs/releases/v0.70.2.md)
 
 ## Development
 
@@ -74,3 +74,5 @@ pnpm --dir apps/desktop-tauri run tauri:dev
 Development requires Rust, Windows build tools and the pinned pnpm version. Run `cargo test --locked --workspace`, `cargo fmt --all -- --check`, frontend `pnpm test`, `pnpm run lint` and `pnpm run build`. Build using `pnpm run tauri:build`; raw Cargo can embed the development URL. [Repository rules](AGENTS.md)
 
 [MIT license](LICENSE). Original collector/UI work belongs to the Win-CodexBar/CodexBar contributors. This fork has its own [issues](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues) and releases.
+
+![Gemini Apps connection in Windows (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.4-gemini-apps-ja.jpg)

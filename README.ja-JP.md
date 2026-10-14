@@ -57,6 +57,8 @@ Windows画像は、公開済みの**v0.70.2 EXEをダウンロードして起動
 
 コードはWindows DPAPI／Android Keystoreで保護し、HMAC-SHA256で要求を認証、AES-256-GCMで応答を暗号化します。メール、名前、パス、プロンプト、会話内容、サービスのトークンは送信しません。コードは私的に保管し、無効化には**ペアリングを取り消す**を使います。
 
-**GeminiはGemini CLIの使用量です。Google Gemini Windowsアプリ／Gemini Appsの使用量は自動取得しません。** 実アカウント・実機スマホ・ランチャー・Samsung Now Barの確認は、エミュレーターの検証とは別です。[検証記録](docs/mobile-validation.md) · [v0.70.2の変更](docs/releases/v0.70.2.md)
+**Gemini Appsの現在・週間の使用率とリセット日時を独立した接続で取得できます。Gemini CLIとは別表示です。スマホでの表示はAndroid v0.9.8以降に対応します。** [Gemini Apps connection](docs/gemini-apps.md) 実アカウント・実機スマホ・ランチャー・Samsung Now Barの確認は、エミュレーターの検証とは別です。[検証記録](docs/mobile-validation.md) · [v0.70.2の変更](docs/releases/v0.70.2.md)
 
 開発方法は[English README](README.md#development)、ライセンスは[MIT](LICENSE)です。元となった[CodexBar](https://github.com/steipete/CodexBar)とWin-CodexBarの貢献者に謝意を表します。
+
+![Gemini Apps connection in Windows (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.4-gemini-apps-ja.jpg)
