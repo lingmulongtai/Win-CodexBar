@@ -4,6 +4,8 @@ Gemini Apps (`geminiapps`) reads the **Current usage** and **Weekly limit** show
 
 ## Connect on Windows
 
+Use Windows **v0.70.5 or later**. It fixes a Gemini bootstrap transport error present in v0.70.4.
+
 1. Install the official Google Gemini desktop app and sign in with your primary Google account.
 2. Close Gemini once. It locks its session database while running.
 3. In **Settings → Providers → Gemini Apps**, enable the provider and choose **Connect using Gemini desktop app**.
@@ -24,6 +26,6 @@ Pair your phone and tablet using the same Windows pairing code. Each device keep
 
 The undocumented first-party quota RPC can change. Missing/invalid windows or timestamps report an error; unknown data does not become 0%. The API supplies no verified stable Google account identity, token totals, model-level breakdown or established plan-name mapping. Account-dependent history/reset tracking is therefore omitted from the mobile Gemini Apps observation.
 
-The native app session and quota RPC were verified on 2026-10-15, after a user-approved close/read/restart with credentials kept in memory. Deterministic tests cover framing, changed schemas, fractions, zero usage, window ordering, timestamps, scoped cookie extraction and separate CLI/Apps IDs. Native GUI screenshots use an isolated synthetic profile; they do not expose Google account information or chats. Production collector and release verification are recorded in the release notes.
+The native app session and quota RPC were verified on 2026-10-15. After the user approved encrypted storage, the Rust collector successfully reused the saved Windows-user DPAPI session while Gemini was running. Gemini's bootstrap rejected the client's HTTP/2 stream; the Gemini Apps collector now uses HTTP/1.1 with normal TLS verification. Deterministic tests cover framing, changed schemas, fractions, zero usage, window ordering, timestamps, scoped cookie extraction and separate CLI/Apps IDs. Native GUI screenshots use an isolated synthetic profile; they do not expose Google account information or chats. Published-executable verification is recorded in the release notes.
 
 [Acquisition evidence](gemini-apps-investigation.md) · [Mobile sharing](android-sharing.md) · [Google's Usage Limits help](https://support.google.com/gemini/answer/16275805?hl=en)
