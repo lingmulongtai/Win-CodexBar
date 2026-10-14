@@ -12,7 +12,9 @@ Android permite recopilar en el teléfono o recibir los datos de Windows, con ex
 
 Los detalles muestran tokens y costos estimados en USD de los registros locales del PC, cuando están disponibles, para hoy, 30 días y el período elegido. Pueden incluir varias cuentas; no son cargos facturados. Se muestra la fecha y hora de la agregación. **Gemini corresponde a Gemini CLI; el uso de Google Gemini Apps no se recopila.**
 
-![Configuración real de Windows](docs/images/mobile-connect/windows-sharing-ja.jpg)
+![Configuración real de Windows](docs/images/mobile-connect/windows-release-v0.70.2-sharing-ja.jpg)
+
+![Información y comprobación de actualizaciones del EXE publicado v0.70.2](docs/images/mobile-connect/windows-release-v0.70.2-about-ja.jpg)
 
 [Guía de conexión](docs/android-sharing.md) · [Cambios v0.70.2](docs/releases/v0.70.2.md) · [Validación y límites](docs/mobile-validation.md) · [README completo en inglés](README.md) · [Reportar problemas en este fork](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues)
 

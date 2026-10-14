@@ -4,7 +4,7 @@
 
 - Locked Rust workspace tests: 4,178 core tests passed, one ignored; one CLI test and 715 Tauri tests passed. Rust formatting and workspace clippy with warnings denied passed.
 - Frontend: the full run passed 1,102 tests; eight Advanced-settings fixture failures were corrected and all eight reran successfully, covering 1,110 tests. TypeScript/Vite and locale checks passed. Lint retained seven existing warnings and no errors. Hosted CI runs the complete suite again on the final source.
-- Fresh native debug EXE v0.70.1 displayed the Japanese sharing controls, the selected endpoint, and the owned app title/version. Existing residents were not used as proof.
+- The downloaded, published v0.70.2 EXE passed the native GUI verification described below. Its own Windows.Graphics.Capture screenshots replace the earlier implementation-build images in every active README.
 - The actual native Windows listener and Kotlin receiver exchanged authenticated encrypted synthetic quota and local-log totals: 12,500 tokens today, 250,000 over 30 days, estimated USD 0.25/5.25. Both loopback and a detected Tailscale-address listener passed the forced native interoperability test.
 - Android v0.9.7 API 36.1 preserved the existing pairing across debug APK updates; its normal dashboard displayed three Windows sources. Phone mode stopped automatic PC polling and retained pairing. Windows mode restored PC sources. Native screenshots include both modes and PC detail totals.
 - Android unit tests: 408 passed, one environment-dependent native interop test skipped in the regular suite; that test separately passed against the native Windows server. Lint and debug APK build passed.
@@ -12,7 +12,21 @@
 
 CUA Driver is unavailable on this host. The bundled Computer Use capture uses Windows.Graphics.Capture for real native pixels; CDP drives only the app's own WebView2. Android images are actual ADB captures, not reconstructed UI. Proof profiles and pairing codes remain outside Git.
 
-![Current native Windows sharing settings](images/mobile-connect/windows-sharing-ja.jpg)
+## Published EXE GUI verification
+
+On 2026-10-14 (Asia/Tokyo), the exact EXE downloaded from the stable v0.70.2 release was launched with an isolated proof profile. Its SHA-256 is `7c389d63d289631fc79ac5ca1b0ad41f73889e92a781323de74b46f59cdd7db0`; release provenance binds it to source commit `97577a553954d4b3ac45d03e4d4d862b196213c0`. This is the published binary, not a local rebuild. The earlier Windows network permission dialog closed when the previous test process exited; the new launch and captures have no permission overlay. No access grant, firewall or VPN change was needed.
+
+- The native window and app information show **Win-CodexBar + Mobile Connect**, version **0.70.2**, stable channel.
+- Clicking the sharing toggle in the real WebView2 GUI started and stopped the native listener. The final capture shows sharing active on the isolated loopback endpoint, port 43825.
+- The detected Tailscale and LAN buttons selected the corresponding discovery result and saved it. Reloading retained the Tailscale selection; saved native state also matched LAN. Endpoint selection was checked with sharing stopped; off-LAN phone connectivity remains outside this check.
+- The app information screen completed **Check for updates** without an error and displayed the latest-version result. The loaded published About module contains the owned repository/README website target.
+- Native captures show the complete sharing controls and app information. Neither capture contains a pairing code, real account identity or the host's LAN/Tailscale address. The rendered pages have no horizontal overflow.
+
+CDP drove the app's own observed WebView2 target and checked persisted/native state. The bundled Computer Use API captured the real Windows window using Windows.Graphics.Capture because CUA Driver is not installed. Images were saved directly from those captures without reconstructing or editing the UI. This completes the previously unfinished published-EXE GUI capture. Tray-menu and physical-phone checks below remain separate.
+
+![Published v0.70.2 native Windows sharing settings](images/mobile-connect/windows-release-v0.70.2-sharing-ja.jpg)
+
+![Published v0.70.2 app information after update checking](images/mobile-connect/windows-release-v0.70.2-about-ja.jpg)
 
 ## Portable EXE gate correction
 

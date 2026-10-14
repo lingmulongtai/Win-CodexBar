@@ -42,6 +42,6 @@ The product identifier, settings directory, auto-start identity, toast identity,
 
 ## Validation and limits
 
-Native Windows proof used an isolated configuration with synthetic quota data, the actual Tauri app, and Android's actual Kotlin receiver. It is evidence for transport interoperability, not a real-account or physical-phone acceptance test. Unit tests cover authentication vectors, malformed messages, replay rejection, listener shutdown, canonical provider IDs, unknown values, source changes, stale observations and account-scoped history. See the PR's validation report for exact results.
+Native Windows proof used an isolated configuration with synthetic quota data, the actual Tauri app, and Android's actual Kotlin receiver. The downloaded, published v0.70.2 EXE also passed GUI checks for sharing on/off, Tailscale/LAN selection and persistence, and updates, with native screenshots. It is evidence for transport interoperability and the published GUI, not a real-account or physical-phone acceptance test. Unit tests cover authentication vectors, malformed messages, replay rejection, listener shutdown, canonical provider IDs, unknown values, source changes, stale observations and account-scoped history. See the [validation report](mobile-validation.md) for exact results.
 
 There is no cloud relay, phone discovery, QR scanner, automatic firewall change or Google Gemini Apps collector. Pairing includes the endpoint; no provider token must be re-entered on the phone. Off-LAN physical-phone acceptance remains separate from local native/emulator checks.

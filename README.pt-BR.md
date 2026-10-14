@@ -12,7 +12,9 @@ O Android oferece coleta no telefone ou recepção dos dados coletados no Window
 
 Os detalhes mostram tokens e custos estimados em USD dos logs locais do PC, quando disponíveis: hoje, 30 dias e período selecionado. Podem incluir várias contas e não representam cobranças. A data e hora da agregação são exibidas. **Gemini significa Gemini CLI; o uso do Google Gemini Apps não é coletado.**
 
-![Configuração real do Windows](docs/images/mobile-connect/windows-sharing-ja.jpg)
+![Configuração real do Windows](docs/images/mobile-connect/windows-release-v0.70.2-sharing-ja.jpg)
+
+![Informações e verificação de atualização do EXE publicado v0.70.2](docs/images/mobile-connect/windows-release-v0.70.2-about-ja.jpg)
 
 [Guia de conexão](docs/android-sharing.md) · [Mudanças v0.70.2](docs/releases/v0.70.2.md) · [Validação e limites](docs/mobile-validation.md) · [README completo em inglês](README.md) · [Problemas deste fork](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues)
 
