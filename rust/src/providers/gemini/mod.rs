@@ -25,7 +25,7 @@ impl GeminiProvider {
         Self {
             metadata: ProviderMetadata {
                 id: ProviderId::Gemini,
-                display_name: "Gemini",
+                display_name: "Gemini CLI",
                 session_label: "Daily",
                 weekly_label: "Daily",
                 supports_opus: false,
