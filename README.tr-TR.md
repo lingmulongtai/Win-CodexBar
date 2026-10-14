@@ -14,7 +14,7 @@ Ayrıntılar, mevcutsa PC'nin yerel günlüklerinden bugün, son 30 gün ve seç
 
 v0.70.3 ile standart Windows profillerinden çerez aktarımı için Vivaldi ayrı bir seçenek olarak görünür. [Kurulum ve şifreleme sınırları](docs/COOKIES.md).
 
-![Windows v0.70.3 içinde Vivaldi seçimi](docs/images/mobile-connect/windows-v0.70.3-vivaldi-ja.jpg)
+![Yayımlanan v0.70.3 EXE içinde Vivaldi seçimi](docs/images/mobile-connect/windows-v0.70.3-vivaldi-ja.jpg)
 
 ![Gerçek Windows paylaşım ayarları](docs/images/mobile-connect/windows-release-v0.70.2-sharing-ja.jpg)
 

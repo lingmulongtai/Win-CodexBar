@@ -14,7 +14,7 @@ Los detalles muestran tokens y costos estimados en USD de los registros locales 
 
 Desde v0.70.3, Vivaldi aparece como opción propia para importar cookies desde sus perfiles estándar de Windows. [Configuración y límites de cifrado](docs/COOKIES.md).
 
-![Vivaldi seleccionado en Windows v0.70.3](docs/images/mobile-connect/windows-v0.70.3-vivaldi-ja.jpg)
+![Vivaldi seleccionado en el EXE publicado v0.70.3](docs/images/mobile-connect/windows-v0.70.3-vivaldi-ja.jpg)
 
 ![Configuración real de Windows](docs/images/mobile-connect/windows-release-v0.70.2-sharing-ja.jpg)
 

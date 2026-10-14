@@ -27,7 +27,7 @@ The original collectors, tray, history, notifications, themes and provider setti
 
 [v0.70.3 Vivaldi changes](docs/releases/v0.70.3.md) · [Browser import setup and encryption limits](docs/COOKIES.md)
 
-![Vivaldi selected in the native v0.70.3 Windows settings](docs/images/mobile-connect/windows-v0.70.3-vivaldi-ja.jpg)
+![Vivaldi selected in the published v0.70.3 Windows EXE](docs/images/mobile-connect/windows-v0.70.3-vivaldi-ja.jpg)
 
 ## Connect
 
