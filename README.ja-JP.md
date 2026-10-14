@@ -25,7 +25,7 @@ Windows版は**署名なし**です。元プロジェクトの署名証明書や
 
 [v0.70.3のVivaldi対応](docs/releases/v0.70.3.md) · [ブラウザー取込の設定と暗号化の制約](docs/COOKIES.md)
 
-![Windows版v0.70.3でVivaldiを選択](docs/images/mobile-connect/windows-v0.70.3-vivaldi-ja.jpg)
+![公開EXE v0.70.3でVivaldiを選択](docs/images/mobile-connect/windows-v0.70.3-vivaldi-ja.jpg)
 
 ## スマホとの接続
 
