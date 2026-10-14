@@ -14,6 +14,8 @@ fn schema_error() -> ProviderError {
 pub(super) async fn fetch(cookie: &str, timeout: u64) -> Result<UsageSnapshot, ProviderError> {
     let client = crate::core::credentialed_http_client_builder()
         .redirect(reqwest::redirect::Policy::none())
+        // Gemini's bootstrap can reject this client's HTTP/2 streams.
+        .http1_only()
         .timeout(std::time::Duration::from_secs(timeout.clamp(5, 60)))
         .user_agent("Mozilla/5.0")
         .build()?;
