@@ -12,6 +12,8 @@ Android 0.9.7可選手機收集或Windows收集，並設定個別服務的手機
 
 從v0.70.3起，可單獨選擇Vivaldi，匯入Windows標準設定檔中的Cookie。[設定與加密限制](docs/COOKIES.md)。
 
+![Windows v0.70.3中選擇Vivaldi](docs/images/mobile-connect/windows-v0.70.3-vivaldi-ja.jpg)
+
 ![Windows共用設定實拍](docs/images/mobile-connect/windows-release-v0.70.2-sharing-ja.jpg)
 
 ![已發布v0.70.2的應用程式資訊與更新檢查](docs/images/mobile-connect/windows-release-v0.70.2-about-ja.jpg)
