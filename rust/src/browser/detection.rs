@@ -22,6 +22,7 @@ pub enum BrowserType {
     ChromeForTesting,
     Edge,
     Brave,
+    Vivaldi,
     Arc,
     Firefox,
     Chromium,
@@ -38,6 +39,7 @@ impl BrowserType {
             BrowserType::ChromeForTesting,
             BrowserType::Edge,
             BrowserType::Brave,
+            BrowserType::Vivaldi,
             BrowserType::Arc,
             BrowserType::Firefox,
             BrowserType::Chromium,
@@ -59,6 +61,7 @@ impl BrowserType {
             BrowserType::ChromeForTesting => "Chrome for Testing",
             BrowserType::Edge => "Microsoft Edge",
             BrowserType::Brave => "Brave",
+            BrowserType::Vivaldi => "Vivaldi",
             BrowserType::Arc => "Arc",
             BrowserType::Firefox => "Firefox",
             BrowserType::Chromium => "Chromium",
@@ -75,6 +78,7 @@ impl BrowserType {
             BrowserType::ChromeForTesting => "chrome-for-testing",
             BrowserType::Edge => "edge",
             BrowserType::Brave => "brave",
+            BrowserType::Vivaldi => "vivaldi",
             BrowserType::Arc => "arc",
             BrowserType::Firefox => "firefox",
             BrowserType::Chromium => "chromium",
@@ -94,6 +98,7 @@ impl BrowserType {
             }
             BrowserType::Edge => Some(local.join("Microsoft/Edge/User Data")),
             BrowserType::Brave => Some(local.join("BraveSoftware/Brave-Browser/User Data")),
+            BrowserType::Vivaldi => Some(local.join("Vivaldi/User Data")),
             BrowserType::Arc => Some(local.join("Arc/User Data")),
             BrowserType::Firefox => roaming.map(|root| root.join("Mozilla/Firefox/Profiles")),
             BrowserType::Chromium => Some(local.join("Chromium/User Data")),
@@ -326,6 +331,12 @@ mod tests {
                 "Brave",
                 "brave",
             ),
+            (
+                BrowserType::Vivaldi,
+                "Vivaldi/User Data",
+                "Vivaldi",
+                "vivaldi",
+            ),
             (BrowserType::Arc, "Arc/User Data", "Arc", "arc"),
             (
                 BrowserType::Firefox,
@@ -358,9 +369,45 @@ mod tests {
             assert_eq!(browser.key(), key);
             assert!(keys.insert(browser.key()), "duplicate IPC key: {key}");
             assert!(BrowserType::all().contains(&browser));
+            assert_eq!(browser.is_chromium_based(), browser != BrowserType::Firefox);
             assert_eq!(
                 browser.user_data_dir(local, None),
                 (browser != BrowserType::Firefox).then(|| local.join(relative_path))
+            );
+        }
+    }
+
+    #[test]
+    fn vivaldi_detection_finds_user_profiles_and_their_cookie_paths() {
+        let temp = tempfile::tempdir().unwrap();
+        let local = temp.path().join("AppData/Local");
+        assert!(BrowserDetector::detect_in_roots(BrowserType::Vivaldi, &local, None).is_none());
+
+        let user_data = local.join("Vivaldi/User Data");
+        for name in ["Profile 2", "Default", "Guest Profile", "System Profile"] {
+            std::fs::create_dir_all(user_data.join(name)).unwrap();
+        }
+        let browser = BrowserDetector::detect_in_roots(BrowserType::Vivaldi, &local, None).unwrap();
+        assert_eq!(browser.browser_type, BrowserType::Vivaldi);
+        assert_eq!(browser.user_data_dir, user_data);
+        assert_eq!(
+            browser
+                .profiles
+                .iter()
+                .map(|profile| profile.name.as_str())
+                .collect::<Vec<_>>(),
+            ["Default", "Profile 2"]
+        );
+        assert!(browser.profiles[0].is_default);
+        assert!(!browser.profiles[1].is_default);
+        for profile in &browser.profiles {
+            assert_eq!(
+                profile.cookies_db_path(),
+                profile.path.join("Network/Cookies")
+            );
+            assert_eq!(
+                profile.local_state_path(&browser.user_data_dir),
+                user_data.join("Local State")
             );
         }
     }

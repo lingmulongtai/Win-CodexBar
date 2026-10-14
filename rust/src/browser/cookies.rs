@@ -879,17 +879,22 @@ mod tests {
     }
 
     #[test]
-    fn test_abe_error_names_selected_brave_browser() {
-        let msg = CookieError::AppBoundEncryption.user_message_for_browser(BrowserType::Brave);
-        assert!(msg.contains("Brave"), "ABE error should name Brave");
-        assert!(
-            msg.contains("Chromium App-Bound Encryption"),
-            "ABE error should explain the Chromium mechanism"
-        );
-        assert!(
-            msg.contains("Paste") || msg.contains("manual"),
-            "ABE error should preserve an actionable fallback"
-        );
+    fn test_abe_error_names_selected_chromium_browser() {
+        for browser in [BrowserType::Brave, BrowserType::Vivaldi] {
+            let msg = CookieError::AppBoundEncryption.user_message_for_browser(browser);
+            assert!(
+                msg.contains(browser.display_name()),
+                "ABE error should name the selected browser"
+            );
+            assert!(
+                msg.contains("Chromium App-Bound Encryption"),
+                "ABE error should explain the Chromium mechanism"
+            );
+            assert!(
+                msg.contains("Paste") || msg.contains("manual"),
+                "ABE error should preserve an actionable fallback"
+            );
+        }
     }
 
     /// Verify that modern Chromium `v20` cookies are recognized as App-Bound

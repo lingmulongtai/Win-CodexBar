@@ -9,6 +9,7 @@ Win-CodexBar can extract browser cookies for providers that use web authenticati
 | Chrome | DPAPI + AES-256-GCM; modern profiles may use Chromium ABE (`v20`) | ⚠️ Automatic only when the needed cookies are not App-Bound |
 | Edge | DPAPI + AES-256-GCM; modern profiles may use Chromium ABE (`v20`) | ⚠️ Automatic only when the needed cookies are not App-Bound |
 | Brave | DPAPI + AES-256-GCM; modern profiles may use Chromium ABE (`v20`) | ⚠️ Automatic only when the needed cookies are not App-Bound |
+| Vivaldi | DPAPI + AES-256-GCM; App-Bound cookies remain unsupported | ⚠️ Standard Windows profiles; automatic only when the needed cookies are not App-Bound |
 | Chrome Beta, Dev, Canary, Chrome for Testing, Chromium | DPAPI + AES-256-GCM; modern profiles may use Chromium ABE (`v20`) | ⚠️ Automatic only when the needed cookies are not App-Bound |
 | Firefox | Unencrypted SQLite | ✅ Automatic |
 
@@ -27,6 +28,8 @@ Chromium App-Bound Encryption (ABE) binds protected cookie keys to the browser i
 2. Select the provider you want to configure
 3. In the provider detail pane, find the **Browser Cookies** section
 4. Choose your browser from the dropdown and click **Import**
+
+Vivaldi is a separate choice with the stable browser ID `vivaldi`. Its standard Windows profile root is `%LOCALAPPDATA%\Vivaldi\User Data`; `Default` and additional `Profile N` directories use the existing Chromium cookie and browser-storage readers. Only that browser's profiles are used when Vivaldi is selected. Arbitrary standalone/custom profile locations are not detected automatically. See [Vivaldi's profile-location documentation](https://help.vivaldi.com/desktop/privacy/preventing-vivaldi-profiles-from-being-uploaded-to-git-repositories/).
 
 ## Manual Cookies
 

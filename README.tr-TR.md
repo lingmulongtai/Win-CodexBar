@@ -12,6 +12,10 @@ Android, telefonda veri toplama veya Windows'ta toplanan verileri alma modları 
 
 Ayrıntılar, mevcutsa PC'nin yerel günlüklerinden bugün, son 30 gün ve seçilen dönem için token sayısını ve tahmini USD maliyetlerini gösterir. Birden fazla hesabı içerebilir; fatura tutarı değildir. Toplama tarihi ve saati gösterilir. **Gemini, Gemini CLI anlamına gelir; Google Gemini Apps kullanımı toplanmaz.**
 
+v0.70.3 ile standart Windows profillerinden çerez aktarımı için Vivaldi ayrı bir seçenek olarak görünür. [Kurulum ve şifreleme sınırları](docs/COOKIES.md).
+
+![Windows v0.70.3 içinde Vivaldi seçimi](docs/images/mobile-connect/windows-v0.70.3-vivaldi-ja.jpg)
+
 ![Gerçek Windows paylaşım ayarları](docs/images/mobile-connect/windows-release-v0.70.2-sharing-ja.jpg)
 
 ![Yayımlanan v0.70.2 EXE bilgileri ve güncelleme denetimi](docs/images/mobile-connect/windows-release-v0.70.2-about-ja.jpg)
