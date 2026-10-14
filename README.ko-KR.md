@@ -12,6 +12,8 @@ Android는 휴대전화에서 직접 수집하거나 Windows에서 수집한 데
 
 PC의 로컬 로그에서 확인되는 오늘, 최근 30일 및 선택 기간의 토큰 수와 추정 USD 비용을 상세 화면에 표시합니다. 여러 계정이 포함될 수 있으며 청구 금액과는 다릅니다. 집계 날짜와 시각을 표시합니다. **Gemini는 Gemini CLI입니다. Google Gemini Apps 사용량은 수집하지 않습니다.**
 
+v0.70.3부터 기본 Windows 프로필의 쿠키를 가져올 때 Vivaldi를 별도로 선택할 수 있습니다. [설정 및 암호화 제한](docs/COOKIES.md).
+
 ![실제 Windows 공유 설정](docs/images/mobile-connect/windows-release-v0.70.2-sharing-ja.jpg)
 
 ![배포된 v0.70.2 EXE 정보 및 업데이트 확인](docs/images/mobile-connect/windows-release-v0.70.2-about-ja.jpg)

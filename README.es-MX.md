@@ -12,6 +12,8 @@ Android permite recopilar en el teléfono o recibir los datos de Windows, con ex
 
 Los detalles muestran tokens y costos estimados en USD de los registros locales del PC, cuando están disponibles, para hoy, 30 días y el período elegido. Pueden incluir varias cuentas; no son cargos facturados. Se muestra la fecha y hora de la agregación. **Gemini corresponde a Gemini CLI; el uso de Google Gemini Apps no se recopila.**
 
+Desde v0.70.3, Vivaldi aparece como opción propia para importar cookies desde sus perfiles estándar de Windows. [Configuración y límites de cifrado](docs/COOKIES.md).
+
 ![Configuración real de Windows](docs/images/mobile-connect/windows-release-v0.70.2-sharing-ja.jpg)
 
 ![Información y comprobación de actualizaciones del EXE publicado v0.70.2](docs/images/mobile-connect/windows-release-v0.70.2-about-ja.jpg)

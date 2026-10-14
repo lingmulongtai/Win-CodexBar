@@ -21,8 +21,11 @@ This fork's Windows EXE is **unsigned** and uses no upstream signing certificate
 | Android acquisition modes | Phone collection or Windows collection, with optional per-service phone exceptions. Pairing, choices and separate histories survive switching. |
 | PC token/cost totals | Cached local-log totals for today, 30 days and the selected history period, where available, with their own aggregation timestamp. USD costs are estimates. |
 | Owned distribution | Direct EXE, stable releases, correct support/update links and independent app identity. Existing Mobile Preview settings/pairings are retained. |
+| Vivaldi browser import | Detects standard Windows Vivaldi profiles and offers a separate choice in Browser Cookies. Existing Chromium encryption limits apply. |
 
 The original collectors, tray, history, notifications, themes and provider settings remain the foundation. This integration does not start a second collector.
+
+[v0.70.3 Vivaldi changes](docs/releases/v0.70.3.md) · [Browser import setup and encryption limits](docs/COOKIES.md)
 
 ## Connect
 
