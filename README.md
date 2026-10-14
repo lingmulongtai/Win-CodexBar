@@ -37,9 +37,11 @@ Windows must remain running. Android polls during dashboard/background refreshes
 
 ## Actual screens
 
-Native Windows and Android emulator captures use synthetic data. Loopback/host addresses shown here are validation endpoints; use LAN or Tailscale for a physical phone.
+The Windows captures are from the downloaded, published **v0.70.2 EXE**, including a completed update check. Native Windows and Android emulator captures use synthetic data. Loopback/host addresses shown here are validation endpoints; use LAN or Tailscale for a physical phone.
 
-![Japanese Windows sharing settings](docs/images/mobile-connect/windows-sharing-ja.jpg)
+![Published v0.70.2 Windows sharing settings](docs/images/mobile-connect/windows-release-v0.70.2-sharing-ja.jpg)
+
+![Published v0.70.2 app information and completed update check](docs/images/mobile-connect/windows-release-v0.70.2-about-ja.jpg)
 
 <p>
   <img src="docs/images/mobile-connect/android-windows-mode.png" width="280" alt="Android Windows acquisition mode" />

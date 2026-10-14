@@ -12,7 +12,9 @@ Android, telefonda veri toplama veya Windows'ta toplanan verileri alma modları 
 
 Ayrıntılar, mevcutsa PC'nin yerel günlüklerinden bugün, son 30 gün ve seçilen dönem için token sayısını ve tahmini USD maliyetlerini gösterir. Birden fazla hesabı içerebilir; fatura tutarı değildir. Toplama tarihi ve saati gösterilir. **Gemini, Gemini CLI anlamına gelir; Google Gemini Apps kullanımı toplanmaz.**
 
-![Gerçek Windows paylaşım ayarları](docs/images/mobile-connect/windows-sharing-ja.jpg)
+![Gerçek Windows paylaşım ayarları](docs/images/mobile-connect/windows-release-v0.70.2-sharing-ja.jpg)
+
+![Yayımlanan v0.70.2 EXE bilgileri ve güncelleme denetimi](docs/images/mobile-connect/windows-release-v0.70.2-about-ja.jpg)
 
 [Bağlantı rehberi](docs/android-sharing.md) · [v0.70.2 değişiklikleri](docs/releases/v0.70.2.md) · [Doğrulama ve sınırlar](docs/mobile-validation.md) · [Tam İngilizce README](README.md) · [Bu fork için sorun bildir](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/issues)
 

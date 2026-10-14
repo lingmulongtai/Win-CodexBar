@@ -10,6 +10,8 @@
 
 Android 0.9.7可选择手机采集或Windows采集，并设置个别服务的手机例外。配对、凭据、选择和分别保存的历史记录在切换后保留。PC离线时不自动改用手机的另一个账号。新增PC本地日志的今日、30天与所选期间的Token数和USD估算费用，可能包含多个账号，并非实际账单。**Gemini指Gemini CLI，不是Gemini Apps。**
 
-![Windows共享设置实拍](docs/images/mobile-connect/windows-sharing-ja.jpg)
+![Windows共享设置实拍](docs/images/mobile-connect/windows-release-v0.70.2-sharing-ja.jpg)
+
+![已发布v0.70.2的应用信息与更新检查](docs/images/mobile-connect/windows-release-v0.70.2-about-ja.jpg)
 
 完整说明、Android截图与开发步骤见[English README](README.md)、[日本語](README.ja-JP.md)和[设置指南](docs/android-sharing.md)。截图使用测试数据；验证范围见[记录](docs/mobile-validation.md)。[MIT](LICENSE)；原始项目来自[CodexBar](https://github.com/steipete/CodexBar)。

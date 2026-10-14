@@ -35,9 +35,11 @@ PCは起動したままにします。スマホが通常の更新タイミング
 
 ## 実際の画面
 
-新しいネイティブWindowsアプリとAndroidエミュレーターで撮影しています。表示値は検証用の架空データです。画像のループバック／ホストアドレスはエミュレーター用で、実際のスマホではLANまたはTailscaleを選びます。
+Windows画像は、公開済みの**v0.70.2 EXEをダウンロードして起動・操作・撮影**したものです。情報画面では更新確認の完了も確認しています。Android画像はエミュレーターで撮影しています。表示値は検証用の架空データです。画像のループバック／ホストアドレスは検証用で、実際のスマホではLANまたはTailscaleを選びます。
 
-![Windowsの共有設定](docs/images/mobile-connect/windows-sharing-ja.jpg)
+![公開EXE v0.70.2の共有設定](docs/images/mobile-connect/windows-release-v0.70.2-sharing-ja.jpg)
+
+![公開EXE v0.70.2の情報画面と更新確認結果](docs/images/mobile-connect/windows-release-v0.70.2-about-ja.jpg)
 
 <p>
   <img src="docs/images/mobile-connect/android-windows-mode.png" width="280" alt="Androidの取得モード選択" />
