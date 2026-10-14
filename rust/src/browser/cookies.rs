@@ -348,7 +348,7 @@ impl CookieExtractor {
 
     /// Decrypt data using Windows DPAPI
     #[cfg(windows)]
-    fn dpapi_decrypt(encrypted_data: &[u8]) -> Result<Vec<u8>, CookieError> {
+    pub(crate) fn dpapi_decrypt(encrypted_data: &[u8]) -> Result<Vec<u8>, CookieError> {
         use windows::Win32::Foundation::{HLOCAL, LocalFree};
         use windows::Win32::Security::Cryptography::{CRYPT_INTEGER_BLOB, CryptUnprotectData};
 
@@ -399,7 +399,7 @@ impl CookieExtractor {
     }
 
     #[cfg(not(windows))]
-    fn dpapi_decrypt(_encrypted_data: &[u8]) -> Result<Vec<u8>, CookieError> {
+    pub(crate) fn dpapi_decrypt(_encrypted_data: &[u8]) -> Result<Vec<u8>, CookieError> {
         if crate::wsl::is_wsl() {
             Err(CookieError::Dpapi(
                 "DPAPI is not available in WSL. Chromium cookies cannot be automatically \
