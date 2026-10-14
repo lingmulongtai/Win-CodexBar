@@ -20,4 +20,6 @@ Android 0.9.7可選手機收集或Windows收集，並設定個別服務的手機
 
 完整說明、Android截圖與開發步驟見[English README](README.md)、[日本語](README.ja-JP.md)和[設定指南](docs/android-sharing.md)。截圖使用測試資料；驗證範圍見[記錄](docs/mobile-validation.md)。[MIT](LICENSE)；原始專案來自[CodexBar](https://github.com/steipete/CodexBar)。
 
-![Gemini Apps connection in Windows (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.4-gemini-apps-ja.jpg)
+![Published v0.70.5 Gemini Apps usage (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.5-gemini-usage-ja.jpg)
+
+![Published v0.70.5 Gemini Apps connection controls](docs/images/mobile-connect/windows-v0.70.5-gemini-connection-ja.jpg)

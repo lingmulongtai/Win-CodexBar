@@ -24,4 +24,6 @@ Desde a v0.70.3, o Vivaldi aparece como uma opção própria para importar cooki
 
 Capturas do Windows nativo e do emulador Android usam dados sintéticos. A validação em telefone físico e com contas reais permanece pendente. [Licença MIT](LICENSE).
 
-![Gemini Apps connection in Windows (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.4-gemini-apps-ja.jpg)
+![Published v0.70.5 Gemini Apps usage (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.5-gemini-usage-ja.jpg)
+
+![Published v0.70.5 Gemini Apps connection controls](docs/images/mobile-connect/windows-v0.70.5-gemini-connection-ja.jpg)

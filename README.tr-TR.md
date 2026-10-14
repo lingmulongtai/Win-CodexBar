@@ -24,4 +24,6 @@ v0.70.3 ile standart Windows profillerinden çerez aktarımı için Vivaldi ayr�
 
 Görüntüler yerel Windows ve Android emülatöründe sentetik verilerle alınmıştır. Fiziksel telefon ve gerçek hesap doğrulaması henüz tamamlanmamıştır. [MIT lisansı](LICENSE).
 
-![Gemini Apps connection in Windows (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.4-gemini-apps-ja.jpg)
+![Published v0.70.5 Gemini Apps usage (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.5-gemini-usage-ja.jpg)
+
+![Published v0.70.5 Gemini Apps connection controls](docs/images/mobile-connect/windows-v0.70.5-gemini-connection-ja.jpg)

@@ -1,10 +1,10 @@
-# Mobile Connect v0.70.2 validation
+# Mobile Connect validation
 
-## Gemini Apps update (v0.70.4 / Android v0.9.8)
+## Gemini Apps update (v0.70.5 / Android v0.9.8)
 
-Gemini Apps now has its own Windows collector and Android provider identity. The earlier unsupported-Gemini statements below describe older releases. See [Gemini Apps setup](gemini-apps.md) and [v0.70.4 validation and limits](releases/v0.70.4.md) for current behavior. The native connection screen uses the existing styled credential buttons and does not offer an unsupported account switch action.
+Gemini Apps now has its own Windows collector and Android provider identity. The earlier unsupported-Gemini statements below describe older releases. See [Gemini Apps setup](gemini-apps.md) and [v0.70.5 validation and limits](releases/v0.70.5.md) for current behavior. The native connection screen uses the existing styled credential buttons and does not offer an unsupported account switch action. The saved Windows-user DPAPI session was verified in the native Rust and Tauri collectors while Gemini was running; v0.70.5 repairs the HTTP/2 bootstrap failure observed in v0.70.4.
 
-## Current local checks
+## Mobile Connect v0.70.2 local checks
 
 - Locked Rust workspace tests: 4,178 core tests passed, one ignored; one CLI test and 715 Tauri tests passed. Rust formatting and workspace clippy with warnings denied passed.
 - Frontend: the full run passed 1,102 tests; eight Advanced-settings fixture failures were corrected and all eight reran successfully, covering 1,110 tests. TypeScript/Vite and locale checks passed. Lint retained seven existing warnings and no errors. Hosted CI runs the complete suite again on the final source.
