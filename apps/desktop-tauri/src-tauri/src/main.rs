@@ -248,6 +248,8 @@ fn main() {
             commands::claude_account_remove,
             commands::claude_account_switch,
             commands::grok_accounts_list,
+            commands::connect_gemini_apps,
+            commands::disconnect_gemini_apps,
             commands::grok_account_add,
             commands::grok_account_reauthenticate,
             commands::grok_account_cancel_login,

@@ -1605,3 +1605,11 @@ MobileSharingLan = Usar LAN
 MobileSharingDiscover = Detectar direcciones de nuevo
 MobileSharingTailscaleHelper = Conecta la PC y el teléfono a la misma red de Tailscale y selecciona la dirección Tailscale de la PC. El nodo de salida del teléfono puede permanecer en None. Tras cambiar la dirección, pega el nuevo código de emparejamiento en Android. Solo el tráfico de uso de esta aplicación necesita llegar a la PC.
 MobileSharingTailscaleUnavailable = No se detectó una dirección IPv4 de Tailscale. Instala o conecta Tailscale en esta PC y vuelve a detectar; también puedes introducir la dirección manualmente.
+
+# Gemini Apps desktop connection
+GeminiAppsTitle = Conexión de Gemini para escritorio
+GeminiAppsHelp = Cierra la app oficial de Google Gemini, conecta aquí y vuelve a abrir Gemini. La sesión se cifra para este usuario de Windows y permanece en la PC. Los límites actuales (5 horas) y semanales son independientes de Gemini CLI. Solo se admite la cuenta principal de Google. Reconecta si la sesión vence.
+GeminiAppsConnect = Conectar con la app de Gemini
+GeminiAppsDisconnect = Desconectar Gemini Apps
+GeminiAppsSaved = Sesión guardada:
+GeminiAppsNotConnected = Sin conexión

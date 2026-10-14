@@ -1606,3 +1606,11 @@ MobileSharingLan = LAN kullan
 MobileSharingDiscover = Adresleri yeniden algıla
 MobileSharingTailscaleHelper = PC ve telefonu aynı Tailscale ağına bağlayın ve PC’nin Tailscale adresini seçin. Telefonun çıkış düğümü None olarak kalabilir. Adresi değiştirdikten sonra yeni eşleştirme kodunu Android’e yapıştırın. Yalnızca bu uygulamanın kullanım istekleri PC’ye ulaşmalıdır.
 MobileSharingTailscaleUnavailable = Tailscale IPv4 adresi algılanamadı. Bu PC’ye Tailscale yükleyin veya bağlanın ve yeniden algılayın; adresi elle de girebilirsiniz.
+
+# Gemini Apps desktop connection
+GeminiAppsTitle = Gemini masaüstü bağlantısı
+GeminiAppsHelp = Resmi Google Gemini uygulamasını kapatın, burada bağlanın ve Gemini uygulamasını yeniden açın. Oturum bu Windows kullanıcısı için şifrelenir ve bilgisayarda kalır. Geçerli (5 saat) ve haftalık sınırlar Gemini CLI ile ayrıdır. Yalnızca birincil Google hesabı desteklenir. Oturum sona ererse yeniden bağlanın.
+GeminiAppsConnect = Gemini masaüstü uygulamasıyla bağlan
+GeminiAppsDisconnect = Gemini Apps bağlantısını kes
+GeminiAppsSaved = Oturum kaydedildi:
+GeminiAppsNotConnected = Bağlı değil

@@ -49,6 +49,7 @@ import { GrokAccountsSection } from "./sections/credentials/GrokAccountsSection"
 import { TokenAccountsPanel } from "../tokens/TokenAccountsPanel";
 import { ApiKeySection } from "./ApiKeySection";
 import { CookieSection } from "./CookieSection";
+import { GeminiAppsSection } from "./sections/GeminiAppsSection";
 import { MenuBarMetricSection } from "./sections/MenuBarMetricSection";
 import { AccentColorSection } from "./sections/AccentColorSection";
 import { ProviderIssueNotice } from "./sections/ProviderIssueNotice";
@@ -501,16 +502,17 @@ export function ProviderDetailPane({
         )}
       </SettingsGroup>
       <SettingsGroup className="provider-detail-group provider-credential-storage-group">
-        <CredentialStorageSection
+        {detail.id !== "geminiapps" && <CredentialStorageSection
           status={credentialStatus}
           busy={busy}
           onRevoke={handleRevokeCredentials}
           t={t}
-        />
+        />}
       </SettingsGroup>
 
       <SettingsGroup className="provider-detail-group provider-fields-group">
         <CredentialsDispatcher providerId={detail.id} t={t} />
+        {detail.id === "geminiapps" && <GeminiAppsSection key={credKey} disabled={settingsDisabled} t={t} onChanged={reload} />}
         <ApiKeySection key={`api-${credKey}`} providerId={detail.id} />
         <CookieSection
           key={`cookie-${credKey}`}

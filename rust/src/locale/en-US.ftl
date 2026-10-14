@@ -1608,3 +1608,11 @@ MobileSharingRevoked = Previous pairing codes are invalid. Pair again with the n
 MobileSharingRunning = Sharing is running
 MobileSharingStopped = Sharing is stopped
 MobileSharingFailed = Mobile sharing failed.
+
+# Gemini Apps desktop connection
+GeminiAppsTitle = Gemini desktop connection
+GeminiAppsHelp = Close the official Google Gemini app, then connect here and reopen Gemini. Your session is encrypted on this Windows account and stays on the PC. Current (5-hour) and weekly limits are separate from Gemini CLI. Uses the primary Google account; multiple Google accounts are not supported yet. Reconnect if the session expires.
+GeminiAppsConnect = Connect using Gemini desktop app
+GeminiAppsDisconnect = Disconnect Gemini Apps
+GeminiAppsSaved = Session saved:
+GeminiAppsNotConnected = Not connected

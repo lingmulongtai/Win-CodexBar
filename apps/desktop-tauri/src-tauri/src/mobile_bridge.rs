@@ -330,6 +330,7 @@ const ANDROID_PROVIDERS: &[&str] = &[
     "codex",
     "claude",
     "gemini",
+    "geminiapps",
     "copilot",
     "cursor",
     "zai",
