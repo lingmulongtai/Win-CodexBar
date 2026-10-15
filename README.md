@@ -31,7 +31,7 @@ The original collectors, tray, history, notifications, themes and provider setti
 
 ## Gemini Apps
 
-Use **v0.70.5 or later** to connect the usage limits from Google's Gemini desktop app. Current/weekly quotas and reset times are separate from Gemini CLI and Antigravity. Later refreshes reuse the encrypted login while Gemini is running; Android **v0.9.8 or later** displays the same sanitized quotas. [Connection guide](docs/gemini-apps.md) · [v0.70.5 changes and verification](docs/releases/v0.70.5.md)
+Use **v0.70.6 or later** to connect the usage limits from Google's Gemini desktop app. Current/weekly quotas and reset times are separate from Gemini CLI and Antigravity. Google session updates are retained in encrypted storage while Gemini is running; Android **v0.9.8 or later** displays the same sanitized quotas. If your older connection expired, reconnect once after updating. [Connection guide](docs/gemini-apps.md) · [v0.70.6 session renewal fix](docs/releases/v0.70.6.md)
 
 The following native Windows captures use the downloaded, published **v0.70.5 EXE** with an isolated demo profile.
 

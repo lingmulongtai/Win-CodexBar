@@ -1,6 +1,8 @@
 //! Gemini Apps quota, independent of Gemini CLI and Antigravity.
 pub mod desktop_session;
 mod protocol;
+mod session;
+pub mod session_cache;
 
 use crate::core::{
     FetchContext, ManualEmptyCookiePolicy, Provider, ProviderError, ProviderFetchResult,
@@ -13,6 +15,12 @@ pub struct GeminiAppsProvider {
 }
 
 impl GeminiAppsProvider {
+    /// Verify an explicitly imported session and return its renewed header.
+    /// This value must remain inside the native credential storage boundary.
+    pub async fn verify_session(cookie: &str, timeout: u64) -> Result<String, ProviderError> {
+        Ok(protocol::fetch(cookie, timeout).await?.cookie_header)
+    }
+
     pub fn new() -> Self {
         Self {
             metadata: ProviderMetadata {
@@ -63,9 +71,13 @@ impl Provider for GeminiAppsProvider {
                 message: "Connect Gemini Apps in Settings → Providers. Close Gemini once before importing its session.".into(),
                 sign_in_url: "https://gemini.google.com/app".into(),
             })?;
-        let usage = protocol::fetch(cookie, ctx.web_timeout).await?;
+        let (header, epoch) = session_cache::header(cookie);
+        let session = protocol::fetch(&header, ctx.web_timeout).await?;
+        session_cache::save_if_current(cookie, epoch, &session.cookie_header).map_err(|_| {
+            ProviderError::Other("Could not save the renewed Gemini Apps session securely.".into())
+        })?;
         // This RPC does not supply a stable Google account identity.
-        Ok(ProviderFetchResult::new(usage, "web"))
+        Ok(ProviderFetchResult::new(session.usage, "web"))
     }
 }
 

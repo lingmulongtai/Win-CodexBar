@@ -1,3 +1,4 @@
+use super::session::SessionCookies;
 use crate::core::{ProviderError, RateWindow, UsageSnapshot};
 use chrono::DateTime;
 use serde_json::Value;
@@ -11,7 +12,31 @@ fn schema_error() -> ProviderError {
     ProviderError::Parse("Gemini Apps usage response is unavailable or has changed.".into())
 }
 
-pub(super) async fn fetch(cookie: &str, timeout: u64) -> Result<UsageSnapshot, ProviderError> {
+pub(super) struct VerifiedSession {
+    pub usage: UsageSnapshot,
+    pub cookie_header: String,
+}
+
+pub(super) async fn fetch(cookie: &str, timeout: u64) -> Result<VerifiedSession, ProviderError> {
+    let cookies = SessionCookies::new(cookie)?;
+    let rotate = cookies.rotation_due();
+    fetch_at(
+        cookies,
+        timeout,
+        ORIGIN,
+        "https://accounts.google.com",
+        rotate,
+    )
+    .await
+}
+
+async fn fetch_at(
+    mut cookies: SessionCookies,
+    timeout: u64,
+    origin: &str,
+    accounts: &str,
+    rotate: bool,
+) -> Result<VerifiedSession, ProviderError> {
     let client = crate::core::credentialed_http_client_builder()
         .redirect(reqwest::redirect::Policy::none())
         // Gemini's bootstrap can reject this client's HTTP/2 streams.
@@ -19,19 +44,38 @@ pub(super) async fn fetch(cookie: &str, timeout: u64) -> Result<UsageSnapshot, P
         .timeout(std::time::Duration::from_secs(timeout.clamp(5, 60)))
         .user_agent("Mozilla/5.0")
         .build()?;
+    if rotate && let Some(header) = cookies.rotation_header() {
+        // Protocol facts only; independently implemented. The explicit target
+        // and no-redirect policy keep authentication on Google's own origins.
+        match client
+            .post(format!("{accounts}/RotateCookies"))
+            .header("Cookie", header)
+            .header("Origin", accounts)
+            .header("Content-Type", "application/json")
+            .body("[000,\"-0000000000000000000\"]")
+            .send()
+            .await
+        {
+            Ok(response) if response.status().is_success() => cookies.absorb(&response, true),
+            _ => tracing::warn!(
+                "Gemini Apps session renewal was unavailable; verifying the current session"
+            ),
+        }
+    }
     let page = client
-        .get(format!("{ORIGIN}/app"))
-        .header("Cookie", cookie)
+        .get(format!("{origin}/app"))
+        .header("Cookie", cookies.header())
         .send()
         .await?;
+    cookies.absorb(&page, false);
     let html = read_body(page, BOOTSTRAP_LIMIT).await?;
     let csrf = parse_csrf(&html)?;
     let response = client
-        .post(format!("{ORIGIN}/_/BardChatUi/data/batchexecute"))
+        .post(format!("{origin}/_/BardChatUi/data/batchexecute"))
         .query(&[("rpcids", RPC), ("source-path", "/app"), ("rt", "c")])
-        .header("Cookie", cookie)
-        .header("Origin", ORIGIN)
-        .header("Referer", format!("{ORIGIN}/app"))
+        .header("Cookie", cookies.header())
+        .header("Origin", origin)
+        .header("Referer", format!("{origin}/app"))
         .header("X-Same-Domain", "1")
         .form(&[
             ("f.req", "[[[\"jSf9Qc\",\"[]\",null,\"generic\"]]]"),
@@ -39,7 +83,12 @@ pub(super) async fn fetch(cookie: &str, timeout: u64) -> Result<UsageSnapshot, P
         ])
         .send()
         .await?;
-    parse_response(&read_body(response, QUOTA_LIMIT).await?)
+    cookies.absorb(&response, false);
+    let usage = parse_response(&read_body(response, QUOTA_LIMIT).await?)?;
+    Ok(VerifiedSession {
+        usage,
+        cookie_header: cookies.header(),
+    })
 }
 
 async fn read_body(mut response: reqwest::Response, limit: usize) -> Result<String, ProviderError> {
@@ -71,16 +120,24 @@ async fn read_body(mut response: reqwest::Response, limit: usize) -> Result<Stri
 
 fn parse_csrf(html: &str) -> Result<String, ProviderError> {
     // Decode exactly the bootstrap JSON string; never log bootstrap HTML.
-    html.split_once("\"SNlM0e\"")
-        .and_then(|(_, tail)| tail.trim_start().strip_prefix(':'))
-        .and_then(|tail| {
+    html.match_indices("\"SNlM0e\"")
+        .filter_map(|(index, key)| html[index + key.len()..].trim_start().strip_prefix(':'))
+        .find_map(|tail| {
             serde_json::Deserializer::from_str(tail.trim_start())
                 .into_iter::<String>()
                 .next()
                 .and_then(Result::ok)
+                .filter(|s| !s.is_empty())
         })
-        .filter(|s| !s.is_empty())
-        .ok_or(ProviderError::AuthRequired)
+        .ok_or_else(|| {
+            if html.contains("accounts.google.com/ServiceLogin") {
+                ProviderError::OAuthExpired(
+                    "Gemini Apps session expired. Reconnect in Settings → Providers.".into(),
+                )
+            } else {
+                schema_error()
+            }
+        })
 }
 
 fn parse_response(body: &str) -> Result<UsageSnapshot, ProviderError> {
@@ -179,6 +236,128 @@ mod tests {
     fn window(kind: u64, fraction: Value) -> Value {
         json!([2400, fraction, kind, [[1800000000, 0]]])
     }
+    #[tokio::test]
+    async fn renewal_is_used_by_bootstrap_rpc_and_the_next_fresh_client() {
+        let mut server = mockito::Server::new_async().await;
+        let rotate = server
+            .mock("POST", "/RotateCookies")
+            .match_header("cookie", "__Secure-1PSID=primary; __Secure-1PSIDTS=old")
+            .match_body("[000,\"-0000000000000000000\"]")
+            .with_header(
+                "set-cookie",
+                "__Secure-1PSIDTS=rotated; Domain=.google.com; Path=/; Secure",
+            )
+            .with_header("set-cookie", "accounts_only=do-not-forward; Path=/; Secure")
+            .create_async()
+            .await;
+        let bootstrap = server
+            .mock("GET", "/app")
+            .match_header(
+                "cookie",
+                "__Secure-1PSID=primary; __Secure-1PSIDTS=rotated; host_only=keep",
+            )
+            .with_header(
+                "set-cookie",
+                "__Secure-1PSIDTS=bootstrap; Domain=.google.com; Path=/; Secure",
+            )
+            .with_header(
+                "set-cookie",
+                "wrong=blocked; Domain=other.google.com; Path=/",
+            )
+            .with_body(r#"{"SNlM0e":"csrf"}"#)
+            .create_async()
+            .await;
+        let quota_path = "/_/BardChatUi/data/batchexecute?rpcids=jSf9Qc&source-path=%2Fapp&rt=c";
+        let quota = server
+            .mock("POST", quota_path)
+            .match_header(
+                "cookie",
+                "__Secure-1PSID=primary; __Secure-1PSIDTS=bootstrap; host_only=keep",
+            )
+            .with_header(
+                "set-cookie",
+                "__Secure-1PSIDTS=rpc; Domain=.google.com; Path=/; Secure",
+            )
+            .with_header("set-cookie", "host_only=; Max-Age=0; Path=/")
+            .with_header("set-cookie", "scoped=blocked; Path=/private")
+            .with_header("set-cookie", "implicit_path=blocked")
+            .with_body(framed(&json!([2, [window(1, json!(0))]])))
+            .create_async()
+            .await;
+        let session = fetch_at(
+            SessionCookies::new("host_only=keep; __Secure-1PSID=primary; __Secure-1PSIDTS=old")
+                .unwrap(),
+            5,
+            &server.url(),
+            &server.url(),
+            true,
+        )
+        .await
+        .unwrap();
+        assert_eq!(
+            session.cookie_header,
+            "__Secure-1PSID=primary; __Secure-1PSIDTS=rpc"
+        );
+        rotate.assert_async().await;
+        bootstrap.assert_async().await;
+        quota.assert_async().await;
+        bootstrap.remove_async().await;
+        quota.remove_async().await;
+        let next_page = server
+            .mock("GET", "/app")
+            .match_header("cookie", session.cookie_header.as_str())
+            .with_body(r#"{"SNlM0e":"next"}"#)
+            .create_async()
+            .await;
+        let next_quota = server
+            .mock("POST", quota_path)
+            .match_header("cookie", session.cookie_header.as_str())
+            .with_body(framed(&json!([2, [window(1, json!(0.1))]])))
+            .create_async()
+            .await;
+        let next = fetch_at(
+            SessionCookies::new(&session.cookie_header).unwrap(),
+            5,
+            &server.url(),
+            &server.url(),
+            false,
+        )
+        .await
+        .unwrap();
+        assert_eq!(next.usage.primary.used_percent, 10.0);
+        next_page.assert_async().await;
+        next_quota.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn login_redirect_is_never_followed_and_failed_verification_returns_no_session() {
+        let mut server = mockito::Server::new_async().await;
+        let redirect = server
+            .mock("GET", "/app")
+            .with_status(302)
+            .with_header("location", "/credential-trap")
+            .with_header("set-cookie", "SID=unverified; Path=/")
+            .create_async()
+            .await;
+        let trap = server
+            .mock("GET", "/credential-trap")
+            .expect(0)
+            .create_async()
+            .await;
+        assert!(
+            fetch_at(
+                SessionCookies::new("SID=original").unwrap(),
+                5,
+                &server.url(),
+                &server.url(),
+                false
+            )
+            .await
+            .is_err()
+        );
+        redirect.assert_async().await;
+        trap.assert_async().await;
+    }
     fn framed(quota: &Value) -> String {
         format!(
             ")]}}'\n\n123\n{}\n",
@@ -224,11 +403,19 @@ mod tests {
         assert!(parse_response("<html>sign in</html>").is_err());
     }
     #[test]
-    fn csrf_is_decoded_and_absence_requires_login() {
+    fn csrf_is_decoded_and_schema_failure_is_not_called_a_logout() {
         assert_eq!(parse_csrf(r#"{"SNlM0e":"a\u003db"}"#).unwrap(), "a=b");
         assert!(matches!(
             parse_csrf("<html></html>"),
-            Err(ProviderError::AuthRequired)
+            Err(ProviderError::Parse(_))
+        ));
+        assert_eq!(
+            parse_csrf(r#"["SNlM0e"];{"SNlM0e":"valid"}"#).unwrap(),
+            "valid"
+        );
+        assert!(matches!(
+            parse_csrf("https://accounts.google.com/ServiceLogin"),
+            Err(ProviderError::OAuthExpired(_))
         ));
     }
     #[test]

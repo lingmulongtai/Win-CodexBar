@@ -260,9 +260,13 @@ pub fn revoke_provider_credentials(
     keys.remove(provider_id);
     keys.save().map_err(|e| e.to_string())?;
 
-    let mut cookies = ManualCookies::load();
-    cookies.remove(provider_id);
-    cookies.save().map_err(|e| e.to_string())?;
+    if id == ProviderId::GeminiApps {
+        codexbar::providers::geminiapps::session_cache::select(None).map_err(|e| e.to_string())?;
+    } else {
+        let mut cookies = ManualCookies::load();
+        cookies.remove(provider_id);
+        cookies.save().map_err(|e| e.to_string())?;
+    }
 
     let token_store = TokenAccountStore::new();
     let mut token_accounts = token_store.load().map_err(|e| e.to_string())?;

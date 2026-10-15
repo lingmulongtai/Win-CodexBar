@@ -4,15 +4,19 @@ Gemini Apps (`geminiapps`) reads the **Current usage** and **Weekly limit** show
 
 ## Connect on Windows
 
-Use Windows **v0.70.5 or later**. It fixes a Gemini bootstrap transport error present in v0.70.4.
+Use Windows **v0.70.6 or later**. Version 0.70.5 fixed a bootstrap transport error, but did not retain Google's session renewals and could lose access after a successful connection.
 
 1. Install the official Google Gemini desktop app and sign in with your primary Google account.
 2. Close Gemini once. It locks its session database while running.
 3. In **Settings → Providers → Gemini Apps**, enable the provider and choose **Connect using Gemini desktop app**.
-4. Wait for successful verification, then reopen Gemini. Later refreshes work while Gemini is open.
+4. Wait for successful verification, then reopen Gemini. Later refreshes retain new cookies from Google's bootstrap/quota responses and attempt Google session renewal at startup and at most once per ten minutes, while Gemini remains open.
 5. To remove this connection, use **Disconnect Gemini Apps**. If Google expires the session, sign in again and repeat the import.
 
 The connection checks the usage API before replacing a saved session. Only matching, unexpired root-path Google/Gemini cookies are read. Their values are encrypted for your Windows user by the existing DPAPI credential store, are never displayed in the settings UI, and are never sent to Android. No process debugging, encryption bypass, Gemini modification or automatic app restart is used.
+
+Renewed cookies use a separate DPAPI-protected `geminiapps_session.json`, bound to the exact connection you selected. Background renewal keeps the account-selection file unchanged, so successful refreshes stay available to Android. Disconnect and credential revocation remove the renewal cache; an older request cannot restore it after a reconnect. Only the two Google authentication cookies needed for renewal are sent to the fixed Google Accounts endpoint. Redirects are never followed.
+
+If the connection was already expired in v0.70.5, update and connect once more. HTTP 200 alone does not mean the session authenticated: the collector requires the authenticated current-usage payload. A changed bootstrap schema reports a fetch error separately from an explicit sign-in requirement. Google can still revoke a login or require sign-in again.
 
 This version supports the default `/app` Google account route. Selecting among multiple Google accounts is not supported. Indexed/other-origin redirects fail instead of silently changing accounts. App-bound encrypted sessions cannot be imported.
 
