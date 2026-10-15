@@ -1,8 +1,8 @@
 # Mobile Connect validation
 
-## Gemini Apps update (v0.70.5 / Android v0.9.8)
+## Gemini Apps update (v0.70.6 / Android v0.9.8)
 
-Gemini Apps now has its own Windows collector and Android provider identity. The earlier unsupported-Gemini statements below describe older releases. See [Gemini Apps setup](gemini-apps.md) and [v0.70.5 validation and limits](releases/v0.70.5.md) for current behavior. The native connection screen uses the existing styled credential buttons and does not offer an unsupported account switch action. The saved Windows-user DPAPI session was verified in the native Rust and Tauri collectors while Gemini was running; v0.70.5 repairs the HTTP/2 bootstrap failure observed in v0.70.4.
+Gemini Apps has its own Windows collector and Android provider identity. The unsupported-Gemini statements below are historical. Use v0.70.6 or later: v0.70.5 repaired HTTP/2 bootstrap failures but discarded Google's renewed cookies. Version 0.70.6 retains response cookies, attempts periodic Google session renewal and stores the result separately from Android's credential-selection stamp. See [Gemini Apps setup](gemini-apps.md) and [v0.70.6 published-EXE validation](releases/v0.70.6.md). Repeated live collection with Gemini open was verified for approximately 50 minutes, followed by a successful quota fetch from the installed published EXE; multi-hour lifetime remains unverified. Fresh native screenshots of that downloaded EXE appear in every active README and the release notes.
 
 ## Mobile Connect v0.70.2 local checks
 
