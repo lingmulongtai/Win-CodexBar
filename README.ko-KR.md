@@ -24,6 +24,6 @@ v0.70.3부터 기본 Windows 프로필의 쿠키를 가져올 때 Vivaldi를 별
 
 네이티브 Windows와 Android 에뮬레이터에서 합성 데이터로 촬영했습니다. 실제 휴대전화와 실제 계정 검증은 아직 완료되지 않았습니다. [MIT 라이선스](LICENSE).
 
-![Published v0.70.5 Gemini Apps usage (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.5-gemini-usage-ja.jpg)
+![Published v0.70.6 Gemini Apps usage (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.6-gemini-usage-ja.jpg)
 
-![Published v0.70.5 Gemini Apps connection controls](docs/images/mobile-connect/windows-v0.70.5-gemini-connection-ja.jpg)
+![Published v0.70.6 Gemini Apps connection controls](docs/images/mobile-connect/windows-v0.70.6-gemini-connection-ja.jpg)

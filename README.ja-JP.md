@@ -31,11 +31,11 @@ Windows版は**署名なし**です。元プロジェクトの署名証明書や
 
 **v0.70.6以降**で、GoogleのGeminiデスクトップアプリと接続できます。現在・週間の使用率とリセット日時を、Gemini CLI・Antigravityとは別に表示します。Geminiを起動したまま、Googleが更新した認証情報を暗号化して引き継ぎ、Android **v0.9.8以降**にも同じ使用枠を送れます。以前の接続が期限切れなら、更新後に一度だけ再接続してください。[接続手順](docs/gemini-apps.md) · [v0.70.6の接続維持の修正](docs/releases/v0.70.6.md)
 
-画像は、公開された**v0.70.5 EXEをダウンロードして起動・撮影**した実際のWindows画面です。専用のデモ設定を使っています。
+画像は、公開された**v0.70.6 EXEをダウンロードして起動・撮影**した実際のWindows画面です。専用のデモ設定を使っています。
 
-![公開EXE v0.70.5でGemini Appsの使用量を表示（デモデータ）](docs/images/mobile-connect/windows-v0.70.5-gemini-usage-ja.jpg)
+![公開EXE v0.70.6でGemini Appsの使用量を表示（デモデータ）](docs/images/mobile-connect/windows-v0.70.6-gemini-usage-ja.jpg)
 
-![公開EXE v0.70.5のGemini Apps接続設定](docs/images/mobile-connect/windows-v0.70.5-gemini-connection-ja.jpg)
+![公開EXE v0.70.6のGemini Apps接続設定](docs/images/mobile-connect/windows-v0.70.6-gemini-connection-ja.jpg)
 
 ## スマホとの接続
 

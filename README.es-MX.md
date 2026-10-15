@@ -24,6 +24,6 @@ Desde v0.70.3, Vivaldi aparece como opción propia para importar cookies desde s
 
 Capturas de Windows nativo y emulador Android con datos sintéticos. La aceptación en teléfonos físicos y con cuentas reales está pendiente. [Licencia MIT](LICENSE).
 
-![Published v0.70.5 Gemini Apps usage (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.5-gemini-usage-ja.jpg)
+![Published v0.70.6 Gemini Apps usage (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.6-gemini-usage-ja.jpg)
 
-![Published v0.70.5 Gemini Apps connection controls](docs/images/mobile-connect/windows-v0.70.5-gemini-connection-ja.jpg)
+![Published v0.70.6 Gemini Apps connection controls](docs/images/mobile-connect/windows-v0.70.6-gemini-connection-ja.jpg)

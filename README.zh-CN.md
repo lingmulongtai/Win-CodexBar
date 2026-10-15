@@ -20,6 +20,6 @@ Android 0.9.7可选择手机采集或Windows采集，并设置个别服务的手
 
 完整说明、Android截图与开发步骤见[English README](README.md)、[日本語](README.ja-JP.md)和[设置指南](docs/android-sharing.md)。截图使用测试数据；验证范围见[记录](docs/mobile-validation.md)。[MIT](LICENSE)；原始项目来自[CodexBar](https://github.com/steipete/CodexBar)。
 
-![Published v0.70.5 Gemini Apps usage (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.5-gemini-usage-ja.jpg)
+![Published v0.70.6 Gemini Apps usage (isolated demo profile)](docs/images/mobile-connect/windows-v0.70.6-gemini-usage-ja.jpg)
 
-![Published v0.70.5 Gemini Apps connection controls](docs/images/mobile-connect/windows-v0.70.5-gemini-connection-ja.jpg)
+![Published v0.70.6 Gemini Apps connection controls](docs/images/mobile-connect/windows-v0.70.6-gemini-connection-ja.jpg)
