@@ -29,7 +29,7 @@ Windows版は**署名なし**です。元プロジェクトの署名証明書や
 
 ## Gemini Appsの使用量
 
-**v0.70.5以降**で、GoogleのGeminiデスクトップアプリと接続できます。現在・週間の使用率とリセット日時を、Gemini CLI・Antigravityとは別に表示します。接続後はGeminiを起動したまま更新でき、Android **v0.9.8以降**にも同じ使用枠を送れます。Googleのログイン情報はWindows内に暗号化保存します。[接続手順](docs/gemini-apps.md) · [v0.70.5の変更・検証記録](docs/releases/v0.70.5.md)
+**v0.70.6以降**で、GoogleのGeminiデスクトップアプリと接続できます。現在・週間の使用率とリセット日時を、Gemini CLI・Antigravityとは別に表示します。Geminiを起動したまま、Googleが更新した認証情報を暗号化して引き継ぎ、Android **v0.9.8以降**にも同じ使用枠を送れます。以前の接続が期限切れなら、更新後に一度だけ再接続してください。[接続手順](docs/gemini-apps.md) · [v0.70.6の接続維持の修正](docs/releases/v0.70.6.md)
 
 画像は、公開された**v0.70.5 EXEをダウンロードして起動・撮影**した実際のWindows画面です。専用のデモ設定を使っています。
 
