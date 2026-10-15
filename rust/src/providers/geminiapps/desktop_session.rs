@@ -43,7 +43,7 @@ fn read(connection: &rusqlite::Connection, key: &[u8]) -> Result<String, String>
         ORDER BY length(host_key) DESC, length(path) DESC",
         )
         .map_err(|_| UNAVAILABLE.to_string())?;
-    let chrome_now = (chrono::Utc::now().timestamp() + 11_644_473_600) * 1_000_000;
+    let chrome_now = chrono::Utc::now().timestamp_micros() + 11_644_473_600_000_000;
     let rows = query
         .query_map([chrome_now], |row| {
             Ok((
@@ -119,7 +119,7 @@ fn decrypt(encrypted: &[u8], key: &[u8], host: &str, version: i64) -> Result<Str
     String::from_utf8(value.to_vec()).map_err(|_| unavailable())
 }
 
-fn valid_name(name: &str) -> bool {
+pub(super) fn valid_name(name: &str) -> bool {
     !name.is_empty()
         && name
             .bytes()
