@@ -2,6 +2,9 @@
 
 ## Android companion fork
 
+- Every development task must begin by fetching the read-only `upstream` remote and reviewing new default-branch commits. Integrate compatible mainline improvements before extending the affected area; document the exact checked upstream SHA, included work, tests and concrete reasons for any deferred incompatibility. Review new upstream branches as context, not as automatically approved changes.
+- Preserve Mobile Connect, Gemini Apps session renewal, Vivaldi support, the owned config namespace, Android protocol compatibility and this fork's updater/download/release ownership while syncing. Use normal merges or explicitly scoped ports without rebasing shared history. Upstream review is task-driven and does not create a scheduled automation.
+
 - This fork is `lingmulongtai/Win-CodexBar-Mobile-Connect`. Bind all GitHub writes to that repository through `scripts/gh-safe.sh`.
 - `nesszer/Win-CodexBar` and `steipete/CodexBar` are read-only upstreams unless the user explicitly authorizes a particular upstream write.
 - The upstream release/signing/Winget scripts and their canonical repository assumptions do not authorize publishing from this fork to upstream repositories.
@@ -85,7 +88,7 @@ pnpm run tauri:build
 - Errors: `thiserror` (`ProviderError`) and `anyhow` where already used; keep user-facing messages friendly.
 - Logging: `tracing` only. Never log secrets, cookies, tokens, or raw API keys.
 - Frontend tests are co-located `*.test.ts` / `*.test.tsx`. Bridge types in `types/bridge.ts` must stay aligned with Rust command payloads (including settings tab ids).
-- **Settings tab ids** (case-sensitive; backend whitelist in `surface_target.rs` must mirror frontend `SettingsTabId` / `TAB_META`): `general`, `providers`, `notifications`, `menuBar`, `menu`, `usageSpend`, `advanced`, `hooks`, `about`. Unknown ids fall back to General in the UI. Old ids `display` / `apiKeys` / `cookies` are not valid settings tabs.
+- **Settings tab ids** (case-sensitive; backend whitelist in `surface_target.rs` must mirror frontend `SettingsTabId` / `TAB_META`): `general`, `providers`, `notifications`, `menuBar`, `menu`, `usageSpend`, `mobileConnect`, `advanced`, `hooks`, `about`. Unknown ids fall back to General in the UI. Old ids `display` / `apiKeys` / `cookies` are not valid settings tabs.
 - Cookie import UX uses **explicit browser selection** in Preferences — do not assume Chrome-only.
 - Claude CLI output is user-configurable; do not treat a customizable status line as the usage source of truth.
 - Keep provider data siloed: never show identity / plan / email from provider A in provider B UI.
@@ -164,7 +167,7 @@ Then follow post-install instructions (permissions / accessibility as prompted).
 2. **Close** any already-running CodexBar instance (single-instance plugin may hand off to the old process).
 3. **Launch** the new binary. For stable automation (no blur-dismiss), set proof mode, e.g.  
    `$env:CODEXBAR_PROOF_MODE = 'settings:menu'`  
-   (settings tab ids: `general`, `providers`, `notifications`, `menuBar`, `menu`, `usageSpend`, `advanced`, `hooks`, `about` — float bar section is on **`menu`**).  
+   (settings tab ids: `general`, `providers`, `notifications`, `menuBar`, `menu`, `usageSpend`, `mobileConnect`, `advanced`, `hooks`, `about` — float bar section is on **`menu`**).
    To use CDP, also set `$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = '--remote-debugging-port=<port>'` (one port per parallel lane).
 4. **Drive in the background only** — never `bring_to_front`, foreground mode, `hotkey`, or `type_text`; they take the user's focus or keyboard.
    - **CDP (preferred for webview controls):** read `http://127.0.0.1:<port>/json/list` and attach to the window's own page target by URL — main / tray panel / Settings: `http://tauri.localhost/`; float bar: `…?window=floatbar…`. Never the first target: tools that attach to it or open `about:blank` (e.g. browser-use) see a blank page. Click with `Input.dispatchMouseEvent` (does not move the OS cursor or take focus); assert DOM state and the persisted value via the app bridge (`get_settings_snapshot`).

@@ -5,12 +5,12 @@ This independent fork adds an optional encrypted Windows-to-Android feed to the 
 ## Setup
 
 1. [Download the EXE](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe), start **Win-CodexBar + Mobile Connect** and connect/enable your providers.
-2. In **Settings → Advanced → Android sharing**, select **Tailscale (no exit node)** or **LAN** to use the detected PC address. You can also enter a numeric private IPv4 address. Enable sharing. Default TCP port: **43825**.
+2. In the updated app, open **Settings → Mobile Connect** (v0.70.6 and older: **Advanced → Android sharing**), then select **Tailscale (no exit node)** or **LAN** to use the detected PC address. You can also enter a numeric private IPv4 address. Enable sharing. Default TCP port: **43825**.
 3. If Windows Firewall blocks it, allow this app on the trusted private network you use. Keep the selected address reachable from the phone. Do not expose the port through an internet router.
 4. Use **Copy pairing code**, transfer that private code to the phone, and paste it into **CodexBar → Connections → Usage source & Windows connection**. Connecting selects Windows mode.
 5. Choose **Collect on this phone** or **Collect on Windows**. Advanced phone exceptions select individual saved phone connections. Choices survive mode changes; **Use Windows for all services** explicitly clears exceptions.
 
-日本語UIではWindowsの「詳細設定 → Androidへの共有」で接続先を選び、Androidの「接続 → 取得方法とWindows接続」にコードを貼り付けます。「スマホで取得」「Windowsでまとめて取得」を選択できます。旧版の選択はスマホ例外として引き継ぎ、全取得をPCへ移す場合は「すべてWindowsから取得する」を選びます。
+日本語UIでは更新版Windowsの「設定 → モバイル接続」で接続先を選び、Androidの「接続 → 取得方法とWindows接続」にコードを貼り付けます。v0.70.6以前は「詳細設定 → Androidへの共有」です。「スマホで取得」「Windowsでまとめて取得」を選択できます。旧版の選択はスマホ例外として引き継ぎ、全取得をPCへ移す場合は「すべてWindowsから取得する」を選びます。
 
 ## Tailscale without an exit node
 
@@ -26,7 +26,11 @@ Phone mode uses saved phone connections without automatic PC polling. Windows mo
 
 Sanitized supported-provider snapshots include quota windows, reset times, observation time, optional budgets/balances and known Codex reset credits. Unknown values remain unknown. Failed fetches never look like fresh zero usage. Quota observations over 35 minutes old are stale; over two hours old are unavailable. History/reset baselines are archived separately by opaque account/source and retained when switching, bounded by existing retention limits.
 
-Optional **Local usage on this PC** totals come from completed cached Windows log scans: today/30-day/selected-period tokens and estimated USD costs, PC calendar date, aggregation time, a sanitized model label and incomplete-request count where known. They may include multiple accounts and are separate from the signed-in quota account and billed charges. Local aggregation has its own stale label. Sharing never starts a scan; enable local usage/cost features on Windows when needed. This does not reproduce every desktop-only field or layout.
+Optional **Local usage on this PC** totals come from completed cached Windows log scans: today/30-day/selected-period tokens and estimated USD costs, PC calendar date, aggregation time, a sanitized model label and incomplete-request count where known. They may include multiple accounts and are separate from the signed-in quota account and billed charges. Local aggregation has its own stale label. Enable local usage/cost features on Windows when needed. Snapshot requests read the cache; in the dashboard update, sharing also refreshes that cache in the PC background at most once per five minutes, independently of the number of paired devices. This does not reproduce every desktop-only field or layout.
+
+The [development dashboard update](mobile-dashboard-update.md) adds canonical PC quota history and daily spend/token series for Android History and Spend. The PC retains encrypted account/connection archives for up to 90 days and exports a bounded 30-day series. New observations begin with the update; older phone samples are not reassigned to a PC account. All paired devices read the same PC series.
+
+**Settings → Mobile Connect → Allow settings changes from Android** enables optional **Android Connections → PC settings**. It defaults off. Paired devices can change only the fixed refresh interval (0 for manual, or 60–86400 seconds) and Usage & Spend period. Fixed intervals turn Adaptive off; conflicting edits reload the current settings for review. Pairing, provider credentials, files and hooks remain local-only. This requires the updated Android and Windows apps; published older downloads do not include it yet.
 
 Supported IDs are Codex, Claude, Gemini CLI, Gemini Apps, Copilot, Cursor, z.ai, ZenMux, Kimi Coding, ElevenLabs, OpenRouter, Synthetic, Chutes, DeepSeek, Venice, Moonshot API, ClinePass, IBM Bob, Fireworks, Devin and Antigravity. Authentication-required/unavailable PC providers remain PC-sourced with an actionable status. This does not add collectors.
 

@@ -6,7 +6,7 @@ Windows AI usage monitoring with encrypted sharing to **CodexBar for Android**. 
 
 ## Download
 
-**[Download Windows EXE directly](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [Stable release and checksums](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · **[Signed Android APK](https://github.com/lingmulongtai/CodexBar-android/releases/latest/download/app-release.apk)**
+**[Download Windows EXE directly](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [Stable release and checksums](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · **[Signed Android APK](https://github.com/lingmulongtai/CodexBar-android/releases/latest)**
 
 Save the EXE in a permanent folder and run it. No ZIP extraction or Node.js installation is required. Windows 10/11 x64 and [Microsoft WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) are required. No separate VC++ Redistributable or WebView2 loader DLL is needed. The Universal CRT is included in Windows 10/11; the WebView2 Runtime itself is separate.
 
@@ -14,12 +14,18 @@ This fork's Windows EXE is **unsigned** and uses no upstream signing certificate
 
 ## What this fork adds
 
+v0.71.0 adds a dedicated **Mobile Connect** settings pane, encrypted shared PC quota history, Usage & Spend charts on Android/tablets and opt-in remote PC settings. **Use Android v0.10.0 or later for shared history, spend and PC controls.** [Changes, screenshots and verification](docs/releases/v0.71.0.md)
+
+![Mobile Connect dedicated pane in the actual native development EXE](docs/images/mobile-connect/windows-dashboard-mobile-connect.jpg)
+
 | Feature | Behavior |
 | --- | --- |
 | Android sharing | Windows collects once; the phone receives sanitized encrypted snapshots. Provider credentials stay on the PC. |
 | Tailscale selection | Detect/select the PC's Tailscale IPv4 address. Same tailnet required; no exit node needed. LAN is also supported. |
 | Android acquisition modes | Phone collection or Windows collection, with optional per-service phone exceptions. Pairing, choices and separate histories survive switching. |
 | PC token/cost totals | Cached local-log totals for today, 30 days and the selected history period, where available, with their own aggregation timestamp. USD costs are estimates. |
+| Shared history and spend | The updated PC keeps account/connection-specific history and sends the same saved series and daily reference cost/token data to paired devices. |
+| Opt-in PC controls | Android can change only the PC fixed refresh interval and Usage & Spend period after local permission. Concurrent changes return a conflict. |
 | Owned distribution | Direct EXE, stable releases, correct support/update links and independent app identity. Existing Mobile Preview settings/pairings are retained. |
 | Vivaldi browser import | Detects standard Windows Vivaldi profiles and offers a separate choice in Browser Cookies. Existing Chromium encryption limits apply. |
 
@@ -42,7 +48,7 @@ The following native Windows captures use the downloaded, published **v0.70.6 EX
 ## Connect
 
 1. Connect and enable the desired providers on Windows.
-2. Open **Advanced → Android sharing**. Select **Tailscale (no exit node)** or **LAN**, then enable sharing. Default TCP port: **43825**.
+2. In the updated app, open **Settings → Mobile Connect** (published v0.70.6 and older: **Advanced → Android sharing**). Select **Tailscale (no exit node)** or **LAN**, then enable sharing. Default TCP port: **43825**.
 3. Copy the private pairing code into Android **Connections → Usage source & Windows connection**, then connect. Pairing selects Windows mode.
 4. Choose **Collect on this phone** or **Collect on Windows**. Advanced phone exceptions select individual services to keep on their saved phone connection.
 

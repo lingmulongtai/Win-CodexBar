@@ -1,10 +1,11 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BootstrapState, SurfaceTarget } from "../types/bridge";
 
 const mocks = vi.hoisted(() => ({
   update: vi.fn(),
-  reorderProviders: vi.fn(),
+  reorderVisibleProviders: vi.fn(),
+  restoreDefaultProviderOrder: vi.fn(),
   setSurfaceMode: vi.fn(),
   windowLabel: "settings",
   shellTarget: null as SurfaceTarget | null,
@@ -27,7 +28,8 @@ vi.mock("../lib/tauri", () => ({
   getWorkAreaRect: () => Promise.resolve(null),
   getProviderStatuses: () => Promise.resolve([]),
   setSurfaceMode: mocks.setSurfaceMode,
-  reorderProviders: mocks.reorderProviders,
+  reorderVisibleProviders: mocks.reorderVisibleProviders,
+  restoreDefaultProviderOrder: mocks.restoreDefaultProviderOrder,
 }));
 vi.mock("../hooks/useSettings", () => ({
   useSettings: (settings: unknown) => ({
@@ -68,6 +70,7 @@ vi.mock("./settings/tabs/ProvidersTab", () => ({
 }));
 
 import Settings from "./Settings";
+vi.mock("./settings/tabs/MobileSharingSettings", () => ({ default: () => <div data-testid="tab">mobileConnect</div> }));
 
 const providers = [
   { id: "codex", displayName: "Codex", cookieDomain: null },
@@ -102,7 +105,8 @@ describe("Settings sidebar", () => {
     vi.clearAllMocks();
     mocks.windowLabel = "settings";
     mocks.shellTarget = null;
-    mocks.reorderProviders.mockResolvedValue(undefined);
+    mocks.reorderVisibleProviders.mockResolvedValue([]);
+    mocks.restoreDefaultProviderOrder.mockResolvedValue([]);
   });
 
   it("lists the app panes in the macOS order, then the providers with an on count", () => {
@@ -114,6 +118,7 @@ describe("Settings sidebar", () => {
     expect(panes).toEqual([
       "general",
       "usageSpend",
+      "mobileConnect",
       "notifications",
       "menuBar",
       "menu",
@@ -121,7 +126,7 @@ describe("Settings sidebar", () => {
       "hooks",
       "about",
     ]);
-    expect(container.querySelectorAll(".settings-sidebar__chip")).toHaveLength(7);
+    expect(container.querySelectorAll(".settings-sidebar__chip")).toHaveLength(8);
     expect(container.querySelector(".settings-sidebar__app-icon")).not.toBeNull();
     expect(providerNames()).toEqual(["codex", "zai", "claude", "cline", "grok"]);
     expect(screen.getByText("SettingsSidebarProvidersOnCount")).toBeInTheDocument();
@@ -165,7 +170,7 @@ describe("Settings sidebar", () => {
     expect(sort).toHaveAttribute("title", "SettingsSidebarSortOnHint");
 
     fireEvent.keyDown(row("codex"), { key: "ArrowDown", altKey: true });
-    expect(mocks.reorderProviders).not.toHaveBeenCalled();
+    expect(mocks.reorderVisibleProviders).not.toHaveBeenCalled();
 
     fireEvent.click(sort);
     expect(mocks.update).toHaveBeenCalledWith({ providersSortedAlphabetically: false });
@@ -195,7 +200,13 @@ describe("Settings sidebar", () => {
   it("reorders with Alt+Arrow and saves the new order", () => {
     render(<Settings state={state} />);
     fireEvent.keyDown(row("codex"), { key: "ArrowDown", altKey: true });
-    expect(mocks.reorderProviders).toHaveBeenCalledWith(["zai", "codex", "claude", "cline", "grok"]);
+    expect(mocks.reorderVisibleProviders).toHaveBeenCalledWith([
+      "zai",
+      "codex",
+      "claude",
+      "cline",
+      "grok",
+    ]);
     expect(providerNames()).toEqual(["zai", "codex", "claude", "cline", "grok"]);
   });
 
@@ -203,7 +214,109 @@ describe("Settings sidebar", () => {
     render(<Settings state={state} />);
     fireEvent.change(screen.getByRole("searchbox"), { target: { value: "c" } });
     fireEvent.keyDown(row("codex"), { key: "ArrowDown", altKey: true });
-    expect(mocks.reorderProviders).not.toHaveBeenCalled();
+    expect(mocks.reorderVisibleProviders).not.toHaveBeenCalled();
+  });
+
+  const optionsButton = () => screen.getByRole("button", { name: "ProviderSidebarOptions" });
+  const undoItem = () => screen.getByRole("menuitem", { name: "ProviderSidebarUndoOrder" });
+
+  it("shows only enabled providers with the enabled-only option, and does not reorder then", () => {
+    render(<Settings state={makeState({ providersEnabledOnly: true })} />);
+    expect(providerNames()).toEqual(["codex", "zai", "grok"]);
+    fireEvent.keyDown(row("codex"), { key: "ArrowDown", altKey: true });
+    expect(mocks.reorderVisibleProviders).not.toHaveBeenCalled();
+
+    fireEvent.click(optionsButton());
+    expect(screen.getByRole("menuitemcheckbox", { name: "ProviderSidebarShowEnabledOnly" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    fireEvent.click(screen.getByRole("menuitemcheckbox", { name: "ProviderSidebarShowEnabledOnly" }));
+    expect(mocks.update).toHaveBeenCalledWith({ providersEnabledOnly: false });
+  });
+
+  it("turns the enabled-only option on from the options menu", () => {
+    render(<Settings state={state} />);
+    fireEvent.click(optionsButton());
+    fireEvent.click(screen.getByRole("menuitemcheckbox", { name: "ProviderSidebarShowEnabledOnly" }));
+    expect(mocks.update).toHaveBeenCalledWith({ providersEnabledOnly: true });
+  });
+
+  it("undoes the last drag reorder from the options menu", () => {
+    render(<Settings state={state} />);
+    fireEvent.keyDown(row("codex"), { key: "ArrowDown", altKey: true });
+    expect(providerNames()).toEqual(["zai", "codex", "claude", "cline", "grok"]);
+
+    fireEvent.click(optionsButton());
+    fireEvent.click(undoItem());
+    expect(mocks.reorderVisibleProviders).toHaveBeenLastCalledWith([
+      "codex",
+      "zai",
+      "claude",
+      "cline",
+      "grok",
+    ]);
+    expect(providerNames()).toEqual(["codex", "zai", "claude", "cline", "grok"]);
+  });
+
+  it("undoes the last drag reorder with Ctrl+Z", () => {
+    const { container } = render(<Settings state={state} />);
+    fireEvent.keyDown(row("codex"), { key: "ArrowDown", altKey: true });
+    fireEvent.keyDown(container.querySelector(".settings-sidebar")!, { key: "z", ctrlKey: true });
+    expect(mocks.reorderVisibleProviders).toHaveBeenLastCalledWith([
+      "codex",
+      "zai",
+      "claude",
+      "cline",
+      "grok",
+    ]);
+  });
+
+  it("drops the undo once the saved order changes outside the sidebar", () => {
+    const { rerender } = render(<Settings state={state} />);
+    fireEvent.keyDown(row("codex"), { key: "ArrowDown", altKey: true });
+    fireEvent.click(optionsButton());
+    expect(undoItem()).toBeEnabled();
+    fireEvent.click(optionsButton());
+
+    const moved = [...providers].reverse();
+    rerender(<Settings state={{ ...state, providers: moved } as BootstrapState} />);
+    fireEvent.click(optionsButton());
+    expect(undoItem()).toBeDisabled();
+  });
+
+  it("restores the default order and turns sorting off, and undo brings both back", async () => {
+    mocks.restoreDefaultProviderOrder.mockResolvedValue(
+      providers.map((p, order) => ({ id: p.id, displayName: p.displayName, enabled: true, order })),
+    );
+    render(<Settings state={makeState({ providersSortedAlphabetically: true })} />);
+    fireEvent.click(optionsButton());
+    fireEvent.click(screen.getByRole("menuitem", { name: "ProviderSidebarRestoreDefaultOrder" }));
+    expect(mocks.update).toHaveBeenCalledWith({ providersSortedAlphabetically: false });
+    expect(mocks.restoreDefaultProviderOrder).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(optionsButton());
+    await waitFor(() => expect(undoItem()).toBeEnabled());
+    fireEvent.click(undoItem());
+    expect(mocks.update).toHaveBeenLastCalledWith({ providersSortedAlphabetically: true });
+    expect(mocks.reorderVisibleProviders).toHaveBeenLastCalledWith([
+      "codex",
+      "zai",
+      "claude",
+      "cline",
+      "grok",
+    ]);
+  });
+
+  it("turns sorting back on when restoring the default order fails", async () => {
+    mocks.restoreDefaultProviderOrder.mockRejectedValue(new Error("save failed"));
+    render(<Settings state={makeState({ providersSortedAlphabetically: true })} />);
+    fireEvent.click(optionsButton());
+    fireEvent.click(screen.getByRole("menuitem", { name: "ProviderSidebarRestoreDefaultOrder" }));
+    expect(mocks.update).toHaveBeenCalledWith({ providersSortedAlphabetically: false });
+    await waitFor(() =>
+      expect(mocks.update).toHaveBeenLastCalledWith({ providersSortedAlphabetically: true }),
+    );
   });
 
   it("drives the main window surface only outside the detached window", () => {
@@ -218,6 +331,11 @@ describe("Settings sidebar", () => {
 });
 
 describe("Settings deep links", () => {
+  it("opens Mobile Connect directly as its own pane", () => {
+    render(<Settings state={state} initialTab="mobileConnect" />);
+    expect(screen.getByTestId("tab")).toHaveTextContent("mobileConnect");
+    expect(title()).toBe("TabMobileConnect");
+  });
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.windowLabel = "settings";

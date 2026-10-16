@@ -2,7 +2,7 @@
 
 Android için CodexBar'a şifrelenmiş kullanım verisi paylaşan Windows uygulaması. [CodexBar](https://github.com/steipete/CodexBar) tabanlı [Win-CodexBar](https://github.com/nesszer/Win-CodexBar) projesinin bağımsız bir fork'udur.
 
-**[EXE indir](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [Sürümler ve SHA256SUMS](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · [İmzalı Android APK](https://github.com/lingmulongtai/CodexBar-android/releases/latest/download/app-release.apk)
+**[EXE indir](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [Sürümler ve SHA256SUMS](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · [İmzalı Android APK](https://github.com/lingmulongtai/CodexBar-android/releases/latest)
 
 Windows 10/11 x64 ve Microsoft WebView2 Runtime gereklidir. EXE'yi kaydedip çalıştırın; ZIP açmak veya Node.js kurmak gerekmez. Bu fork'un Windows EXE'si **imzasızdır**. Güncellemek için uygulamayı kapatın ve EXE'yi değiştirin.
 

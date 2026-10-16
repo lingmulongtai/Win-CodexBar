@@ -6,16 +6,18 @@ import {
   SIDEBAR_PANES,
   TAB_META,
   canReorderProviders,
+  canUndoProviderOrder,
   filterProvidersByQuery,
   isSettingsTab,
   parseSettingsTabRequest,
   providersTabRequest,
+  sameIds,
   sortProvidersAlphabetically,
   nextEnabledProviders,
 } from "./settingsTabs";
 
 describe("isSettingsTab", () => {
-  it.each(["general", "providers", "notifications", "menuBar", "menu", "usageSpend", "advanced", "hooks", "about"])(
+  it.each(["general", "providers", "notifications", "menuBar", "menu", "usageSpend", "mobileConnect", "advanced", "hooks", "about"])(
     "returns true for a known tab id (%s)",
     (id) => {
       expect(isSettingsTab(id)).toBe(true);
@@ -52,6 +54,7 @@ describe("TAB_META", () => {
       "menuBar",
       "menu",
       "usageSpend",
+      "mobileConnect",
       "advanced",
       "hooks",
       "about",
@@ -116,6 +119,7 @@ describe("SIDEBAR_PANES", () => {
     expect(SIDEBAR_PANES.map((pane) => [pane.id, pane.chip])).toEqual([
       ["general", "gray"],
       ["usageSpend", "green"],
+      ["mobileConnect", "blue"],
       ["notifications", "red"],
       ["menuBar", "blue"],
       ["menu", "teal"],
@@ -177,12 +181,62 @@ describe("sortProvidersAlphabetically", () => {
   });
 });
 
+describe("filterProvidersByQuery aliases and words", () => {
+  const providers = [
+    { id: "codex", displayName: "Codex", cliAliases: ["openai"] },
+    { id: "claude", displayName: "Claude", cliAliases: ["anthropic"] },
+    { id: "zai", displayName: "Zâi" },
+  ];
+
+  it("matches CLI aliases as well as names", () => {
+    expect(filterProvidersByQuery(providers, "openai").map((p) => p.id)).toEqual(["codex"]);
+    expect(filterProvidersByQuery(providers, "anthropic").map((p) => p.id)).toEqual(["claude"]);
+  });
+
+  it("requires every word to match some field, in any field", () => {
+    expect(filterProvidersByQuery(providers, "anthropic claude").map((p) => p.id)).toEqual([
+      "claude",
+    ]);
+    expect(filterProvidersByQuery(providers, "claude nope")).toEqual([]);
+  });
+
+  it("ignores accents", () => {
+    expect(filterProvidersByQuery(providers, "zai").map((p) => p.id)).toEqual(["zai"]);
+    expect(filterProvidersByQuery(providers, "ZÂI").map((p) => p.id)).toEqual(["zai"]);
+  });
+});
+
 describe("canReorderProviders", () => {
   it("allows reordering only in the saved order with no search", () => {
     expect(canReorderProviders(false, "")).toBe(true);
     expect(canReorderProviders(false, "  ")).toBe(true);
     expect(canReorderProviders(true, "")).toBe(false);
     expect(canReorderProviders(false, "cl")).toBe(false);
+  });
+
+  it("is off while the enabled-only filter hides providers", () => {
+    expect(canReorderProviders(false, "", true)).toBe(false);
+    expect(canReorderProviders(false, "", false)).toBe(true);
+  });
+});
+
+describe("canUndoProviderOrder", () => {
+  const undo = { before: ["a", "b", "c"], after: ["b", "a", "c"], restoreAlphabetical: null };
+
+  it("is off with nothing to undo", () => {
+    expect(canUndoProviderOrder(null, ["a", "b", "c"])).toBe(false);
+  });
+
+  it("is on only while the order still matches what the change left", () => {
+    expect(canUndoProviderOrder(undo, ["b", "a", "c"])).toBe(true);
+    expect(canUndoProviderOrder(undo, ["a", "b", "c"])).toBe(false);
+    expect(canUndoProviderOrder(undo, ["b", "a"])).toBe(false);
+  });
+
+  it("compares ids in order", () => {
+    expect(sameIds([], [])).toBe(true);
+    expect(sameIds(["a", "b"], ["b", "a"])).toBe(false);
+    expect(sameIds(["a"], ["a", "b"])).toBe(false);
   });
 });
 
