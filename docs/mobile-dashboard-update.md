@@ -14,9 +14,9 @@ This implementation is included in Windows v0.71.0 and Android v0.10.0. Both app
 
 ## Native screen
 
-Captured from the actual newly built Windows Tauri EXE with an isolated synthetic profile. It is a development build, not a screenshot of a published release. The installed resident and its credentials were retained. The copy action was exercised successfully while the listener ran. The code itself is never displayed in the image.
+Captured from the downloaded, published Windows v0.71.0 EXE with an isolated synthetic profile on this Windows desktop. The installed resident was separately updated with its credentials and pairing retained. The copy action was exercised during pre-publication validation while the listener ran. The private pairing code is not displayed in the image. See [published artifact verification](releases/v0.71.0.md#published-artifact-verification) for the download, installation and released Android interoperability checks.
 
-![Dedicated Mobile Connect pane](images/mobile-connect/windows-dashboard-mobile-connect.jpg)
+![Published v0.71.0 Mobile Connect pane](images/mobile-connect/windows-v0.71.0-mobile-connect-ja.jpg)
 
 ![Android tablet PC spend view, emulator demo data](images/mobile-connect/android-dashboard-tablet-spend.png)
 
@@ -28,7 +28,7 @@ Rust workspace tests: 4,841 core tests, 1 CLI test and 773 Tauri tests passed, w
 
 An actual Android WorkManager job consumed the public synthetic Rust fixture. The baseline produced no reset alerts; a later background job produced four notifications (Codex reset, Codex reset-balance increase, Claude reset, Copilot reset). This proves the pipeline on the API 36.1 emulator. Android’s real PC settings dialog also changed the native EXE’s period to 7 days, reported success, and restored 30 days. Home-card drag order survived a force-stop/relaunch. Physical phone/tablet, real Tailscale off-LAN, OEM battery restrictions and Samsung Now Bar acceptance remain separate.
 
-Validation uses only isolated demo settings. Windows remains an unsigned EXE. This task has not pushed branches, created a release, changed a firewall/VPN, restarted Gemini or replaced the installed resident.
+Interoperability and screenshot validation use isolated demo settings. Windows remains an unsigned EXE. Both versions are now pushed and published as stable latest releases. The installed Windows resident was updated and left running; its saved credential/pairing files match the pre-update copies.
 
 ## Fork commit sequence
 
