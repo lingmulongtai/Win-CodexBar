@@ -3,7 +3,6 @@ import { useLocale } from "../../../hooks/useLocale";
 import { getSafeDiagnostics } from "../../../lib/tauri";
 import { Field, SettingsGroup, Toggle } from "../../../components/FormControls";
 import type { TabProps } from "../settingsTabs";
-import MobileSharingSettings from "./MobileSharingSettings";
 
 function formatCodexSessionsDirs(paths: string[]): string {
   return paths.join("; ");
@@ -148,7 +147,6 @@ export default function AdvancedTab({ settings, set, saving }: TabProps) {
         </Field>
       </SettingsGroup>
 
-      <MobileSharingSettings />
 
       <SettingsGroup
         title={t("NetworkProxyTitle")}

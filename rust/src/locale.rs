@@ -190,6 +190,9 @@ locale_keys! {
 
     // Tab names (Preferences)
     TabGeneral,
+    TabMobileConnect,
+    MobileSharingPending,
+    MobileSharingListeningHelp,
     TabProviders,
     TabNotifications,
     TabMenuBar,

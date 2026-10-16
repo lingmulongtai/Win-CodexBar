@@ -1745,3 +1745,6 @@ OpenAiOrgLimitsLoad = 加载项目上限
 OpenAiOrgLimitsEmpty = 未找到项目上限。
 OpenAiOrgLimitsScoped = 项目上限适用于整个组织。请先清空项目 ID 再加载。
 OpenAiOrgLimitsTruncated = 仅检查了部分项目。
+TabMobileConnect = Mobile Connect
+MobileSharingPending = Sharing enabled, listener unavailable
+MobileSharingListeningHelp = Copy the pairing code above to connect a phone or tablet. Listening means this PC is ready; it does not confirm a device connection. Address changes restart the listener without changing existing pairing keys.

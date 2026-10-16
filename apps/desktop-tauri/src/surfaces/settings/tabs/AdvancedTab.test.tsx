@@ -207,7 +207,6 @@ describe("AdvancedTab Mac grouped layout", () => {
       "PrivacyTitle",
       "CodexLocalLogsTitle",
       "SectionLocalIntegrations",
-      "MobileSharingTitle",
       "NetworkProxyTitle",
       "DiagnosticsSectionHeading",
     ]);

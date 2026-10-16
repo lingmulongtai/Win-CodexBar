@@ -1745,3 +1745,6 @@ OpenAiOrgLimitsLoad = Загрузить лимиты проектов
 OpenAiOrgLimitsEmpty = Лимиты проектов не найдены.
 OpenAiOrgLimitsScoped = Лимиты проектов действуют на всю организацию. Очистите ID проекта, чтобы загрузить их.
 OpenAiOrgLimitsTruncated = Проверены не все проекты.
+TabMobileConnect = Mobile Connect
+MobileSharingPending = Sharing enabled, listener unavailable
+MobileSharingListeningHelp = Copy the pairing code above to connect a phone or tablet. Listening means this PC is ready; it does not confirm a device connection. Address changes restart the listener without changing existing pairing keys.

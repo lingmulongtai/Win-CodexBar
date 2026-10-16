@@ -1684,7 +1684,7 @@ MobileSharingCopy = Copy pairing code
 MobileSharingCopied = Pairing code copied. Paste it in Android Connections.
 MobileSharingRevoke = Revoke paired phones
 MobileSharingRevoked = Previous pairing codes are invalid. Pair again with the new code.
-MobileSharingRunning = Sharing is running
+MobileSharingRunning = Listening for phones and tablets
 MobileSharingStopped = Sharing is stopped
 MobileSharingFailed = Mobile sharing failed.
 
@@ -1747,3 +1747,6 @@ OpenAiOrgLimitsLoad = Load project caps
 OpenAiOrgLimitsEmpty = No project caps were found.
 OpenAiOrgLimitsScoped = Project caps apply to the whole organization. Clear the project ID to load them.
 OpenAiOrgLimitsTruncated = Only some projects were checked.
+TabMobileConnect = Mobile Connect
+MobileSharingPending = Sharing enabled, listener unavailable
+MobileSharingListeningHelp = Copy the pairing code above to connect a phone or tablet. Listening means this PC is ready; it does not confirm a device connection. Address changes restart the listener without changing existing pairing keys.

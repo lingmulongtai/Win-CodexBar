@@ -9,6 +9,7 @@ export type SettingsTabId =
   | "menuBar"
   | "menu"
   | "usageSpend"
+  | "mobileConnect"
   | "advanced"
   | "hooks"
   | "about";

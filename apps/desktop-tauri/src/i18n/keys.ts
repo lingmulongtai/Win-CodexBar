@@ -6,6 +6,9 @@
 
 export const ALL_LOCALE_KEYS = [
   "TabGeneral",
+  "TabMobileConnect",
+  "MobileSharingPending",
+  "MobileSharingListeningHelp",
   "GeminiAppsTitle",
   "GeminiAppsHelp",
   "GeminiAppsConnect",

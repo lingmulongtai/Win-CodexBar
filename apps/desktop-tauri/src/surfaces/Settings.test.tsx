@@ -70,6 +70,7 @@ vi.mock("./settings/tabs/ProvidersTab", () => ({
 }));
 
 import Settings from "./Settings";
+vi.mock("./settings/tabs/MobileSharingSettings", () => ({ default: () => <div data-testid="tab">mobileConnect</div> }));
 
 const providers = [
   { id: "codex", displayName: "Codex", cookieDomain: null },
@@ -117,6 +118,7 @@ describe("Settings sidebar", () => {
     expect(panes).toEqual([
       "general",
       "usageSpend",
+      "mobileConnect",
       "notifications",
       "menuBar",
       "menu",
@@ -124,7 +126,7 @@ describe("Settings sidebar", () => {
       "hooks",
       "about",
     ]);
-    expect(container.querySelectorAll(".settings-sidebar__chip")).toHaveLength(7);
+    expect(container.querySelectorAll(".settings-sidebar__chip")).toHaveLength(8);
     expect(container.querySelector(".settings-sidebar__app-icon")).not.toBeNull();
     expect(providerNames()).toEqual(["codex", "zai", "claude", "cline", "grok"]);
     expect(screen.getByText("SettingsSidebarProvidersOnCount")).toBeInTheDocument();
@@ -329,6 +331,11 @@ describe("Settings sidebar", () => {
 });
 
 describe("Settings deep links", () => {
+  it("opens Mobile Connect directly as its own pane", () => {
+    render(<Settings state={state} initialTab="mobileConnect" />);
+    expect(screen.getByTestId("tab")).toHaveTextContent("mobileConnect");
+    expect(title()).toBe("TabMobileConnect");
+  });
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.windowLabel = "settings";

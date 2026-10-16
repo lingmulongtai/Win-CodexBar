@@ -8,6 +8,13 @@ import MobileSharingSettings from "./MobileSharingSettings";
 const running = { enabled: true, running: true, address: "192.168.1.10", port: 43825, error: null };
 describe("Android sharing", () => {
   beforeEach(() => { vi.clearAllMocks(); api.getMobileSharingStatus.mockResolvedValue(running); api.getMobileNetworkAddresses.mockResolvedValue({ tailscaleAddress: "100.74.102.71", lanAddress: running.address }); });
+  it("shows an enabled listener failure separately from successful actions", async () => {
+    api.getMobileSharingStatus.mockResolvedValue({ ...running, running: false, error: "Listener unavailable" });
+    render(<MobileSharingSettings />);
+    expect(await screen.findByRole("alert")).toHaveTextContent("Listener unavailable");
+    expect(screen.getByRole("status")).toHaveTextContent("MobileSharingPending");
+    expect(screen.queryByRole("button", { name: "MobileSharingCopy" })).not.toBeInTheDocument();
+  });
   it("selects the PC's Tailscale endpoint without changing the port or pairing key", async () => {
     api.configureMobileSharing.mockResolvedValue({ ...running, address: "100.74.102.71" });
     render(<MobileSharingSettings />);

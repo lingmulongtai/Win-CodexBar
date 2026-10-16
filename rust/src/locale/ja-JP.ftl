@@ -1682,7 +1682,7 @@ MobileSharingCopy = ペアリングコードをコピー
 MobileSharingCopied = コードをコピーしました。Androidの「接続」に貼り付けてください。
 MobileSharingRevoke = スマホのペアリングを解除
 MobileSharingRevoked = 以前のコードを無効にしました。新しいコードで再接続してください。
-MobileSharingRunning = 共有中
+MobileSharingRunning = スマホ・タブレットの接続を待ち受け中
 MobileSharingStopped = 共有停止中
 MobileSharingFailed = Androidへの共有に失敗しました。
 
@@ -1745,3 +1745,6 @@ OpenAiOrgLimitsLoad = プロジェクト上限を読み込む
 OpenAiOrgLimitsEmpty = プロジェクト上限は見つかりませんでした。
 OpenAiOrgLimitsScoped = プロジェクト上限は組織全体に適用されます。読み込むにはプロジェクト ID を空にしてください。
 OpenAiOrgLimitsTruncated = 一部のプロジェクトのみ確認しました。
+TabMobileConnect = モバイル接続
+MobileSharingPending = 共有は有効ですが、待ち受けを開始できていません
+MobileSharingListeningHelp = 上のコードをコピーしてスマホやタブレットを接続できます。「待ち受け中」はPCの準備状態で、端末との接続確認ではありません。アドレス変更では待ち受けを再起動しますが、接続キーは保持します。

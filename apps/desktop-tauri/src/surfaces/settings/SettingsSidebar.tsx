@@ -48,6 +48,9 @@ function Glyph({ children }: { children: ReactNode }) {
 }
 
 const PANE_GLYPHS: Record<Exclude<SettingsTabId, "providers" | "about">, ReactElement> = {
+  mobileConnect: (
+    <Glyph><rect x="4" y="1" width="8" height="14" rx="2" /><path d="M7 12h2M6 4h4" /></Glyph>
+  ),
   general: (
     <Glyph>
       <circle cx="8" cy="8" r="2" />

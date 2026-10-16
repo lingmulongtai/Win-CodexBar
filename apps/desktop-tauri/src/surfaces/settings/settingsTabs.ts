@@ -8,6 +8,7 @@ export const TAB_META: { id: SettingsTabId; labelKey: LocaleKey }[] = [
   { id: "menuBar", labelKey: "TabMenuBar" },
   { id: "menu", labelKey: "TabMenu" },
   { id: "usageSpend", labelKey: "TabUsageSpend" },
+  { id: "mobileConnect", labelKey: "TabMobileConnect" },
   { id: "advanced", labelKey: "TabAdvanced" },
   { id: "hooks", labelKey: "TabHooks" },
   { id: "about", labelKey: "TabAbout" },
@@ -66,6 +67,7 @@ export interface SidebarPane {
 export const SIDEBAR_PANES: SidebarPane[] = [
   { id: "general", labelKey: "TabGeneral", chip: "gray" },
   { id: "usageSpend", labelKey: "TabUsageSpend", chip: "green" },
+  { id: "mobileConnect", labelKey: "TabMobileConnect", chip: "blue" },
   { id: "notifications", labelKey: "TabNotifications", chip: "red" },
   { id: "menuBar", labelKey: "TabMenuBar", chip: "blue" },
   { id: "menu", labelKey: "TabMenu", chip: "teal" },

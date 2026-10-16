@@ -17,7 +17,7 @@ import {
 } from "./settingsTabs";
 
 describe("isSettingsTab", () => {
-  it.each(["general", "providers", "notifications", "menuBar", "menu", "usageSpend", "advanced", "hooks", "about"])(
+  it.each(["general", "providers", "notifications", "menuBar", "menu", "usageSpend", "mobileConnect", "advanced", "hooks", "about"])(
     "returns true for a known tab id (%s)",
     (id) => {
       expect(isSettingsTab(id)).toBe(true);
@@ -54,6 +54,7 @@ describe("TAB_META", () => {
       "menuBar",
       "menu",
       "usageSpend",
+      "mobileConnect",
       "advanced",
       "hooks",
       "about",
@@ -118,6 +119,7 @@ describe("SIDEBAR_PANES", () => {
     expect(SIDEBAR_PANES.map((pane) => [pane.id, pane.chip])).toEqual([
       ["general", "gray"],
       ["usageSpend", "green"],
+      ["mobileConnect", "blue"],
       ["notifications", "red"],
       ["menuBar", "blue"],
       ["menu", "teal"],
