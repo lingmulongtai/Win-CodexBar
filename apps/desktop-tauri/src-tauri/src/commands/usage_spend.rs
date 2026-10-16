@@ -125,6 +125,7 @@ fn token_activity_sources(
 
 #[derive(Debug, Clone)]
 struct CachedUsageSpendSummary {
+    generation: u64,
     key: String,
     summary: UsageSpendSummary,
     refresh_owner: Option<UsageSpendRefreshOwner>,
@@ -150,6 +151,9 @@ struct UsageSpendCoordinator {
 }
 
 impl UsageSpendCoordinator {
+    fn may_publish(&self, generation: Option<u64>) -> bool {
+        generation == Some(self.next_generation)
+    }
     fn begin(&mut self, scope: String) -> UsageSpendRefreshOwner {
         self.next_generation = self.next_generation.wrapping_add(1).max(1);
         let owner = UsageSpendRefreshOwner {
@@ -239,6 +243,7 @@ fn clear_usage_spend_refresh_if_owned(owner: &UsageSpendRefreshOwner) {
 }
 
 struct BuiltUsageSpendSummary {
+    publication_generation: Option<u64>,
     key: String,
     summary: UsageSpendSummary,
     refresh_owner: Option<UsageSpendRefreshOwner>,
@@ -287,6 +292,16 @@ pub async fn get_usage_spend_summary(
         let mut summary = built.summary;
         clear_summary_refreshing(&mut summary);
         return Ok(summary);
+    }
+    // A late build with the same cache key must not overwrite a newer generation.
+    // Keep the coordinator lock through publication so begin() cannot race it.
+    if let Ok(coordinator) = usage_spend_coordinator().lock()
+        && coordinator.may_publish(built.publication_generation)
+    {
+        let settings = codexbar::settings::Settings::load();
+        if settings.cost_usage_enabled && period == settings.spend_dashboard_period {
+            crate::mobile_bridge::publish_spend(&built.summary);
+        }
     }
     Ok(built.summary)
 }
@@ -338,6 +353,7 @@ fn build_usage_spend_summary_cached(
             .map_err(|error| error.to_string())?;
         if let Some(existing) = guard.reusable(&key, force_refresh) {
             return Ok(BuiltUsageSpendSummary {
+                publication_generation: Some(existing.generation),
                 key: existing.key.clone(),
                 summary: existing.summary.clone(),
                 refresh_owner: existing.refresh_owner.clone(),
@@ -369,6 +385,7 @@ fn build_usage_spend_summary_cached(
         let mut summary = summary;
         clear_summary_refreshing(&mut summary);
         return Ok(BuiltUsageSpendSummary {
+            publication_generation: None,
             key,
             summary,
             refresh_owner: Some(owner),
@@ -379,11 +396,13 @@ fn build_usage_spend_summary_cached(
     }
     let refresh_owner = refreshing.then(|| owner.clone());
     coordinator.cache = Some(CachedUsageSpendSummary {
+        generation: owner.generation,
         key: key.clone(),
         summary: summary.clone(),
         refresh_owner: refresh_owner.clone(),
     });
     Ok(BuiltUsageSpendSummary {
+        publication_generation: Some(owner.generation),
         key,
         summary,
         refresh_owner,
@@ -1382,6 +1401,7 @@ mod cache_key_tests {
         let mut coordinator = UsageSpendCoordinator::default();
         assert!(coordinator.reusable("day|30", false).is_none());
         coordinator.cache = Some(CachedUsageSpendSummary {
+            generation: 0,
             key: "day|30".to_string(),
             summary: empty_summary(),
             refresh_owner: None,
@@ -1390,6 +1410,19 @@ mod cache_key_tests {
         assert!(coordinator.reusable("day|30", false).is_some());
         assert!(coordinator.reusable("day|30", true).is_none());
         assert!(coordinator.reusable("day|7", false).is_none());
+    }
+
+    #[test]
+    fn a_late_same_key_build_cannot_overwrite_the_shared_spend() {
+        let mut coordinator = UsageSpendCoordinator::default();
+        let a = coordinator.begin("same-key".into());
+        assert!(coordinator.may_publish(Some(a.generation)));
+        let b = coordinator.begin("same-key".into());
+        assert!(!coordinator.may_publish(Some(a.generation)));
+        assert!(coordinator.may_publish(Some(b.generation)));
+        coordinator.clear_if_indexing(&b);
+        assert!(coordinator.may_publish(Some(b.generation)));
+        assert!(!coordinator.may_publish(None));
     }
 
     #[test]

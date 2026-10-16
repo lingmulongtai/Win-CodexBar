@@ -11,10 +11,13 @@ use serde::{Deserialize, Serialize};
 use std::net::{IpAddr, SocketAddr};
 use std::sync::{Arc, Mutex};
 use tauri::Manager;
+mod shared_data;
+pub(crate) use shared_data::{publish_spend, schedule_spend_refresh};
 
 #[derive(Clone)]
 pub(crate) struct MobileObservation {
     scope: Option<[u8; 32]>,
+    history_scope: Option<[u8; 32]>,
     reset_credits: Option<ResetCreditsObservation>,
     pub(crate) fresh: bool,
     credential_stamp: CredentialStamp,
@@ -52,6 +55,7 @@ impl MobileObservation {
     pub(crate) fn seeded(usage: &ProviderUsageSnapshot) -> Self {
         Self {
             scope: None,
+            history_scope: None,
             reset_credits: None,
             fresh: true,
             credential_stamp: credential_stamp(),
@@ -79,10 +83,21 @@ impl MobileObservation {
             .map(str::to_owned)
             .or_else(|| account.map(|value| value.to_string()))
             .or_else(|| result.usage.account_email.clone());
+        let scope = identity
+            .filter(|value| !value.trim().is_empty())
+            .map(|value| mobile_bridge::account_scope(id.cli_name(), value.trim()));
+        let history_scope = scope.or_else(|| {
+            // A selected Gemini login is a connection boundary, not a verified Google account ID.
+            if id != ProviderId::GeminiApps {
+                return None;
+            }
+            codexbar::settings::ManualCookies::load()
+                .get("geminiapps")
+                .map(|header| mobile_bridge::account_scope("geminiapps-selected-login", header))
+        });
         Self {
-            scope: identity
-                .filter(|value| !value.trim().is_empty())
-                .map(|value| mobile_bridge::account_scope(id.cli_name(), value.trim())),
+            scope,
+            history_scope,
             reset_credits: result.reset_credits,
             fresh: true,
             credential_stamp,
@@ -352,7 +367,7 @@ const ANDROID_PROVIDERS: &[&str] = &[
 
 fn snapshot(app: &tauri::AppHandle, pairing: &Pairing) -> MobileSnapshot {
     let state = app.state::<Mutex<AppState>>();
-    let providers = state
+    let providers: Vec<MobileProvider> = state
         .lock()
         .ok()
         .map(|guard| {
@@ -391,6 +406,7 @@ fn snapshot(app: &tauri::AppHandle, pairing: &Pairing) -> MobileSnapshot {
         schema_version: 1,
         source: mobile_bridge::SOURCE.into(),
         generated_at_epoch_seconds: chrono::Utc::now().timestamp(),
+        spend: shared_data::cached_spend(&providers),
         providers,
     }
 }
@@ -399,6 +415,14 @@ fn project(
     usage: &ProviderUsageSnapshot,
     observation: Option<&MobileObservation>,
     pairing: &Pairing,
+) -> MobileProvider {
+    project_usage(usage, observation, Some(pairing))
+}
+
+fn project_usage(
+    usage: &ProviderUsageSnapshot,
+    observation: Option<&MobileObservation>,
+    pairing: Option<&Pairing>,
 ) -> MobileProvider {
     let now = chrono::Utc::now().timestamp();
     let updated_at = parse_time(&usage.updated_at).unwrap_or(0);
@@ -525,11 +549,26 @@ fn project(
         status: status.into(),
         subject_id: observation
             .and_then(|observation| observation.scope.as_ref())
-            .and_then(|scope| mobile_bridge::account_subject(pairing, scope)),
+            .and_then(|scope| {
+                pairing.and_then(|pairing| mobile_bridge::account_subject(pairing, scope))
+            }),
         windows,
         budget,
         balance,
         local_usage: None,
+        history_scope_id: observation
+            .and_then(|item| item.history_scope.or(item.scope))
+            .and_then(|scope| {
+                pairing.and_then(|pairing| mobile_bridge::account_subject(pairing, &scope))
+            }),
+        history: if fresh && pairing.is_some() {
+            observation
+                .and_then(|item| item.history_scope.or(item.scope))
+                .map(|scope| mobile_bridge::quota_history(&usage.provider_id, &scope, now))
+                .unwrap_or_default()
+        } else {
+            Vec::new()
+        },
         reset_credits: if fresh {
             observation
                 .and_then(|metadata| metadata.reset_credits)
@@ -555,7 +594,75 @@ fn project(
     {
         provider.status = "unavailable".into();
     }
+    trim_history(&mut provider);
     provider
+}
+
+fn trim_history(provider: &mut MobileProvider) {
+    provider.history.retain_mut(|series| {
+        series
+            .samples
+            .retain(|sample| sample.t <= provider.updated_at_epoch_seconds + 120);
+        !series.samples.is_empty()
+            && provider
+                .windows
+                .iter()
+                .any(|window| window.label == series.label)
+    });
+}
+
+pub(crate) fn record_published_history(
+    app: &tauri::AppHandle,
+    id: ProviderId,
+    usage: &ProviderUsageSnapshot,
+    captured: Option<&MobileObservation>,
+    generation: u64,
+) {
+    if !ANDROID_PROVIDERS.contains(&id.cli_name()) {
+        return;
+    }
+    let state = app.state::<Mutex<AppState>>();
+    let Ok(guard) = state.lock() else {
+        return;
+    };
+    let Some(observation) = captured else {
+        return;
+    };
+    // Keep publication ownership stable through the history write. Never reinterpret
+    // an older snapshot using a replacement account's observation.
+    if guard.provider_refresh_generation != generation
+        || !history_owner_matches(observation, guard.mobile_observations.get(&id))
+        || !guard.provider_cache.iter().any(|current| {
+            current.provider_id == usage.provider_id && current.updated_at == usage.updated_at
+        })
+    {
+        return;
+    }
+    let Some(scope) = observation.history_scope.or(observation.scope) else {
+        return;
+    };
+    let projected = project_usage(usage, Some(observation), None);
+    if projected.status == "ready" {
+        mobile_bridge::record_history(
+            id.cli_name(),
+            scope,
+            projected.updated_at_epoch_seconds,
+            &projected.windows,
+        );
+    }
+}
+
+fn history_owner_matches(
+    captured: &MobileObservation,
+    current: Option<&MobileObservation>,
+) -> bool {
+    current.is_some_and(|current| {
+        current.fresh
+            && captured.fresh
+            && current.scope == captured.scope
+            && current.history_scope == captured.history_scope
+            && current.credential_stamp == captured.credential_stamp
+    })
 }
 
 fn project_local_usage(summary: ProviderLocalUsageSummary, now: i64) -> Option<MobileLocalUsage> {
@@ -706,6 +813,7 @@ mod tests {
         let usage: ProviderUsageSnapshot = serde_json::from_value(serde_json::json!({ "providerId":"codex", "primary":{"usedPercent":25.0}, "updatedAt":now.to_rfc3339(), "errorState":"ready", "accountEmail":"private@example.com", "accountLabel":"private label" })).unwrap();
         let observation = MobileObservation {
             scope: Some(mobile_bridge::account_scope("codex", "private@example.com")),
+            history_scope: None,
             reset_credits: Some(ResetCreditsObservation {
                 available_count: 0,
                 next_expires_at: None,
@@ -736,5 +844,57 @@ mod tests {
         assert_eq!(projected.status, "unavailable");
         assert!(projected.reset_credits.is_none());
         assert_eq!(projected.updated_at_epoch_seconds, now.timestamp());
+    }
+
+    #[test]
+    fn a_late_observation_cannot_relabel_usage_as_a_replacement_account() {
+        let usage: ProviderUsageSnapshot = serde_json::from_value(serde_json::json!({"providerId":"codex","primary":{"usedPercent":25.0},"updatedAt":chrono::Utc::now().to_rfc3339(),"errorState":"ready"})).unwrap();
+        let mut a = MobileObservation::seeded(&usage);
+        a.scope = Some([1; 32]);
+        let mut b = a.clone();
+        b.scope = Some([2; 32]);
+        assert!(history_owner_matches(&a, Some(&a)));
+        assert!(!history_owner_matches(&a, Some(&b)));
+        b.scope = a.scope;
+        b.fresh = false;
+        assert!(!history_owner_matches(&a, Some(&b)));
+        assert!(!history_owner_matches(&a, None));
+    }
+
+    #[test]
+    fn changed_windows_cannot_invalidate_the_android_snapshot() {
+        use codexbar::mobile_bridge::{MobileHistoryPoint, MobileQuotaHistory};
+        let usage: ProviderUsageSnapshot = serde_json::from_value(serde_json::json!({"providerId":"codex","primary":{"usedPercent":25.0},"primaryLabel":"Session","updatedAt":chrono::Utc::now().to_rfc3339(),"errorState":"ready"})).unwrap();
+        let mut provider = project_usage(&usage, Some(&MobileObservation::seeded(&usage)), None);
+        let at = provider.updated_at_epoch_seconds;
+        provider.history = vec![
+            MobileQuotaHistory {
+                label: "Old model".into(),
+                samples: vec![MobileHistoryPoint {
+                    t: at,
+                    u: 0.2,
+                    r: None,
+                }],
+            },
+            MobileQuotaHistory {
+                label: "Session".into(),
+                samples: vec![
+                    MobileHistoryPoint {
+                        t: at,
+                        u: 0.2,
+                        r: None,
+                    },
+                    MobileHistoryPoint {
+                        t: at + 121,
+                        u: 0.4,
+                        r: None,
+                    },
+                ],
+            },
+        ];
+        trim_history(&mut provider);
+        assert_eq!(provider.history.len(), 1);
+        assert_eq!(provider.history[0].label, "Session");
+        assert_eq!(provider.history[0].samples.len(), 1);
     }
 }

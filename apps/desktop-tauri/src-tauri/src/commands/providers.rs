@@ -719,6 +719,7 @@ async fn do_refresh_providers_with_policy(
     update_tray_and_notifications(app, &state, &inputs.settings, &inputs.token_accounts)?;
 
     events::emit_refresh_complete(app, enabled_count, error_count);
+    crate::mobile_bridge::schedule_spend_refresh(app);
     crate::auto_refresh::schedule_refresh_enrichment(&inputs.settings);
 
     Ok(ProviderRefreshOutcome::Published { generation })
@@ -947,15 +948,28 @@ async fn refresh_provider(
                 &snapshot,
                 cached.as_ref(),
             );
-            Some(snapshot)
+            let observation = guard.mobile_observations.get(&id).cloned();
+            Some((snapshot, observation))
         }
     } else {
         None
     };
 
-    if let Some(snapshot) = published {
+    if let Some((snapshot, observation)) = published {
         events::emit_provider_updated(&app, &snapshot);
         if fresh_snapshot {
+            let history_app = app.clone();
+            let history_usage = snapshot.clone();
+            let _ = tauri::async_runtime::spawn_blocking(move || {
+                crate::mobile_bridge::record_published_history(
+                    &history_app,
+                    id,
+                    &history_usage,
+                    observation.as_ref(),
+                    generation,
+                )
+            })
+            .await;
             dispatch_usage_updated_hook(
                 hooks_enabled,
                 id,

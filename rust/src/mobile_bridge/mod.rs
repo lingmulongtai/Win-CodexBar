@@ -1,8 +1,10 @@
 //! Opt-in encrypted snapshots for the Android companion. Provider credentials
 //! and raw provider responses are deliberately absent from this wire model.
 
+mod history;
 mod protocol;
 mod server;
+pub use history::{quota_history, record_history};
 
 pub use protocol::{Pairing, account_scope, account_subject, is_private_address};
 use serde::{Deserialize, Serialize};
@@ -18,6 +20,8 @@ pub struct MobileSnapshot {
     pub source: String,
     pub generated_at_epoch_seconds: i64,
     pub providers: Vec<MobileProvider>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub spend: Option<MobileSpend>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -33,6 +37,60 @@ pub struct MobileProvider {
     pub reset_credits: Option<MobileResetCredits>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub local_usage: Option<MobileLocalUsage>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub history_scope_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub history: Vec<MobileQuotaHistory>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MobileQuotaHistory {
+    pub label: String,
+    pub samples: Vec<MobileHistoryPoint>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MobileHistoryPoint {
+    pub t: i64,
+    pub u: f64,
+    pub r: Option<i64>,
+}
+
+/// Only aggregate data; project names, paths and conversations never enter this model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MobileSpend {
+    pub updated_at_epoch_seconds: i64,
+    pub reporting_period: String,
+    pub time_zone: String,
+    pub cost_tracking_enabled: bool,
+    pub rows: Vec<MobileSpendRow>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MobileSpendRow {
+    pub provider_id: String,
+    pub currency: String,
+    pub refreshing: bool,
+    pub seven_day: Option<f64>,
+    pub thirty_day: Option<f64>,
+    pub period_cost: Option<f64>,
+    pub seven_day_tokens: Option<u64>,
+    pub thirty_day_tokens: Option<u64>,
+    pub period_tokens: Option<u64>,
+    pub tokens_lower_bound: bool,
+    pub daily: Vec<MobileSpendDay>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MobileSpendDay {
+    pub day: String,
+    pub tokens: Option<u64>,
+    pub cost_usd: Option<f64>,
+    pub is_scanned: bool,
 }
 
 /// Provider-wide PC log totals; independent from the signed-in quota account.

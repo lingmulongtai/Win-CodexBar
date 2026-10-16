@@ -128,10 +128,7 @@ async fn handle(
         }
         replay.push_back((request.requested_at_epoch_seconds, request.nonce.clone()));
     }
-    let plaintext = serde_json::to_vec(&source(&pairing)).ok()?;
-    if plaintext.len() > 128 * 1024 {
-        return None;
-    }
+    let plaintext = bounded_snapshot(source(&pairing))?;
     let response = encrypt(
         &pairing,
         &request,
@@ -143,6 +140,42 @@ async fn handle(
     socket.get_mut().write_all(&response).await.ok()?;
     socket.get_mut().shutdown().await.ok()?;
     Some(())
+}
+
+fn bounded_snapshot(mut snapshot: MobileSnapshot) -> Option<Vec<u8>> {
+    // Optional history must never make the existing quota exchange unavailable.
+    for _ in 0..9 {
+        let raw = serde_json::to_vec(&snapshot).ok()?;
+        if raw.len() <= 128 * 1024 {
+            return Some(raw);
+        }
+        for provider in &mut snapshot.providers {
+            for series in &mut provider.history {
+                if series.samples.len() <= 2 {
+                    series.samples.clear();
+                    continue;
+                }
+                let last = series.samples.last()?.t;
+                let mut index = 0;
+                series.samples.retain(|sample| {
+                    let keep = index % 2 == 0 || sample.t == last;
+                    index += 1;
+                    keep
+                });
+            }
+            provider.history.retain(|series| !series.samples.is_empty());
+        }
+        if let Some(spend) = &mut snapshot.spend {
+            for row in &mut spend.rows {
+                if !row.daily.is_empty() {
+                    row.daily.drain(..row.daily.len().div_ceil(2));
+                }
+            }
+        }
+    }
+    snapshot.spend = None;
+    let raw = serde_json::to_vec(&snapshot).ok()?;
+    (raw.len() <= 128 * 1024).then_some(raw)
 }
 
 #[cfg(test)]
@@ -157,7 +190,65 @@ mod tests {
             source: super::super::SOURCE.into(),
             generated_at_epoch_seconds: chrono::Utc::now().timestamp(),
             providers: vec![],
+            spend: None,
         })
+    }
+
+    #[test]
+    fn optional_history_is_reduced_before_it_can_break_existing_quota_clients() {
+        use super::super::{MobileHistoryPoint, MobileProvider, MobileQuotaHistory, MobileWindow};
+        let providers = (0..21)
+            .map(|index| MobileProvider {
+                id: format!("provider{index}"),
+                updated_at_epoch_seconds: 1_700_000_000,
+                status: "ready".into(),
+                subject_id: None,
+                windows: vec![MobileWindow {
+                    label: "Current".into(),
+                    used_fraction: 0.2,
+                    resets_at_epoch_seconds: None,
+                    window_duration_seconds: None,
+                }],
+                budget: None,
+                balance: None,
+                reset_credits: None,
+                local_usage: None,
+                history_scope_id: Some("A".repeat(43)),
+                history: (0..8)
+                    .map(|label| MobileQuotaHistory {
+                        label: format!("Window {label}"),
+                        samples: (0..64)
+                            .map(|t| MobileHistoryPoint {
+                                t: 1_700_000_000 + t,
+                                u: 0.123456789,
+                                r: Some(1_700_123_456),
+                            })
+                            .collect(),
+                    })
+                    .collect(),
+            })
+            .collect();
+        let raw = bounded_snapshot(MobileSnapshot {
+            schema_version: 1,
+            source: super::super::SOURCE.into(),
+            generated_at_epoch_seconds: 1_700_000_000,
+            providers,
+            spend: None,
+        })
+        .unwrap();
+        assert!(raw.len() <= 128 * 1024);
+        let decoded: MobileSnapshot = serde_json::from_slice(&raw).unwrap();
+        assert_eq!(decoded.providers.len(), 21);
+        assert!(
+            decoded
+                .providers
+                .iter()
+                .all(|provider| provider.windows.len() == 1)
+        );
+        assert_eq!(
+            decoded.providers[0].history[0].samples.last().unwrap().t,
+            1_700_000_063
+        );
     }
 
     #[tokio::test]
