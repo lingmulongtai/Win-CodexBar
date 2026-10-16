@@ -12,7 +12,7 @@ Windows版は**署名なし**です。元プロジェクトの署名証明書や
 
 ## このフォークの変更点
 
-開発ブランチ `codex/mobile-dashboard-history` では、独立した「モバイル接続」タブ、PCに保存する共通履歴、Android・タブレット向けの使用費用グラフ、許可制のPC設定操作を追加しています。**この更新はまだ公開しておらず、現在の正式版ダウンロードは変更していません。** [変更点・画面・検証結果](docs/mobile-dashboard-update.md)
+v0.71.0では、独立した「モバイル接続」タブ、PCに保存する共通履歴、Android・タブレット向けの使用費用グラフ、許可制のPC設定操作を追加しています。**共通履歴・費用グラフ・PC設定操作にはAndroid v0.10.0以降を使用してください。** [変更点・画面・検証結果](docs/releases/v0.71.0.md)
 
 ![実際のネイティブ開発EXEで表示したモバイル接続の専用タブ](docs/images/mobile-connect/windows-dashboard-mobile-connect.jpg)
 

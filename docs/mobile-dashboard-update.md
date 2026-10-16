@@ -1,6 +1,6 @@
 # Mobile Connect dashboard update
 
-Implemented on `codex/mobile-dashboard-history`, not published as a new stable release yet. The existing v0.70.6 download remains unchanged until publication. Android and Windows both need this update for the new shared data and controls.
+This implementation is included in Windows v0.71.0 and Android v0.10.0. Both apps need the update for the new shared data and controls. This page records validation performed before publication; the release notes record downloaded-artifact verification.
 
 ## Changes
 

@@ -14,7 +14,7 @@ This fork's Windows EXE is **unsigned** and uses no upstream signing certificate
 
 ## What this fork adds
 
-The `codex/mobile-dashboard-history` development branch adds a dedicated **Mobile Connect** settings pane, encrypted shared PC quota history, Usage & Spend charts on Android/tablets and opt-in remote PC settings. **This update has not been published yet; existing stable downloads remain unchanged.** [Changes, screenshots and verification](docs/mobile-dashboard-update.md)
+v0.71.0 adds a dedicated **Mobile Connect** settings pane, encrypted shared PC quota history, Usage & Spend charts on Android/tablets and opt-in remote PC settings. **Use Android v0.10.0 or later for shared history, spend and PC controls.** [Changes, screenshots and verification](docs/releases/v0.71.0.md)
 
 ![Mobile Connect dedicated pane in the actual native development EXE](docs/images/mobile-connect/windows-dashboard-mobile-connect.jpg)
 
