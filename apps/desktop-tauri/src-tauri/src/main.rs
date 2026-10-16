@@ -197,17 +197,23 @@ fn main() {
         shell::activation::grant_foreground_to_running_instance(&context.config().identifier);
     }
 
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .manage(Mutex::new(initial_state))
         .manage(commands::CurrencyRateCache::default())
         .manage(mobile_bridge::MobileSharing::default())
         .plugin(shortcut_bridge::plugin())
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
+        .plugin(tauri_plugin_dialog::init());
+    // Isolated proof profiles must not forward their launch to the user's resident.
+    let builder = if is_proof_mode {
+        builder
+    } else {
+        builder.plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
             if should_reopen_primary_window_from_instance_args(args.iter().skip(1)) {
                 open_primary_window(app, Duration::ZERO);
             }
         }))
+    };
+    builder
         .invoke_handler(tauri::generate_handler![
             commands::get_bootstrap_state,
             mobile_bridge::get_mobile_sharing_status,
