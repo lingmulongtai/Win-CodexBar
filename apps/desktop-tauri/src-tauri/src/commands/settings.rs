@@ -750,10 +750,23 @@ pub async fn update_settings(
     app: tauri::AppHandle,
     patch: SettingsUpdate,
 ) -> Result<SettingsSnapshot, String> {
+    update_settings_checked(app, patch, None)
+}
+
+pub(crate) fn update_settings_checked(
+    app: tauri::AppHandle,
+    patch: SettingsUpdate,
+    expected_revision: Option<&str>,
+) -> Result<SettingsSnapshot, String> {
     let write_guard = UPDATE_SETTINGS_LOCK
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner);
     let mut settings = Settings::load();
+    if expected_revision
+        .is_some_and(|expected| expected != crate::mobile_bridge::settings_revision(&settings))
+    {
+        return Err("mobile-settings-conflict".into());
+    }
     let notify_float_bar = patch.notifies_float_bar();
     let refresh_provider_data = patch.refreshes_provider_data();
     let clear_local_usage_cache = patch.codex_custom_sessions_dirs.is_some()

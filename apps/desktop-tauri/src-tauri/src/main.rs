@@ -215,6 +215,7 @@ fn main() {
             mobile_bridge::configure_mobile_sharing,
             mobile_bridge::get_mobile_pairing_code,
             mobile_bridge::revoke_mobile_pairing,
+            mobile_bridge::set_mobile_remote_settings,
             commands::get_provider_catalog,
             status_poller::get_provider_statuses,
             commands::get_settings_snapshot,

@@ -41,7 +41,7 @@ impl Pairing {
         })
     }
 
-    fn master_key(&self) -> Option<[u8; 32]> {
+    pub(super) fn master_key(&self) -> Option<[u8; 32]> {
         URL_SAFE_NO_PAD
             .decode(&self.shared_key_base64_url)
             .ok()?
@@ -176,7 +176,7 @@ pub(super) fn hmac_sha256(key: &[u8], message: &[u8]) -> [u8; 32] {
     outer.finalize().into()
 }
 
-fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
+pub(super) fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
     left.len() == right.len()
         && left
             .iter()

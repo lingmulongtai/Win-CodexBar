@@ -193,6 +193,8 @@ locale_keys! {
     TabMobileConnect,
     MobileSharingPending,
     MobileSharingListeningHelp,
+    MobileSharingRemoteSettings,
+    MobileSharingRemoteSettingsHelp,
     TabProviders,
     TabNotifications,
     TabMenuBar,

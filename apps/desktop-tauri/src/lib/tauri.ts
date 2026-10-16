@@ -6,6 +6,7 @@ export const getMobileNetworkAddresses = () => invoke<MobileNetworkAddresses>("g
 export const configureMobileSharing = (enabled: boolean, address: string, port: number) => invoke<MobileSharingStatus>("configure_mobile_sharing", { enabled, address, port });
 export const getMobilePairingCode = () => invoke<string>("get_mobile_pairing_code");
 export const revokeMobilePairing = () => invoke<MobileSharingStatus>("revoke_mobile_pairing");
+export const setMobileRemoteSettings = (allowed: boolean) => invoke<MobileSharingStatus>("set_mobile_remote_settings", { allowed });
 export const connectGeminiApps = () => invoke<void>("connect_gemini_apps");
 export const disconnectGeminiApps = () => invoke<void>("disconnect_gemini_apps");
 import type {

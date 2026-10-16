@@ -1748,3 +1748,6 @@ OpenAiOrgLimitsTruncated = 一部のプロジェクトのみ確認しました�
 TabMobileConnect = モバイル接続
 MobileSharingPending = 共有は有効ですが、待ち受けを開始できていません
 MobileSharingListeningHelp = 上のコードをコピーしてスマホやタブレットを接続できます。「待ち受け中」はPCの準備状態で、端末との接続確認ではありません。アドレス変更では待ち受けを再起動しますが、接続キーは保持します。
+
+MobileSharingRemoteSettings = Androidからの設定変更を許可
+MobileSharingRemoteSettingsHelp = 接続済みのスマホ・タブレットから、PCの固定更新間隔と費用画面の集計期間を変更できます。固定間隔を選ぶと自動調整はオフになります。接続キーや認証情報は変更できません。

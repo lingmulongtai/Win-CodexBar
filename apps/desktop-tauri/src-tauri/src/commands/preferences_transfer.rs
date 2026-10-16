@@ -54,6 +54,9 @@ pub async fn import_preferences(
 ) -> Result<SettingsSnapshot, String> {
     let path = checked_path(&path)?;
     let document = PreferencesDocument::read_file(path).map_err(|error| error.to_string())?;
+    let write_guard = super::settings::UPDATE_SETTINGS_LOCK
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
     let mut settings = Settings::load();
     let previous_language = settings.ui_language;
     let previous_period = settings.cost_reporting_period;
@@ -70,6 +73,7 @@ pub async fn import_preferences(
         settings.pin_cost_usage_bucket_time_zone();
     }
     settings.save().map_err(|error| error.to_string())?;
+    drop(write_guard);
     tracing::info!(applied, "imported portable preferences");
     if settings.cost_reporting_period != previous_period
         || settings.cost_usage_enabled != previous_cost_tracking

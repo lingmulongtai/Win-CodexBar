@@ -1748,3 +1748,6 @@ OpenAiOrgLimitsTruncated = 仅检查了部分项目。
 TabMobileConnect = Mobile Connect
 MobileSharingPending = Sharing enabled, listener unavailable
 MobileSharingListeningHelp = Copy the pairing code above to connect a phone or tablet. Listening means this PC is ready; it does not confirm a device connection. Address changes restart the listener without changing existing pairing keys.
+
+MobileSharingRemoteSettings = Allow settings changes from Android
+MobileSharingRemoteSettingsHelp = Paired phones and tablets can change the PC fixed refresh interval and Usage & Spend period. Selecting a fixed interval turns Adaptive off. Pairing keys and provider credentials cannot be changed remotely.

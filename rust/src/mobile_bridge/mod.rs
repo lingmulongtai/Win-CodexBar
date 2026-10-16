@@ -1,6 +1,7 @@
 //! Opt-in encrypted snapshots for the Android companion. Provider credentials
 //! and raw provider responses are deliberately absent from this wire model.
 
+mod control;
 mod history;
 mod protocol;
 mod server;
@@ -8,7 +9,7 @@ pub use history::{quota_history, record_history};
 
 pub use protocol::{Pairing, account_scope, account_subject, is_private_address};
 use serde::{Deserialize, Serialize};
-pub use server::{MobileServer, SnapshotSource};
+pub use server::{ControlSource, MobileServer, SnapshotSource};
 
 pub const DEFAULT_PORT: u16 = 43825;
 pub const SOURCE: &str = "win-codexbar";

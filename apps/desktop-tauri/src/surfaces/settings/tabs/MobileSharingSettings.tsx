@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Field, SettingsGroup, Toggle } from "../../../components/FormControls";
 import { useLocale } from "../../../hooks/useLocale";
-import { configureMobileSharing, getMobilePairingCode, getMobileSharingStatus, getMobileNetworkAddresses, revokeMobilePairing } from "../../../lib/tauri";
+import { configureMobileSharing, getMobilePairingCode, getMobileSharingStatus, getMobileNetworkAddresses, revokeMobilePairing, setMobileRemoteSettings } from "../../../lib/tauri";
 import type { MobileNetworkAddresses, MobileSharingStatus } from "../../../types/bridge";
 
 export default function MobileSharingSettings() {
@@ -71,6 +71,11 @@ export default function MobileSharingSettings() {
       })}>{t("MobileSharingDiscover")}</button>
     </div>
     <p className="settings-group__helper">{t("MobileSharingTailscaleHelper")}</p>
+    <Field label={t("MobileSharingRemoteSettings")}>
+      <Toggle variant="switch" checked={status?.allowRemoteSettings ?? false} ariaLabel={t("MobileSharingRemoteSettings")} disabled={busy || !status}
+        onChange={(allowed) => void run(async () => { setStatus(await setMobileRemoteSettings(allowed)); })} />
+    </Field>
+    <p className="settings-group__helper">{t("MobileSharingRemoteSettingsHelp")}</p>
     {!discovering && !addresses?.tailscaleAddress && <p>{t("MobileSharingTailscaleUnavailable")}</p>}
     <Field label={t("MobileSharingAddress")}>
       <input className="text-input" aria-label={t("MobileSharingAddress")} value={address} disabled={busy || !status} onChange={(event) => setAddress(event.target.value)} autoComplete="off" spellCheck={false} placeholder="192.168.1.10" />

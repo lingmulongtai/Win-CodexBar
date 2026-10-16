@@ -63,6 +63,7 @@ export type Language =
   | "ukrainian";
 
 export interface MobileSharingStatus {
+  allowRemoteSettings: boolean;
   enabled: boolean;
   running: boolean;
   address: string;

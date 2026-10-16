@@ -11,7 +11,9 @@ use serde::{Deserialize, Serialize};
 use std::net::{IpAddr, SocketAddr};
 use std::sync::{Arc, Mutex};
 use tauri::Manager;
+mod remote;
 mod shared_data;
+pub(crate) use remote::settings_revision;
 pub(crate) use shared_data::{publish_spend, schedule_spend_refresh};
 
 #[derive(Clone)]
@@ -137,6 +139,8 @@ struct Config {
     address: String,
     port: u16,
     pairing: Pairing,
+    #[serde(default)]
+    allow_remote_settings: bool,
 }
 
 impl Default for Config {
@@ -154,6 +158,7 @@ impl Default for Config {
             address: address.to_string(),
             port: mobile_bridge::DEFAULT_PORT,
             pairing: Pairing::generate(),
+            allow_remote_settings: false,
         }
     }
 }
@@ -205,6 +210,7 @@ fn validate(config: &Config) -> Result<SocketAddr, String> {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct MobileSharingStatus {
+    allow_remote_settings: bool,
     enabled: bool,
     running: bool,
     address: String,
@@ -227,6 +233,7 @@ impl Default for MobileSharing {
 
 #[derive(Default)]
 struct Runtime {
+    control_gate: Option<Arc<Mutex<bool>>>,
     config: Option<Config>,
     server: Option<MobileServer>,
     error: Option<String>,
@@ -236,6 +243,7 @@ impl Runtime {
     fn status(&self) -> MobileSharingStatus {
         let config = self.config.as_ref();
         MobileSharingStatus {
+            allow_remote_settings: config.is_some_and(|config| config.allow_remote_settings),
             enabled: config.is_some_and(|config| config.enabled),
             running: self.server.is_some(),
             address: config.map_or_else(|| "127.0.0.1".into(), |config| config.address.clone()),
@@ -244,6 +252,11 @@ impl Runtime {
         }
     }
     async fn stop(&mut self) {
+        if let Some(gate) = self.control_gate.take() {
+            *gate
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner) = false;
+        }
         if let Some(server) = self.server.take() {
             server.stop().await;
         }
@@ -259,10 +272,32 @@ impl Runtime {
         let address = validate(config)?;
         let handle = app.clone();
         let source = Arc::new(move |pairing: &Pairing| snapshot(&handle, pairing));
-        self.server = Some(MobileServer::start(address, config.pairing.clone(), source).await
+        let gate = Arc::new(Mutex::new(true));
+        let controls = remote::source(app.clone(), gate.clone(), config.allow_remote_settings);
+        self.control_gate = Some(gate);
+        self.server = Some(MobileServer::start_with_controls(address, config.pairing.clone(), source, Some(controls)).await
             .map_err(|_| "Cannot listen on this address and port. Check that the address belongs to this PC and the port is free.")?);
         Ok(())
     }
+}
+
+#[tauri::command]
+pub(crate) async fn set_mobile_remote_settings(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, MobileSharing>,
+    allowed: bool,
+) -> Result<MobileSharingStatus, String> {
+    let mut runtime = state.0.lock().await;
+    let mut config = runtime
+        .config
+        .clone()
+        .ok_or("Mobile sharing is unavailable")?;
+    config.allow_remote_settings = allowed;
+    save(&config)?;
+    runtime.stop().await;
+    runtime.config = Some(config);
+    runtime.error = runtime.start(&app).await.err();
+    Ok(runtime.status())
 }
 
 pub(crate) fn install(app: tauri::AppHandle) {

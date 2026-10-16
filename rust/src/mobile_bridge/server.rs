@@ -10,6 +10,7 @@ use tokio::sync::{Mutex, Semaphore, oneshot};
 use tokio::task::JoinHandle;
 
 pub type SnapshotSource = Arc<dyn Fn(&Pairing) -> MobileSnapshot + Send + Sync>;
+pub type ControlSource = Arc<dyn Fn(&str, &[u8]) -> Result<Vec<u8>, ()> + Send + Sync>;
 
 pub struct MobileServer {
     task: Option<JoinHandle<()>>,
@@ -22,6 +23,15 @@ impl MobileServer {
         address: SocketAddr,
         pairing: Pairing,
         source: SnapshotSource,
+    ) -> std::io::Result<Self> {
+        Self::start_with_controls(address, pairing, source, None).await
+    }
+
+    pub async fn start_with_controls(
+        address: SocketAddr,
+        pairing: Pairing,
+        source: SnapshotSource,
+        control: Option<ControlSource>,
     ) -> std::io::Result<Self> {
         if !is_private_address(address.ip()) || !pairing.validate() {
             return Err(std::io::Error::new(
@@ -46,9 +56,10 @@ impl MobileServer {
                         let pairing = pairing.clone();
                         let source = source.clone();
                         let replay = replay.clone();
+                        let control = control.clone();
                         clients.spawn(async move {
                             let _permit = permit;
-                            let _outcome = tokio::time::timeout(Duration::from_secs(10), handle(socket, pairing, source, replay)).await;
+                            let _outcome = tokio::time::timeout(Duration::from_secs(10), handle(socket, pairing, source, replay, control)).await;
                         });
                     }
                     _ = clients.join_next(), if !clients.is_empty() => {}
@@ -93,6 +104,7 @@ async fn handle(
     pairing: Pairing,
     source: SnapshotSource,
     replay: Arc<Mutex<VecDeque<(i64, String)>>>,
+    control: Option<ControlSource>,
 ) -> Option<()> {
     let mut socket = BufReader::new(socket);
     let mut line = Vec::with_capacity(1024);
@@ -115,26 +127,63 @@ async fn handle(
             break;
         }
     }
-    let request: Request = serde_json::from_slice(&line).ok()?;
     let now = chrono::Utc::now().timestamp();
-    if !request.authenticate(&pairing, now) {
-        return None;
-    }
+    let version = serde_json::from_slice::<serde_json::Value>(&line)
+        .ok()?
+        .get("protocolVersion")?
+        .as_u64()?;
+    let v1 = if version == 1 {
+        Some(serde_json::from_slice::<Request>(&line).ok()?)
+    } else {
+        None
+    };
+    let v2 = if version == 2 {
+        Some(serde_json::from_slice::<super::control::ControlRequest>(&line).ok()?)
+    } else {
+        None
+    };
+    let (nonce, requested_at, payload) = match (&v1, &v2) {
+        (Some(request), None) if request.authenticate(&pairing, now) => (
+            request.nonce.clone(),
+            request.requested_at_epoch_seconds,
+            Vec::new(),
+        ),
+        (None, Some(request)) => (
+            request.nonce.clone(),
+            request.requested_at_epoch_seconds,
+            request.authenticate(&pairing, now)?,
+        ),
+        _ => return None,
+    };
     {
         let mut replay = replay.lock().await;
         replay.retain(|(time, _)| time.abs_diff(now) <= 120);
-        if replay.len() >= 4096 || replay.iter().any(|(_, nonce)| nonce == &request.nonce) {
+        if replay.len() >= 4096 || replay.iter().any(|(_, seen)| seen == &nonce) {
             return None;
         }
-        replay.push_back((request.requested_at_epoch_seconds, request.nonce.clone()));
+        replay.push_back((requested_at, nonce));
     }
-    let plaintext = bounded_snapshot(source(&pairing))?;
-    let response = encrypt(
-        &pairing,
-        &request,
-        &plaintext,
-        chrono::Utc::now().timestamp(),
-    )?;
+    let response = if let Some(request) = v1 {
+        let plaintext = bounded_snapshot(source(&pairing))?;
+        encrypt(
+            &pairing,
+            &request,
+            &plaintext,
+            chrono::Utc::now().timestamp(),
+        )?
+    } else {
+        let request = v2?;
+        let handler = control?;
+        let resource = request.resource.clone();
+        let plaintext = tokio::task::spawn_blocking(move || handler(&resource, &payload))
+            .await
+            .ok()?
+            .ok()?;
+        if plaintext.len() > 128 * 1024 {
+            return None;
+        }
+        request.encrypt(&pairing, &plaintext, chrono::Utc::now().timestamp())?
+    };
     let mut response = serde_json::to_vec(&response).ok()?;
     response.push(b'\n');
     socket.get_mut().write_all(&response).await.ok()?;
