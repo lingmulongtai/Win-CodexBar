@@ -135,6 +135,33 @@ fn should_suppress_blur_dismiss(launch: LaunchBehavior, proof_mode: bool) -> boo
     launch.suppress_blur_dismiss || proof_mode
 }
 
+fn proof_profile_is_isolated(
+    proof_mode: bool,
+    config_file: Option<&std::path::Path>,
+    normal_root: Option<&std::path::Path>,
+) -> bool {
+    if !proof_mode {
+        return false;
+    }
+    let Some(proof_root) = config_file
+        .and_then(std::path::Path::parent)
+        .and_then(|path| path.canonicalize().ok())
+    else {
+        return false;
+    };
+    let Some(normal_root) = normal_root.and_then(|path| path.canonicalize().ok()) else {
+        return false;
+    };
+    // A different filename in the same directory still shares credential/history stores.
+    if cfg!(windows) {
+        !proof_root
+            .to_string_lossy()
+            .eq_ignore_ascii_case(&normal_root.to_string_lossy())
+    } else {
+        proof_root != normal_root
+    }
+}
+
 fn main() {
     // Per-process log file names: the shell writes codexbar-desktop.log so
     // its cached handle never blocks the CLI's rotation on Windows.
@@ -145,9 +172,14 @@ fn main() {
 
     let proof_config = proof_harness::ProofConfig::from_env();
     let is_proof_mode = proof_config.is_some();
-    if is_proof_mode {
-        let _proof_config_path = codexbar::settings::apply_config_path_env();
-    }
+    let proof_config_path = is_proof_mode
+        .then(codexbar::settings::apply_config_path_env)
+        .flatten();
+    let isolated_proof = proof_profile_is_isolated(
+        is_proof_mode,
+        proof_config_path,
+        codexbar::logging::config_root().as_deref(),
+    );
     let force_start_visible = std::env::var_os("CODEXBAR_START_VISIBLE").is_some();
     let mut settings = codexbar::settings::Settings::load();
     settings.apply_display_mode_fold_migration();
@@ -204,7 +236,7 @@ fn main() {
         .plugin(shortcut_bridge::plugin())
         .plugin(tauri_plugin_dialog::init());
     // Isolated proof profiles must not forward their launch to the user's resident.
-    let builder = if is_proof_mode {
+    let builder = if isolated_proof {
         builder
     } else {
         builder.plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
@@ -498,6 +530,51 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn only_a_separate_proof_store_bypasses_single_instance() {
+        let root =
+            std::env::temp_dir().join(format!("codexbar-proof-isolation-{}", uuid::Uuid::new_v4()));
+        let normal = root.join("normal");
+        let isolated = root.join("proof");
+        std::fs::create_dir_all(&normal).unwrap();
+        std::fs::create_dir_all(&isolated).unwrap();
+        let normal_file = normal.join("settings.json");
+        let isolated_file = isolated.join("settings.json");
+        assert!(!proof_profile_is_isolated(true, None, Some(&normal))); // absent/blank env
+        assert!(!proof_profile_is_isolated(
+            true,
+            Some(&normal_file),
+            Some(&normal)
+        ));
+        assert!(!proof_profile_is_isolated(
+            true,
+            Some(&normal.join("other.json")),
+            Some(&normal)
+        ));
+        assert!(!proof_profile_is_isolated(true, Some(&isolated_file), None));
+        assert!(!proof_profile_is_isolated(
+            true,
+            Some(&root.join("missing/settings.json")),
+            Some(&normal)
+        ));
+        assert!(!proof_profile_is_isolated(
+            false,
+            Some(&isolated_file),
+            Some(&normal)
+        ));
+        assert!(proof_profile_is_isolated(
+            true,
+            Some(&isolated_file),
+            Some(&normal)
+        ));
+        assert!(!proof_profile_is_isolated(
+            true,
+            Some(&normal.join("../normal/settings.json")),
+            Some(&normal)
+        ));
+        std::fs::remove_dir_all(root).unwrap();
+    }
 
     #[test]
     fn close_request_hides_tray_first_surfaces() {
