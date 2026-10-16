@@ -2,7 +2,7 @@
 
 Android용 CodexBar에 암호화된 사용량을 공유하는 Windows 앱입니다. [Win-CodexBar](https://github.com/nesszer/Win-CodexBar)를 기반으로 독립적으로 관리하며, 원본은 [CodexBar](https://github.com/steipete/CodexBar)입니다.
 
-**[EXE 다운로드](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [릴리스와 SHA256SUMS](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · [서명된 Android APK](https://github.com/lingmulongtai/CodexBar-android/releases/latest/download/app-release.apk)
+**[EXE 다운로드](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [릴리스와 SHA256SUMS](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · [서명된 Android APK](https://github.com/lingmulongtai/CodexBar-android/releases/latest)
 
 Windows 10/11 x64와 Microsoft WebView2 Runtime이 필요합니다. EXE를 저장하고 실행하면 됩니다. ZIP 압축 해제나 Node.js 설치가 필요 없습니다. 이 포크의 Windows EXE는 **서명되지 않았습니다**. 업데이트할 때 앱을 종료하고 EXE를 교체하세요.
 

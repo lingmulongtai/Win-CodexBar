@@ -4,7 +4,7 @@ WindowsでAIサービスの使用量を取得し、**CodexBar for Android**へ�
 
 ## ダウンロード
 
-**[Windows用EXEを直接ダウンロード](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [正式リリース・チェックサム](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · **[署名付きAndroid APK](https://github.com/lingmulongtai/CodexBar-android/releases/latest/download/app-release.apk)**
+**[Windows用EXEを直接ダウンロード](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [正式リリース・チェックサム](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · **[署名付きAndroid APK](https://github.com/lingmulongtai/CodexBar-android/releases/latest)**
 
 EXEを保存して起動します。ZIP展開やNode.jsの導入は不要です。Windows 10/11 x64と[Microsoft WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)が必要です。追加のVC++再頒布パッケージやWebView2ローダーDLLは不要です。Universal CRTはWindows 10/11に標準搭載されています。WebView2 Runtime本体は別途必要です。
 
@@ -12,12 +12,18 @@ Windows版は**署名なし**です。元プロジェクトの署名証明書や
 
 ## このフォークの変更点
 
+開発ブランチ `codex/mobile-dashboard-history` では、独立した「モバイル接続」タブ、PCに保存する共通履歴、Android・タブレット向けの使用費用グラフ、許可制のPC設定操作を追加しています。**この更新はまだ公開しておらず、現在の正式版ダウンロードは変更していません。** [変更点・画面・検証結果](docs/mobile-dashboard-update.md)
+
+![実際のネイティブ開発EXEで表示したモバイル接続の専用タブ](docs/images/mobile-connect/windows-dashboard-mobile-connect.jpg)
+
 | 機能 | できること |
 | --- | --- |
 | Androidへの共有 | PCで取得済みの使用量をスマホで確認。認証情報はPCに保持。 |
 | LAN・Tailscale選択 | PCのTailscaleアドレスを検出して選択。スマホのexit nodeは不要。 |
 | 取得モード | スマホで取得／Windowsでまとめて取得を選択。一部サービスだけスマホにする例外も設定。 |
 | PCのトークン・推定費用 | 今日・直近30日・選択期間の集計を、取得できた範囲で表示。集計日時も確認。 |
+| 共通の履歴・費用グラフ | PCにアカウント・接続別の履歴を保持し、複数端末へ同じ保存済み系列と日別費用・トークンを送信。 |
+| PC設定の遠隔操作 | PC側で許可した場合だけ更新間隔・費用画面の期間を変更。同時変更は競合を表示。 |
 | このアプリ用の配布 | EXE直接配布、正式リリース、独立した更新先・識別子。旧Mobile Previewの設定とペアリングは保持。 |
 | Vivaldiの接続候補 | 通常のWindows版Vivaldiのプロファイルを検出し、Cookie取込で選択可能。Chromiumの暗号化による制約は共通。 |
 
@@ -40,7 +46,7 @@ Windows版は**署名なし**です。元プロジェクトの署名証明書や
 ## スマホとの接続
 
 1. Windows側で使うサービスを接続・有効化します。
-2. **設定 → 詳細設定 → Androidへの共有**で**Tailscale（exit node不要）**または**LAN**を選び、共有を有効にします。標準ポートはTCP **43825**です。
+2. 更新版の**設定 → モバイル接続**で**Tailscale（exit node不要）**または**LAN**を選び、共有を有効にします。公開中のv0.70.6以前では**詳細設定 → Androidへの共有**です。標準ポートはTCP **43825**です。
 3. コードをAndroidの**接続 → 取得方法とWindows接続**に貼り付けて接続します。接続するとWindowsモードになります。
 4. **スマホで取得**／**Windowsでまとめて取得**を選べます。認証情報、ペアリング、サービス別の例外、取得先別の履歴はモードを往復しても保持します。
 

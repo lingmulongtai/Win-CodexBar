@@ -2,7 +2,7 @@
 
 Monitor de uso de IA para Windows con conexión cifrada a CodexBar para Android. Fork independiente de [Win-CodexBar](https://github.com/nesszer/Win-CodexBar), basado en [CodexBar](https://github.com/steipete/CodexBar).
 
-**[Descargar EXE](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [Versiones y SHA256SUMS](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · [APK firmado para Android](https://github.com/lingmulongtai/CodexBar-android/releases/latest/download/app-release.apk)
+**[Descargar EXE](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest/download/Win-CodexBar-Mobile-Connect.exe)** · [Versiones y SHA256SUMS](https://github.com/lingmulongtai/Win-CodexBar-Mobile-Connect/releases/latest) · [APK firmado para Android](https://github.com/lingmulongtai/CodexBar-android/releases/latest)
 
 Windows 10/11 x64 con Microsoft WebView2 Runtime. Guarda y ejecuta el EXE; no necesita ZIP ni Node.js. El EXE de este fork **no está firmado**. Para actualizar, cierra la aplicación y reemplaza el archivo.
 
