@@ -1666,7 +1666,7 @@ ProviderOptionNotUsedOnWindows = Поки не використовується 
 ClaudeSwapExecutablePathHelp = Шлях до виконуваного файлу cswap (github.com/realiti4/claude-swap).
 
 MobileSharingTitle = Android sharing
-MobileSharingHelper = Share usage with CodexBar Android on the same LAN or Tailscale network. Enable sharing, copy the pairing code, then paste it in Android Connections. Allow this app through Windows Firewall on your private network if needed. The code grants usage access; keep it private. Provider credentials stay on this PC. Gemini refers to Gemini CLI usage.
+MobileSharingHelper = Share usage with CodexBar Android on the same LAN or Tailscale network. Enable sharing, copy the pairing code, then paste it in Android Connections. Allow this app through Windows Firewall on your private network if needed. The code grants usage access; keep it private. Provider credentials stay on this PC. Gemini CLI and Gemini Apps are shared as separate providers.
 MobileSharingEnable = Share usage with Android
 MobileSharingAddress = This PC's private IPv4 address
 MobileSharingPort = Port (1024–65535)
