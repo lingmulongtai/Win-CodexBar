@@ -2,6 +2,9 @@
 
 ## Android companion fork
 
+- Every development task must begin by fetching the read-only `upstream` remote and reviewing new default-branch commits. Integrate compatible mainline improvements before extending the affected area; document the exact checked upstream SHA, included work, tests and concrete reasons for any deferred incompatibility. Review new upstream branches as context, not as automatically approved changes.
+- Preserve Mobile Connect, Gemini Apps session renewal, Vivaldi support, the owned config namespace, Android protocol compatibility and this fork's updater/download/release ownership while syncing. Use normal merges or explicitly scoped ports without rebasing shared history. Upstream review is task-driven and does not create a scheduled automation.
+
 - This fork is `lingmulongtai/Win-CodexBar-Mobile-Connect`. Bind all GitHub writes to that repository through `scripts/gh-safe.sh`.
 - `nesszer/Win-CodexBar` and `steipete/CodexBar` are read-only upstreams unless the user explicitly authorizes a particular upstream write.
 - The upstream release/signing/Winget scripts and their canonical repository assumptions do not authorize publishing from this fork to upstream repositories.
