@@ -14,7 +14,7 @@ Windows版は**署名なし**です。元プロジェクトの署名証明書や
 
 v0.71.0では、独立した「モバイル接続」タブ、PCに保存する共通履歴、Android・タブレット向けの使用費用グラフ、許可制のPC設定操作を追加しています。**共通履歴・費用グラフ・PC設定操作にはAndroid v0.10.0以降を使用してください。** [変更点・画面・検証結果](docs/releases/v0.71.0.md)
 
-![実際のネイティブ開発EXEで表示したモバイル接続の専用タブ](docs/images/mobile-connect/windows-dashboard-mobile-connect.jpg)
+![公開済みv0.71.0のEXEをダウンロードして撮影したモバイル接続の専用タブ（独立したデモ設定）](docs/images/mobile-connect/windows-v0.71.0-mobile-connect-ja.jpg)
 
 | 機能 | できること |
 | --- | --- |
