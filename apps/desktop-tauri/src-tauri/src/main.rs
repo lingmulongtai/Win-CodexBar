@@ -250,6 +250,7 @@ fn main() {
         .invoke_handler(ipc_guard::guard(tauri::generate_handler![
             commands::get_bootstrap_state,
             mobile_bridge::get_mobile_sharing_status,
+            mobile_bridge::get_provider_quota_history,
             mobile_network::get_mobile_network_addresses,
             mobile_bridge::configure_mobile_sharing,
             mobile_bridge::get_mobile_pairing_code,

@@ -930,6 +930,12 @@ export interface PaceSnapshot {
   monthlyLimitBlock?: MonthlyLimitBlock | null;
 }
 
+/** Account-scoped archive shared by this PC and its paired devices. */
+export interface ProviderQuotaHistorySeries {
+  label: string;
+  samples: { t: number; u: number; r: number | null }[];
+}
+
 /** One burndown chart point (RFC 3339 capture time + remaining percent). */
 export interface QuotaBurndownPoint {
   capturedAt: string;

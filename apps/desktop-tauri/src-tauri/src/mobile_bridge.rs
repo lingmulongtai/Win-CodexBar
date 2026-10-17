@@ -646,6 +646,57 @@ fn trim_history(provider: &mut MobileProvider) {
     });
 }
 
+/// The desktop and paired devices read the same archive. The client cannot
+/// choose an account scope or reuse an old response after an account switch.
+#[tauri::command]
+pub(crate) async fn get_provider_quota_history(
+    app: tauri::AppHandle,
+    provider_id: String,
+    expected_updated_at: String,
+) -> Vec<mobile_bridge::MobileQuotaHistory> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let Some(id) = ProviderId::from_cli_name(&provider_id) else {
+            return Vec::new();
+        };
+        let state = app.state::<Mutex<AppState>>();
+        let Ok(guard) = state.lock() else {
+            return Vec::new();
+        };
+        let Some(usage) = guard
+            .provider_cache
+            .iter()
+            .find(|usage| usage.provider_id == provider_id)
+        else {
+            return Vec::new();
+        };
+        let Some(scope) = desktop_history_scope(
+            usage,
+            guard.mobile_observations.get(&id),
+            &expected_updated_at,
+            &credential_stamp(),
+        ) else {
+            return Vec::new();
+        };
+        mobile_bridge::quota_history(&provider_id, &scope, chrono::Utc::now().timestamp())
+    })
+    .await
+    .unwrap_or_default()
+}
+
+fn desktop_history_scope(
+    usage: &ProviderUsageSnapshot,
+    observation: Option<&MobileObservation>,
+    expected_updated_at: &str,
+    current_stamp: &CredentialStamp,
+) -> Option<[u8; 32]> {
+    let observation = observation?;
+    (usage.updated_at == expected_updated_at
+        && observation.fresh
+        && &observation.credential_stamp == current_stamp)
+        .then(|| observation.history_scope.or(observation.scope))
+        .flatten()
+}
+
 pub(crate) fn record_published_history(
     app: &tauri::AppHandle,
     id: ProviderId,
@@ -765,6 +816,30 @@ fn parse_time(value: &str) -> Option<i64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn desktop_archive_rejects_replaced_credentials_and_stale_requests() {
+        let usage: ProviderUsageSnapshot = serde_json::from_value(serde_json::json!({
+            "providerId":"codex", "primary":{"usedPercent":30.0}, "updatedAt":"current"
+        }))
+        .unwrap();
+        let mut observation = MobileObservation::seeded(&usage);
+        observation.scope = Some([1; 32]);
+        let stamp = observation.credential_stamp.clone();
+        assert_eq!(
+            desktop_history_scope(&usage, Some(&observation), "current", &stamp),
+            Some([1; 32])
+        );
+        assert!(desktop_history_scope(&usage, Some(&observation), "previous", &stamp).is_none());
+        let different_stamp = vec![(std::path::PathBuf::from("different"), None)];
+        assert!(
+            desktop_history_scope(&usage, Some(&observation), "current", &different_stamp)
+                .is_none()
+        );
+        assert!(desktop_history_scope(&usage, None, "current", &stamp).is_none());
+        observation.scope = None;
+        assert!(desktop_history_scope(&usage, Some(&observation), "current", &stamp).is_none());
+    }
     #[test]
     fn gemini_history_uses_the_captured_connection_without_claiming_account_identity() {
         let quota = serde_json::json!([2, [[10, 0.25, 1, [[1800000000, 0]]]]]);

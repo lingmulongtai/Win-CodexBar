@@ -1761,3 +1761,8 @@ GeminiAppsCookieImportHelp = Select a browser and profile already signed in to G
 GeminiAppsProfile = Browser profile
 GeminiAppsBrowserImport = Connect from this browser
 GeminiAppsDedicatedLogin = Connect in a dedicated browser
+
+QuotaArchiveTitle = Usage history
+QuotaArchiveHelp = Saved on this PC for 90 days and shared with paired devices. Shows recorded observations; older data may be summarized daily. Missing periods are not estimated.
+QuotaArchiveSevenDays = 7 days
+QuotaArchiveThirtyDays = 30 days

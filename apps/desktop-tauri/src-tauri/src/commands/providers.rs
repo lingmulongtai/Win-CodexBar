@@ -957,7 +957,6 @@ async fn refresh_provider(
     };
 
     if let Some((snapshot, observation)) = published {
-        events::emit_provider_updated(&app, &snapshot);
         if fresh_snapshot {
             let history_app = app.clone();
             let history_usage = snapshot.clone();
@@ -971,6 +970,10 @@ async fn refresh_provider(
                 )
             })
             .await;
+        }
+        // Consumers can fetch the canonical archive as soon as this event arrives.
+        events::emit_provider_updated(&app, &snapshot);
+        if fresh_snapshot {
             dispatch_usage_updated_hook(
                 hooks_enabled,
                 id,

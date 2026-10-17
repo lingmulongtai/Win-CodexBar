@@ -170,6 +170,18 @@
   color: var(--mac-error);
 }
 
+.menu-surface--tray .quota-archive { padding: 12px; margin-top: 8px; border-radius: 12px; background: rgba(var(--surface-tint-rgb), .06); }
+.menu-surface--tray .quota-archive__heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; font: var(--mac-text-body-medium); }
+.menu-surface--tray .quota-archive__heading button { border: 1px solid rgba(var(--surface-tint-rgb), .2); border-radius: 6px; padding: 4px 8px; color: var(--mac-text); background: transparent; font: var(--mac-text-footnote); cursor: pointer; }
+.menu-surface--tray .quota-archive__heading button[aria-pressed="true"] { background: rgba(var(--surface-tint-rgb), .15); font-weight: 600; box-shadow: inset 0 0 0 1px var(--mac-text-2); }
+.menu-surface--tray .quota-archive .quota-burndown-chart { margin-top: 12px; }
+.menu-surface--tray .quota-archive svg { display: block; width: 100%; height: auto; overflow: visible; }
+.menu-surface--tray .quota-archive .quota-burndown-chart__grid { stroke: var(--mac-text-2); opacity: .2; }
+.menu-surface--tray .quota-archive .quota-burndown-chart__observed { fill: none; stroke: var(--mac-text); stroke-width: 1.5; }
+.menu-surface--tray .quota-archive .quota-burndown-chart__point { fill: var(--mac-text); }
+.menu-surface--tray .quota-archive .quota-burndown-chart__axis, .menu-surface--tray .quota-archive .quota-burndown-chart__caption { display: flex; justify-content: space-between; gap: 8px; font: var(--mac-text-footnote); color: var(--mac-text-2); }
+.menu-surface--tray .quota-archive .menu-surface__hint { margin-top: 8px; }
+
 /* ── Key-value sections (`ProviderDetailSectionsContent`) ── */
 .menu-surface--tray .card-kv {
   display: flex;

@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type { MobileNetworkAddresses, MobileSharingStatus } from "../types/bridge";
 
 export const getMobileSharingStatus = () => invoke<MobileSharingStatus>("get_mobile_sharing_status");
+export const getProviderQuotaHistory = (providerId: string, expectedUpdatedAt: string) => invoke<import("../types/bridge").ProviderQuotaHistorySeries[]>("get_provider_quota_history", { providerId, expectedUpdatedAt });
 export const getMobileNetworkAddresses = () => invoke<MobileNetworkAddresses>("get_mobile_network_addresses");
 export const configureMobileSharing = (enabled: boolean, address: string, port: number) => invoke<MobileSharingStatus>("configure_mobile_sharing", { enabled, address, port });
 export const getMobilePairingCode = () => invoke<string>("get_mobile_pairing_code");
