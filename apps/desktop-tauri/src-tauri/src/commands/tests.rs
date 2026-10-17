@@ -118,7 +118,7 @@ fn command_inputs_reject_invalid_provider_ids_before_storage_writes() {
     assert!(super::set_api_key("not-a-provider".into(), "sk-test".into(), None).is_err());
     assert!(super::set_manual_cookie("not-a-provider".into(), "a=b".into()).is_err());
     assert!(super::remove_api_key("bad\nprovider".into()).is_err());
-    assert!(super::remove_manual_cookie("".into()).is_err());
+    assert!(super::canonical_provider_arg("").is_err());
 }
 
 #[test]

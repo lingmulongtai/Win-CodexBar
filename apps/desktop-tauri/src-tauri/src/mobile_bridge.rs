@@ -79,6 +79,7 @@ impl MobileObservation {
         result: &ProviderFetchResult,
         account: Option<uuid::Uuid>,
         credential_stamp: CredentialStamp,
+        selected_login: Option<&str>,
     ) -> Self {
         let identity = result
             .account_identity()
@@ -93,8 +94,7 @@ impl MobileObservation {
             if id != ProviderId::GeminiApps {
                 return None;
             }
-            codexbar::settings::ManualCookies::load()
-                .get("geminiapps")
+            selected_login
                 .map(|header| mobile_bridge::account_scope("geminiapps-selected-login", header))
         });
         Self {
@@ -765,6 +765,31 @@ fn parse_time(value: &str) -> Option<i64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn gemini_history_uses_the_captured_connection_without_claiming_account_identity() {
+        let quota = serde_json::json!([2, [[10, 0.25, 1, [[1800000000, 0]]]]]);
+        let frame = format!(
+            ")]}}'\n{}",
+            serde_json::json!([["wrb.fr", "jSf9Qc", quota.to_string(), null]])
+        );
+        let result =
+            codexbar::providers::geminiapps::GeminiAppsProvider::parse_browser_response(&frame)
+                .unwrap();
+        let observe = |selected| {
+            MobileObservation::from_result(
+                ProviderId::GeminiApps,
+                &result,
+                None,
+                Vec::new(),
+                selected,
+            )
+        };
+        let a = observe(Some("connection-a"));
+        assert!(a.scope.is_none());
+        assert_eq!(a.history_scope, observe(Some("connection-a")).history_scope);
+        assert_ne!(a.history_scope, observe(Some("connection-b")).history_scope);
+        assert!(observe(None).history_scope.is_none());
+    }
     #[test]
     fn local_totals_keep_their_own_clock_and_sanitize_optional_values() {
         let now = chrono::Utc::now().timestamp();

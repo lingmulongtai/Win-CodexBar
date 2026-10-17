@@ -145,10 +145,13 @@ pub fn set_manual_cookie(
 }
 
 #[tauri::command]
-pub fn remove_manual_cookie(provider_id: String) -> Result<Vec<CookieInfoBridge>, String> {
+pub async fn remove_manual_cookie(
+    app: tauri::AppHandle,
+    provider_id: String,
+) -> Result<Vec<CookieInfoBridge>, String> {
     let canonical_provider = canonical_provider_arg(&provider_id)?;
     if canonical_provider == "geminiapps" {
-        codexbar::providers::geminiapps::session_cache::select(None).map_err(|e| e.to_string())?;
+        super::gemini_apps::revoke(&app)?;
         return Ok(get_manual_cookies());
     }
     let mut cookies = ManualCookies::load();

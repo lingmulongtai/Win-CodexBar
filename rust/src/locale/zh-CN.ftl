@@ -1751,3 +1751,10 @@ MobileSharingListeningHelp = Copy the pairing code above to connect a phone or t
 
 MobileSharingRemoteSettings = Allow settings changes from Android
 MobileSharingRemoteSettingsHelp = Paired phones and tablets can change the PC fixed refresh interval and Usage & Spend period. Selecting a fixed interval turns Adaptive off. Pairing keys and provider credentials cannot be changed remotely.
+
+GeminiAppsBrowserHelp = Sign in once in this app's dedicated Google window. Usage is read inside that persistent browser so device-bound authentication stays with its keys. No Gemini app restart or cookie copy is needed. Google can still require sign-in after revocation.
+GeminiAppsBrowserOpen = Open dedicated Google sign-in
+GeminiAppsBrowserPending = Sign in to Gemini in the separate window, then finish connecting here. Opening the window alone does not establish a connection.
+GeminiAppsBrowserFinish = Finish connecting
+GeminiAppsBrowserCancel = Cancel connection
+GeminiAppsLegacyImport = Legacy cookie import (may expire after a few hours)

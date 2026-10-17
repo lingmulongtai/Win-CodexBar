@@ -9,6 +9,9 @@ export const revokeMobilePairing = () => invoke<MobileSharingStatus>("revoke_mob
 export const setMobileRemoteSettings = (allowed: boolean) => invoke<MobileSharingStatus>("set_mobile_remote_settings", { allowed });
 export const connectGeminiApps = () => invoke<void>("connect_gemini_apps");
 export const disconnectGeminiApps = () => invoke<void>("disconnect_gemini_apps");
+export const beginGeminiBrowser = () => invoke<void>("begin_gemini_browser");
+export const finishGeminiBrowser = () => invoke<void>("finish_gemini_browser");
+export const cancelGeminiBrowser = () => invoke<void>("cancel_gemini_browser");
 import type {
   HooksConfigSave,
   HooksConfigSnapshot,

@@ -1751,3 +1751,10 @@ MobileSharingListeningHelp = 上のコードをコピーしてスマホやタブ
 
 MobileSharingRemoteSettings = Androidからの設定変更を許可
 MobileSharingRemoteSettingsHelp = 接続済みのスマホ・タブレットから、PCの固定更新間隔と費用画面の集計期間を変更できます。固定間隔を選ぶと自動調整はオフになります。接続キーや認証情報は変更できません。
+
+GeminiAppsBrowserHelp = このアプリ専用のGoogle画面で一度ログインします。端末に結び付いた認証を同じブラウザー内に保持し、その中で使用量を取得します。Gemini本体の再起動やCookieのコピーは不要です。Google側でログアウト・認証失効した場合は再ログインが必要です。
+GeminiAppsBrowserOpen = 専用のGoogleログイン画面を開く
+GeminiAppsBrowserPending = 別画面でGeminiにログインした後、ここで「接続を完了」を押してください。画面を開いただけでは接続済みになりません。
+GeminiAppsBrowserFinish = 接続を完了
+GeminiAppsBrowserCancel = 接続をキャンセル
+GeminiAppsLegacyImport = 旧方式：Cookieの取込（数時間で失効する場合あり）

@@ -877,6 +877,7 @@ async fn refresh_provider(
     pace_work_days: Option<u8>,
 ) {
     let (mut snapshot, account_identity, retention) = fetch_provider_snapshot(
+        &app,
         id,
         ctx,
         token_account.id,
@@ -1169,6 +1170,7 @@ struct RefreshRetention {
 }
 
 async fn fetch_provider_snapshot(
+    app: &tauri::AppHandle,
     id: ProviderId,
     ctx: FetchContext,
     token_account_id: Option<uuid::Uuid>,
@@ -1179,10 +1181,19 @@ async fn fetch_provider_snapshot(
     let metadata = provider.metadata().clone();
     let started = std::time::Instant::now();
 
-    let (mut snapshot, account_identity, retention) =
-        match tokio::time::timeout(provider_fetch_timeout(id, &ctx), provider.fetch_usage(&ctx))
-            .await
+    let fetch = async {
+        if id == ProviderId::GeminiApps
+            && matches!(ctx.source_mode, SourceMode::Auto | SourceMode::Web)
+            && let Some(selection) =
+                super::gemini_apps::browser::selection(ctx.manual_cookie_header.as_deref())
         {
+            super::gemini_apps::browser::fetch(app, selection).await
+        } else {
+            provider.fetch_usage(&ctx).await
+        }
+    };
+    let (mut snapshot, account_identity, retention) =
+        match tokio::time::timeout(provider_fetch_timeout(id, &ctx), fetch).await {
             Ok(Ok(result)) => {
                 let account_identity = result.account_identity().map(ToOwned::to_owned);
                 (
@@ -1202,6 +1213,7 @@ async fn fetch_provider_snapshot(
                                 &result,
                                 token_account_id,
                                 mobile_credential_stamp,
+                                ctx.manual_cookie_header.as_deref(),
                             ),
                         ),
                         ..RefreshRetention::default()
