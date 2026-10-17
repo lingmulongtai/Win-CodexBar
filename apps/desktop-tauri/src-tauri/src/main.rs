@@ -289,6 +289,8 @@ fn main() {
             commands::claude_account_switch,
             commands::grok_accounts_list,
             commands::connect_gemini_apps,
+            commands::list_gemini_browser_profiles,
+            commands::connect_gemini_apps_from_browser,
             commands::disconnect_gemini_apps,
             commands::begin_gemini_browser,
             commands::finish_gemini_browser,

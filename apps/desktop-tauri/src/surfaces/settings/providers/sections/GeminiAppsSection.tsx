@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { LocaleKey } from "../../../../i18n/keys";
-import { beginGeminiBrowser, finishGeminiBrowser, cancelGeminiBrowser, connectGeminiApps, disconnectGeminiApps, getManualCookies } from "../../../../lib/tauri";
+import { beginGeminiBrowser, finishGeminiBrowser, cancelGeminiBrowser, connectGeminiApps, connectGeminiAppsFromBrowser, listDetectedBrowsers, listGeminiBrowserProfiles, disconnectGeminiApps, getManualCookies } from "../../../../lib/tauri";
+import type { DetectedBrowserBridge } from "../../../../types/bridge";
+import { Select } from "../../../../components/FormControls";
 
 export function GeminiAppsSection({ disabled, t, onChanged }: {
   disabled: boolean; t: (key: LocaleKey) => string; onChanged: () => void;
@@ -9,16 +11,34 @@ export function GeminiAppsSection({ disabled, t, onChanged }: {
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [browsers, setBrowsers] = useState<DetectedBrowserBridge[]>([]);
+  const [browserType, setBrowserType] = useState("");
+  const [profiles, setProfiles] = useState<string[]>([]);
+  const [profileName, setProfileName] = useState("");
   const mounted = useRef(false);
   useEffect(() => {
     mounted.current = true;
+    void listDetectedBrowsers().then((found) => {
+      if (!mounted.current) return;
+      const supported = found.filter(browser => browser.browserType !== "firefox");
+      setBrowsers(supported);
+      setBrowserType(supported.find(browser => browser.browserType === "vivaldi")?.browserType ?? supported[0]?.browserType ?? "");
+    }).catch((reason: unknown) => { if (mounted.current) setError(String(reason)); });
     void getManualCookies().then((cookies) => {
       if (mounted.current) setSavedAt(cookies.find(c => c.providerId === "geminiapps")?.savedAt ?? null);
     }).catch((reason: unknown) => { if (mounted.current) setError(String(reason)); })
       .finally(() => { if (mounted.current) setBusy(false); });
     return () => { mounted.current = false; };
   }, []);
-  const change = async (action: "browser" | "finish" | "cancel" | "import" | "disconnect") => {
+  useEffect(() => {
+    let current = true;
+    setProfiles([]); setProfileName("");
+    if (browserType) void listGeminiBrowserProfiles(browserType).then((found) => {
+      if (current) { setProfiles(found); setProfileName(found[0] ?? ""); }
+    }).catch((reason: unknown) => { if (current) setError(String(reason)); });
+    return () => { current = false; };
+  }, [browserType]);
+  const change = async (action: "browser" | "finish" | "cancel" | "import" | "browser-import" | "disconnect") => {
     if (busy || disabled) return;
     setBusy(true); setError(null);
     try {
@@ -32,7 +52,7 @@ export function GeminiAppsSection({ disabled, t, onChanged }: {
         if (mounted.current) setPending(false);
         return;
       }
-      await (action === "finish" ? finishGeminiBrowser() : action === "import" ? connectGeminiApps() : disconnectGeminiApps());
+      await (action === "finish" ? finishGeminiBrowser() : action === "import" ? connectGeminiApps() : action === "browser-import" ? connectGeminiAppsFromBrowser(browserType, profileName) : disconnectGeminiApps());
       const cookies = await getManualCookies();
       if (mounted.current) {
         setSavedAt(cookies.find(c => c.providerId === "geminiapps")?.savedAt ?? null);
@@ -55,8 +75,16 @@ export function GeminiAppsSection({ disabled, t, onChanged }: {
   };
   return <section className="provider-detail-section">
     <h3>{t("GeminiAppsTitle")}</h3>
-    <p className="provider-detail-helper">{t("GeminiAppsBrowserHelp")}</p>
     <p>{savedAt ? `${t("GeminiAppsSaved")} ${savedAt}` : t("GeminiAppsNotConnected")}</p>
+    <h4>{t("BrowserCookieImportFromBrowser")}</h4>
+    <p className="provider-detail-helper">{t("GeminiAppsCookieImportHelp")}</p>
+    {browsers.length > 0 && <div className="credential-add-form">
+      <Select ariaLabel={t("SelectBrowser")} value={browserType} options={browsers.map(browser => ({ value: browser.browserType, label: browser.displayName }))} disabled={disabled || busy} onChange={value => { setProfiles([]); setProfileName(""); setBrowserType(value); }} />
+      <Select ariaLabel={t("GeminiAppsProfile")} value={profileName} options={profiles.map(profile => ({ value: profile, label: profile }))} disabled={disabled || busy || profiles.length === 0} onChange={setProfileName} />
+      <button className="credential-btn credential-btn--primary" disabled={disabled || busy || !profileName} onClick={() => void change("browser-import")}>{t("GeminiAppsBrowserImport")}</button>
+    </div>}
+    <h4>{t("GeminiAppsDedicatedLogin")}</h4>
+    <p className="provider-detail-helper">{t("GeminiAppsBrowserHelp")}</p>
     <button className="credential-btn credential-btn--primary" disabled={disabled || busy} onClick={() => void change("browser")}>
       {t("GeminiAppsBrowserOpen")}
     </button>{" "}

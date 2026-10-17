@@ -8,6 +8,8 @@ export const getMobilePairingCode = () => invoke<string>("get_mobile_pairing_cod
 export const revokeMobilePairing = () => invoke<MobileSharingStatus>("revoke_mobile_pairing");
 export const setMobileRemoteSettings = (allowed: boolean) => invoke<MobileSharingStatus>("set_mobile_remote_settings", { allowed });
 export const connectGeminiApps = () => invoke<void>("connect_gemini_apps");
+export const listGeminiBrowserProfiles = (browserType: string) => invoke<string[]>("list_gemini_browser_profiles", { browserType });
+export const connectGeminiAppsFromBrowser = (browserType: string, profileName: string) => invoke<void>("connect_gemini_apps_from_browser", { browserType, profileName });
 export const disconnectGeminiApps = () => invoke<void>("disconnect_gemini_apps");
 export const beginGeminiBrowser = () => invoke<void>("begin_gemini_browser");
 export const finishGeminiBrowser = () => invoke<void>("finish_gemini_browser");

@@ -1756,7 +1756,11 @@ MobileSharingRemoteSettingsHelp = Paired phones and tablets can change the PC fi
 
 GeminiAppsBrowserHelp = Sign in once in this app's dedicated Google window. Usage is read inside that persistent browser so device-bound authentication stays with its keys. No Gemini app restart or cookie copy is needed. Google can still require sign-in after revocation.
 GeminiAppsBrowserOpen = Open dedicated Google sign-in
-GeminiAppsBrowserPending = Sign in to Gemini in the separate window, then finish connecting here. Opening the window alone does not establish a connection.
+GeminiAppsBrowserPending = After completing Google sign-in and two-step verification, return here and choose Finish connecting. If Google keeps loading, Finish tries returning to Gemini in the same profile before verifying usage. Opening the window alone does not connect.
 GeminiAppsBrowserFinish = Finish connecting
 GeminiAppsBrowserCancel = Cancel connection
 GeminiAppsLegacyImport = Legacy cookie import (may expire after a few hours)
+GeminiAppsCookieImportHelp = Select a browser and profile already signed in to Gemini. Only that profile is read. Exported cookies may expire after a few hours.
+GeminiAppsProfile = Browser profile
+GeminiAppsBrowserImport = Connect from this browser
+GeminiAppsDedicatedLogin = Connect in a dedicated browser

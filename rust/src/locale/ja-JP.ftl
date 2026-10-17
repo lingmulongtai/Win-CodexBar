@@ -1687,7 +1687,7 @@ MobileSharingStopped = 共有停止中
 MobileSharingFailed = Androidへの共有に失敗しました。
 
 # Gemini Apps desktop connection
-GeminiAppsTitle = Geminiデスクトップ連携
+GeminiAppsTitle = Gemini Appsへの接続
 GeminiAppsHelp = Google公式Geminiアプリを閉じてから接続し、接続後にGeminiを開き直してください。ログイン情報はこのWindowsユーザーで暗号化してPC内に保存します。現在（5時間）・週間の使用枠はGemini CLIとは別です。Googleのメインアカウントのみ対応しています。ログインが失効したら再接続してください。
 GeminiAppsConnect = Geminiアプリから接続
 GeminiAppsDisconnect = Gemini Appsの接続解除
@@ -1754,7 +1754,11 @@ MobileSharingRemoteSettingsHelp = 接続済みのスマホ・タブレットか�
 
 GeminiAppsBrowserHelp = このアプリ専用のGoogle画面で一度ログインします。端末に結び付いた認証を同じブラウザー内に保持し、その中で使用量を取得します。Gemini本体の再起動やCookieのコピーは不要です。Google側でログアウト・認証失効した場合は再ログインが必要です。
 GeminiAppsBrowserOpen = 専用のGoogleログイン画面を開く
-GeminiAppsBrowserPending = 別画面でGeminiにログインした後、ここで「接続を完了」を押してください。画面を開いただけでは接続済みになりません。
+GeminiAppsBrowserPending = 二段階認証の完了後、ここへ戻り「接続を完了」を押してください。Google画面の読み込みが続く場合も、同じログイン状態でGeminiへ戻って検証を試みます。画面を開いただけでは接続済みになりません。
 GeminiAppsBrowserFinish = 接続を完了
 GeminiAppsBrowserCancel = 接続をキャンセル
 GeminiAppsLegacyImport = 旧方式：Cookieの取込（数時間で失効する場合あり）
+GeminiAppsCookieImportHelp = Geminiにログイン済みのブラウザーとプロファイルを選んで接続できます。選択したプロファイルだけを読み取ります。Cookie方式はGoogle側で数時間後に失効する場合があります。
+GeminiAppsProfile = ブラウザープロファイル
+GeminiAppsBrowserImport = このブラウザーから接続
+GeminiAppsDedicatedLogin = 専用ブラウザーで接続
