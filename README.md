@@ -37,13 +37,15 @@ The original collectors, tray, history, notifications, themes and provider setti
 
 ## Gemini Apps
 
-Use **v0.70.6 or later** to connect the usage limits from Google's Gemini desktop app. Current/weekly quotas and reset times are separate from Gemini CLI and Antigravity. Google session updates are retained in encrypted storage while Gemini is running; Android **v0.9.8 or later** displays the same sanitized quotas. If your older connection expired, reconnect once after updating. [Connection guide](docs/gemini-apps.md) · [v0.70.6 session renewal fix](docs/releases/v0.70.6.md)
+Current/weekly quotas and reset times from Gemini Apps are separate from Gemini CLI and Antigravity. Android **v0.9.8 or later** displays the same sanitized quotas. The published desktop-cookie connection can expire after a few hours. A dedicated persistent-browser connection is under development and awaiting authenticated long-duration verification; it is not yet included in the published v0.71.0 EXE. [Connection guide and verification status](docs/gemini-apps.md)
 
 The following native Windows captures use the downloaded, published **v0.70.6 EXE** with an isolated demo profile.
 
 ![Published v0.70.6 Gemini Apps usage (demo data)](docs/images/mobile-connect/windows-v0.70.6-gemini-usage-ja.jpg)
 
-![Published v0.70.6 Gemini Apps connection controls](docs/images/mobile-connect/windows-v0.70.6-gemini-connection-ja.jpg)
+Dedicated connection controls in the local **v0.71.1 release candidate**, captured from its actual Windows EXE with an anonymous profile. Opening sign-in does not declare the connection authenticated; the multi-hour authenticated test is still pending. [Candidate checks and commits](docs/releases/v0.71.1.md)
+
+![Native Windows dedicated Gemini connection controls, local v0.71.1 candidate](docs/images/mobile-connect/windows-gemini-browser-development-ja.png)
 
 ## Connect
 
