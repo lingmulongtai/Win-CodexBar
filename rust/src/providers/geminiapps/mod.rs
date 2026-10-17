@@ -78,8 +78,20 @@ impl Provider for GeminiAppsProvider {
                 sign_in_url: "https://gemini.google.com/app".into(),
             })?;
         let _fetch = FETCH.lock().await;
-        let (header, epoch) = session_cache::header(cookie);
-        let session = protocol::fetch(&header, ctx.web_timeout).await?;
+        let (header, mut epoch) = session_cache::header(cookie);
+        let session = protocol::fetch_with_checkpoint(&header, ctx.web_timeout, |renewed| {
+            if let Some(next) =
+                session_cache::save_if_current(cookie, epoch, renewed).map_err(|_| {
+                    ProviderError::Other(
+                        "Could not save the renewed Gemini Apps session securely.".into(),
+                    )
+                })?
+            {
+                epoch = next;
+            }
+            Ok(())
+        })
+        .await?;
         session_cache::save_if_current(cookie, epoch, &session.cookie_header).map_err(|_| {
             ProviderError::Other("Could not save the renewed Gemini Apps session securely.".into())
         })?;

@@ -18,24 +18,64 @@ pub(super) struct VerifiedSession {
 }
 
 pub(super) async fn fetch(cookie: &str, timeout: u64) -> Result<VerifiedSession, ProviderError> {
+    fetch_with_checkpoint(cookie, timeout, |_| Ok(())).await
+}
+
+pub(super) async fn fetch_with_checkpoint(
+    cookie: &str,
+    timeout: u64,
+    checkpoint: impl FnMut(&str) -> Result<(), ProviderError> + Send,
+) -> Result<VerifiedSession, ProviderError> {
     let cookies = SessionCookies::new(cookie)?;
     let rotate = cookies.rotation_due();
-    fetch_at(
+    fetch_at_with_checkpoint(
         cookies,
         timeout,
         ORIGIN,
         "https://accounts.google.com",
         rotate,
+        checkpoint,
     )
     .await
 }
 
+#[cfg(test)]
 async fn fetch_at(
+    cookies: SessionCookies,
+    timeout: u64,
+    origin: &str,
+    accounts: &str,
+    rotate: bool,
+) -> Result<VerifiedSession, ProviderError> {
+    fetch_at_with_checkpoint(cookies, timeout, origin, accounts, rotate, |_| Ok(())).await
+}
+
+async fn fetch_at_with_checkpoint(
+    cookies: SessionCookies,
+    timeout: u64,
+    origin: &str,
+    accounts: &str,
+    rotate: bool,
+    checkpoint: impl FnMut(&str) -> Result<(), ProviderError> + Send,
+) -> Result<VerifiedSession, ProviderError> {
+    // Budget the entire exchange, not three independent 60-second requests.
+    // The desktop's outer deadline can otherwise cancel after rotation but
+    // before the refreshed session reaches secure storage.
+    tokio::time::timeout(
+        std::time::Duration::from_secs(timeout.clamp(5, 60)),
+        fetch_exchange(cookies, timeout, origin, accounts, rotate, checkpoint),
+    )
+    .await
+    .map_err(|_| ProviderError::Timeout)?
+}
+
+async fn fetch_exchange(
     mut cookies: SessionCookies,
     timeout: u64,
     origin: &str,
     accounts: &str,
     rotate: bool,
+    mut checkpoint: impl FnMut(&str) -> Result<(), ProviderError> + Send,
 ) -> Result<VerifiedSession, ProviderError> {
     let client = crate::core::credentialed_http_client_builder()
         .redirect(reqwest::redirect::Policy::none())
@@ -45,6 +85,7 @@ async fn fetch_at(
         .user_agent("Mozilla/5.0")
         .build()?;
     if rotate && let Some(header) = cookies.rotation_header() {
+        let previous_freshness = cookies.freshness().map(str::to_owned);
         // Protocol facts only; independently implemented. The explicit target
         // and no-redirect policy keep authentication on Google's own origins.
         match client
@@ -53,10 +94,25 @@ async fn fetch_at(
             .header("Origin", accounts)
             .header("Content-Type", "application/json")
             .body("[000,\"-0000000000000000000\"]")
+            .timeout(std::time::Duration::from_secs(timeout.clamp(5, 10)))
             .send()
             .await
         {
-            Ok(response) if response.status().is_success() => cookies.absorb(&response, true),
+            Ok(response) if response.status().is_success() => {
+                cookies.absorb(&response, true);
+                if cookies.freshness().is_some()
+                    && cookies.freshness() != previous_freshness.as_deref()
+                {
+                    // A later quota/network failure must not lose a successfully
+                    // rotated authentication cookie. Initial connect uses a
+                    // no-op callback until its quota has actually verified.
+                    checkpoint(&cookies.header())?;
+                } else {
+                    tracing::warn!(
+                        "Gemini Apps rotation did not issue a fresh authentication cookie"
+                    );
+                }
+            }
             _ => tracing::warn!(
                 "Gemini Apps session renewal was unavailable; verifying the current session"
             ),
@@ -70,6 +126,7 @@ async fn fetch_at(
     cookies.absorb(&page, false);
     let html = read_body(page, BOOTSTRAP_LIMIT).await?;
     let csrf = parse_csrf(&html)?;
+    checkpoint(&cookies.header())?;
     let response = client
         .post(format!("{origin}/_/BardChatUi/data/batchexecute"))
         .query(&[("rpcids", RPC), ("source-path", "/app"), ("rt", "c")])
@@ -84,6 +141,9 @@ async fn fetch_at(
         .send()
         .await?;
     cookies.absorb(&response, false);
+    if response.status().is_success() {
+        checkpoint(&cookies.header())?;
+    }
     let usage = parse_response(&read_body(response, QUOTA_LIMIT).await?)?;
     Ok(VerifiedSession {
         usage,
@@ -236,6 +296,72 @@ mod tests {
     fn window(kind: u64, fraction: Value) -> Value {
         json!([2400, fraction, kind, [[1800000000, 0]]])
     }
+
+    #[tokio::test]
+    async fn quota_failure_keeps_rotated_authentication_for_the_next_request() {
+        let mut server = mockito::Server::new_async().await;
+        let rotate = server
+            .mock("POST", "/RotateCookies")
+            .with_header(
+                "set-cookie",
+                "__Secure-1PSIDTS=new; Domain=.google.com; Path=/; Secure",
+            )
+            .create_async()
+            .await;
+        let page = server
+            .mock("GET", "/app")
+            .match_header("cookie", "__Secure-1PSID=primary; __Secure-1PSIDTS=new")
+            .with_body(r#"{"SNlM0e":"csrf"}"#)
+            .expect(2)
+            .create_async()
+            .await;
+        let quota_path = "/_/BardChatUi/data/batchexecute?rpcids=jSf9Qc&source-path=%2Fapp&rt=c";
+        let failed = server
+            .mock("POST", quota_path)
+            .with_status(503)
+            .create_async()
+            .await;
+        let mut saved = None;
+        let result = fetch_at_with_checkpoint(
+            SessionCookies::new("__Secure-1PSID=primary; __Secure-1PSIDTS=old").unwrap(),
+            5,
+            &server.url(),
+            &server.url(),
+            true,
+            |header| {
+                saved = Some(header.to_owned());
+                Ok(())
+            },
+        )
+        .await;
+        assert!(result.is_err());
+        rotate.assert_async().await;
+        failed.assert_async().await;
+        assert_eq!(
+            saved.as_deref(),
+            Some("__Secure-1PSID=primary; __Secure-1PSIDTS=new")
+        );
+        failed.remove_async().await;
+        let recovered = server
+            .mock("POST", quota_path)
+            .match_header("cookie", saved.as_deref().unwrap())
+            .with_body(framed(&json!([2, [window(1, json!(0.1))]])))
+            .create_async()
+            .await;
+        assert!(
+            fetch_at(
+                SessionCookies::new(saved.as_deref().unwrap()).unwrap(),
+                5,
+                &server.url(),
+                &server.url(),
+                false
+            )
+            .await
+            .is_ok()
+        );
+        page.assert_async().await;
+        recovered.assert_async().await;
+    }
     #[tokio::test]
     async fn renewal_is_used_by_bootstrap_rpc_and_the_next_fresh_client() {
         let mut server = mockito::Server::new_async().await;
@@ -344,16 +470,25 @@ mod tests {
             .expect(0)
             .create_async()
             .await;
+        let mut saved = false;
         assert!(
-            fetch_at(
+            fetch_at_with_checkpoint(
                 SessionCookies::new("SID=original").unwrap(),
                 5,
                 &server.url(),
                 &server.url(),
-                false
+                false,
+                |_| {
+                    saved = true;
+                    Ok(())
+                }
             )
             .await
             .is_err()
+        );
+        assert!(
+            !saved,
+            "an unauthenticated login page must not replace the saved session"
         );
         redirect.assert_async().await;
         trap.assert_async().await;

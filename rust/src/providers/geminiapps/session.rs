@@ -36,6 +36,10 @@ impl SessionCookies {
             .join("; ")
     }
 
+    pub fn freshness(&self) -> Option<&str> {
+        self.0.get("__Secure-1PSIDTS").map(String::as_str)
+    }
+
     /// Accounts receives only the two parent-domain authentication cookies,
     /// never Gemini host cookies, analytics or another provider's credentials.
     pub fn rotation_header(&self) -> Option<String> {
