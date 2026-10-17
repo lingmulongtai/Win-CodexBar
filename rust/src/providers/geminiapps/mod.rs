@@ -10,6 +10,11 @@ use crate::core::{
 };
 use async_trait::async_trait;
 
+// A refresh must load the last committed cookies after the previous request
+// finishes. Settings invalidation can otherwise start a second collector while
+// the old network request is still rotating the same Google session.
+static FETCH: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+
 pub struct GeminiAppsProvider {
     metadata: ProviderMetadata,
 }
@@ -18,6 +23,7 @@ impl GeminiAppsProvider {
     /// Verify an explicitly imported session and return its renewed header.
     /// This value must remain inside the native credential storage boundary.
     pub async fn verify_session(cookie: &str, timeout: u64) -> Result<String, ProviderError> {
+        let _fetch = FETCH.lock().await;
         Ok(protocol::fetch(cookie, timeout).await?.cookie_header)
     }
 
@@ -71,6 +77,7 @@ impl Provider for GeminiAppsProvider {
                 message: "Connect Gemini Apps in Settings → Providers. Close Gemini once before importing its session.".into(),
                 sign_in_url: "https://gemini.google.com/app".into(),
             })?;
+        let _fetch = FETCH.lock().await;
         let (header, epoch) = session_cache::header(cookie);
         let session = protocol::fetch(&header, ctx.web_timeout).await?;
         session_cache::save_if_current(cookie, epoch, &session.cookie_header).map_err(|_| {

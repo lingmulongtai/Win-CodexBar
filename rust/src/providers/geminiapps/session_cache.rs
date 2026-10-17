@@ -47,14 +47,18 @@ pub(super) fn header(selected: &str) -> (String, u64) {
     )
 }
 
-pub(super) fn save_if_current(selected: &str, epoch: u64, renewed: &str) -> anyhow::Result<()> {
-    let current_epoch = MUTATION
+pub(super) fn save_if_current(
+    selected: &str,
+    epoch: u64,
+    renewed: &str,
+) -> anyhow::Result<Option<u64>> {
+    let mut current_epoch = MUTATION
         .lock()
         .map_err(|_| anyhow::anyhow!("Gemini session storage unavailable"))?;
     save_at(
         &path()?,
         &ManualCookies::load(),
-        *current_epoch,
+        &mut current_epoch,
         selected,
         epoch,
         renewed,
@@ -64,13 +68,13 @@ pub(super) fn save_if_current(selected: &str, epoch: u64, renewed: &str) -> anyh
 fn save_at(
     path: &Path,
     cookies: &ManualCookies,
-    current_epoch: u64,
+    current_epoch: &mut u64,
     selected: &str,
     epoch: u64,
     renewed: &str,
-) -> anyhow::Result<()> {
-    if !selection_matches(current_epoch, epoch, cookies.get("geminiapps"), selected) {
-        return Ok(());
+) -> anyhow::Result<Option<u64>> {
+    if !selection_matches(*current_epoch, epoch, cookies.get("geminiapps"), selected) {
+        return Ok(None);
     }
     let saved = SavedSession {
         binding: binding(selected),
@@ -79,10 +83,12 @@ fn save_at(
     if read_at(path)
         .is_some_and(|old| old.binding == saved.binding && old.cookie_header == saved.cookie_header)
     {
-        return Ok(());
+        *current_epoch = current_epoch.wrapping_add(1);
+        return Ok(Some(*current_epoch));
     }
     crate::secure_file::write_string(path, &serde_json::to_string(&saved)?)?;
-    Ok(())
+    *current_epoch = current_epoch.wrapping_add(1);
+    Ok(Some(*current_epoch))
 }
 
 /// Serialize explicit selection changes with renewal writes. A completed
@@ -156,7 +162,7 @@ mod tests {
         save_at(
             &cache_path,
             &cookies,
-            1,
+            &mut 1,
             "selected-private-header",
             1,
             "renewed-private-header",
@@ -181,7 +187,7 @@ mod tests {
         save_at(
             &cache_path,
             &cookies,
-            2,
+            &mut 2,
             "selected-private-header",
             1,
             "late-disconnected",
@@ -191,7 +197,7 @@ mod tests {
         save_at(
             &cache_path,
             &cookies,
-            3,
+            &mut 3,
             "selected-private-header",
             1,
             "late-reconnected",
@@ -201,5 +207,28 @@ mod tests {
             read_at(&cache_path).unwrap().cookie_header,
             "renewed-private-header"
         );
+    }
+
+    #[test]
+    fn an_older_refresh_cannot_overwrite_a_committed_renewal() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("session.json");
+        let mut cookies = ManualCookies::default();
+        cookies.set("geminiapps", "selected");
+        let mut epoch = 7;
+        assert_eq!(
+            save_at(&path, &cookies, &mut epoch, "selected", 7, "newest").unwrap(),
+            Some(8)
+        );
+        assert_eq!(
+            save_at(&path, &cookies, &mut epoch, "selected", 7, "late-old").unwrap(),
+            None
+        );
+        assert_eq!(read_at(&path).unwrap().cookie_header, "newest");
+        assert_eq!(
+            save_at(&path, &cookies, &mut epoch, "selected", 8, "next").unwrap(),
+            Some(9)
+        );
+        assert_eq!(read_at(&path).unwrap().cookie_header, "next");
     }
 }
