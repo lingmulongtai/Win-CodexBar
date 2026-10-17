@@ -97,6 +97,7 @@ pub fn select(header: Option<&str>) -> anyhow::Result<()> {
     let mut epoch = MUTATION
         .lock()
         .map_err(|_| anyhow::anyhow!("Gemini session storage unavailable"))?;
+    let cache_path = path()?;
     let mut cookies = ManualCookies::load();
     match header {
         Some(value) => cookies.set("geminiapps", value),
@@ -104,10 +105,18 @@ pub fn select(header: Option<&str>) -> anyhow::Result<()> {
     }
     cookies.save()?;
     *epoch = epoch.wrapping_add(1);
-    match std::fs::remove_file(path()?) {
-        Ok(()) => Ok(()),
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
-        Err(error) => Err(error.into()),
+    // The selected login is already committed. Cleanup cannot turn that success
+    // into a failed connection that the UI could subsequently cancel.
+    if !discard_cache(&cache_path) {
+        tracing::warn!("Gemini login selected; could not discard the obsolete renewal cache");
+    }
+    Ok(())
+}
+
+fn discard_cache(path: &Path) -> bool {
+    match std::fs::remove_file(path) {
+        Ok(()) => true,
+        Err(error) => error.kind() == std::io::ErrorKind::NotFound,
     }
 }
 
@@ -123,6 +132,15 @@ fn selection_matches(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn obsolete_cache_cleanup_is_independent_of_a_committed_selection() {
+        let root = tempfile::tempdir().unwrap();
+        assert!(discard_cache(&root.path().join("missing.json")));
+        // A directory cannot be removed as a file, without mutating global config.
+        assert!(!discard_cache(root.path()));
+        assert!(!selection_matches(2, 1, Some("new-login"), "old-login"));
+        assert!(!selection_matches(2, 1, None, "old-login"));
+    }
     #[test]
     fn renewal_is_bound_to_exact_selected_session_not_another_login() {
         let saved = SavedSession {
