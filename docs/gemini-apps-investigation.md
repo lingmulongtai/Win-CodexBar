@@ -90,3 +90,9 @@ The Web RPC is undocumented and may change. A collector needs deterministic fram
 - [Google Gemini Apps limits and Usage Limits display](https://support.google.com/gemini/answer/16275805?hl=en)
 - [Chromium Windows accessibility](https://new.chromium.org/developers/accessibility/windows-accessibility/)
 - [Existing mobile sharing contract](android-sharing.md)
+
+## Stable-release preparation follow-up — 2026-10-18
+
+The user stopped the separate scheduled recorder because its console window interrupted work. The task was removed and is not part of the app or release. Do not restart this recorder. A bounded, one-off pre-update read again verified fresh quota from the same original selected browser connection; no Google sign-in automation was performed. The previously planned 24-hour measurement was not completed.
+
+The release also fixes the 56-point in-process history truncation and time-based canonical archive retention. See the v0.71.1 release notes for current source and artifact validation; the earlier candidate-only statements above describe the historical checks on their listed hashes. The original post-2FA loading cause remains unproven.

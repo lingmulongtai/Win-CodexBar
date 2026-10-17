@@ -51,3 +51,7 @@ Native Windows proof used an isolated configuration with synthetic quota data, t
 There is no cloud relay, phone discovery, QR scanner, automatic firewall change. Pairing includes the endpoint; no provider token must be re-entered on the phone. Off-LAN physical-phone acceptance remains separate from local native/emulator checks.
 
 Multiple Android devices can use the same pairing code concurrently. Each retains its own acquisition mode and phone exceptions. Revoking pairing rotates the shared key for all devices.
+
+## Windows v0.71.1 archive
+
+Windows saves quota observations independently of the sharing listener. Its selected-provider view reads the same account/connection archive as Android and offers 7/30-day views. Archives survive normal restart and retain the last successful atomic checkpoint after a crash. First/latest samples in ten-minute buckets retain recent reset boundaries; capacity pressure summarizes older observations daily. The wire projection remains bounded to 30 days / 64 points per series. Missing collection periods are gaps, and records already lost by an older version cannot be recreated.
