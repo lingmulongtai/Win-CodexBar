@@ -200,7 +200,7 @@ fn parse_csrf(html: &str) -> Result<String, ProviderError> {
         })
 }
 
-fn parse_response(body: &str) -> Result<UsageSnapshot, ProviderError> {
+pub(super) fn parse_response(body: &str) -> Result<UsageSnapshot, ProviderError> {
     if !body.starts_with(")]}'") {
         return Err(schema_error());
     }

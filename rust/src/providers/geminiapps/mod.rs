@@ -20,6 +20,20 @@ pub struct GeminiAppsProvider {
 }
 
 impl GeminiAppsProvider {
+    /// Accept quota only from the native, isolated Gemini browser. No cookies,
+    /// page HTML or CSRF token cross this boundary.
+    pub fn parse_browser_response(body: &str) -> Result<ProviderFetchResult, ProviderError> {
+        if body.len() > 512 * 1024 {
+            return Err(ProviderError::Parse(
+                "Gemini usage response is too large.".into(),
+            ));
+        }
+        Ok(ProviderFetchResult::new(
+            protocol::parse_response(body)?,
+            "web",
+        ))
+    }
+
     /// Verify an explicitly imported session and return its renewed header.
     /// This value must remain inside the native credential storage boundary.
     pub async fn verify_session(cookie: &str, timeout: u64) -> Result<String, ProviderError> {
@@ -77,6 +91,11 @@ impl Provider for GeminiAppsProvider {
                 message: "Connect Gemini Apps in Settings → Providers. Close Gemini once before importing its session.".into(),
                 sign_in_url: "https://gemini.google.com/app".into(),
             })?;
+        if cookie.starts_with("codexbar-gemini-browser:") {
+            return Err(ProviderError::Other(
+                "This Gemini connection uses the Windows app's persistent browser. Keep Win-CodexBar running.".into(),
+            ));
+        }
         let _fetch = FETCH.lock().await;
         let (header, mut epoch) = session_cache::header(cookie);
         let session = protocol::fetch_with_checkpoint(&header, ctx.web_timeout, |renewed| {
@@ -103,6 +122,32 @@ impl Provider for GeminiAppsProvider {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn browser_boundary_accepts_only_bounded_quota_and_no_account_identity() {
+        let quota = serde_json::json!([2, [[10, 0.25, 1, [[1800000000, 0]]]]]);
+        let frame = format!(
+            ")]}}'\n{}",
+            serde_json::json!([["wrb.fr", "jSf9Qc", quota.to_string(), null]])
+        );
+        let result = GeminiAppsProvider::parse_browser_response(&frame).unwrap();
+        assert_eq!(result.usage.primary.used_percent, 25.0);
+        assert!(result.account_identity().is_none());
+        assert!(GeminiAppsProvider::parse_browser_response("<html>Sign in</html>").is_err());
+        assert!(GeminiAppsProvider::parse_browser_response(&"x".repeat(512 * 1024 + 1)).is_err());
+    }
+
+    #[tokio::test]
+    async fn cli_never_sends_a_desktop_browser_selector_to_google() {
+        let ctx = FetchContext {
+            manual_cookie_header: Some(
+                "codexbar-gemini-browser:11111111-1111-4111-8111-111111111111".into(),
+            ),
+            ..Default::default()
+        };
+        assert!(
+            matches!(GeminiAppsProvider::new().fetch_usage(&ctx).await, Err(ProviderError::Other(message)) if message.contains("persistent browser"))
+        );
+    }
     #[tokio::test]
     async fn missing_session_never_imports_an_ambient_account() {
         assert!(
