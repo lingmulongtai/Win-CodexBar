@@ -20,6 +20,51 @@ struct PendingReply {
 }
 static REPLIES: LazyLock<Mutex<HashMap<Uuid, PendingReply>>> = LazyLock::new(Mutex::default);
 static READY: LazyLock<Mutex<HashSet<Uuid>>> = LazyLock::new(Mutex::default);
+static BLOCKED: LazyLock<Mutex<HashMap<Uuid, String>>> = LazyLock::new(Mutex::default);
+
+fn pending_path() -> Result<std::path::PathBuf, String> {
+    codexbar::settings::config_store_dir()
+        .map(|root| root.join("gemini-browser-pending.json"))
+        .ok_or_else(|| "Gemini browser storage is unavailable".into())
+}
+
+fn stored_pending() -> Option<Uuid> {
+    let value = codexbar::secure_file::read_string(&pending_path().ok()?).ok()?;
+    resumable_pending(
+        &value,
+        codexbar::settings::ManualCookies::load().get("geminiapps"),
+        &codexbar::settings::config_store_dir()?,
+    )
+}
+
+fn resumable_pending(
+    document: &str,
+    selected: Option<&str>,
+    root: &std::path::Path,
+) -> Option<Uuid> {
+    // A failed reference-file cleanup must not turn an explicit reconnect into
+    // account editing inside the already selected history scope.
+    let value: String = serde_json::from_str(document).ok()?;
+    let id = selection(Some(&value)).filter(|id| Some(*id) != selection(selected))?;
+    root.join("gemini-browser")
+        .join(id.to_string())
+        .is_dir()
+        .then_some(id)
+}
+
+fn forget_pending() -> Result<(), String> {
+    let path = pending_path()?;
+    // Revoke durably before committing a selection. A failed delete must not
+    // leave a reusable reference to a connection's former history scope.
+    codexbar::secure_file::write_string(&path, "null")
+        .map_err(|_| "Could not securely complete the Gemini sign-in reference")?;
+    if let Err(error) = std::fs::remove_file(path)
+        && error.kind() != std::io::ErrorKind::NotFound
+    {
+        tracing::warn!("Could not remove the completed Gemini sign-in reference");
+    }
+    Ok(())
+}
 
 pub(crate) fn selection(header: Option<&str>) -> Option<Uuid> {
     let value = header?.strip_prefix(PREFIX)?;
@@ -85,7 +130,21 @@ fn ensure_window(app: &tauri::AppHandle, id: Uuid, visible: bool) -> Result<Webv
     .data_directory(directory)
     .visible(visible)
     .focused(false)
-    .on_navigation(move |url| !receive(id, url) && allowed_navigation(url))
+    .on_navigation(move |url| {
+        if receive(id, url) {
+            return false;
+        }
+        let allowed = allowed_navigation(url);
+        if !allowed {
+            // Never log paths, query strings, fragments or the authentication URL.
+            let host = url.host_str().unwrap_or("unknown").to_string();
+            tracing::warn!(host, "Gemini sign-in navigation blocked");
+            if let Ok(mut blocked) = BLOCKED.lock() {
+                blocked.insert(id, host);
+            }
+        }
+        allowed
+    })
     .on_new_window(move |url, _| {
         // A user-initiated Google sign-in popup stays inside this isolated profile.
         if allowed_navigation(&url)
@@ -256,9 +315,17 @@ pub(super) fn begin(app: &tauri::AppHandle) -> Result<(), String> {
         .map_err(|_| "Gemini connection is unavailable")?;
     // A new connection gets its own profile. Opening sign-in must never let an
     // account switch publish usage under the old connection's history scope.
-    let id = (*pending).unwrap_or_else(Uuid::new_v4);
+    let id = (*pending)
+        .or_else(stored_pending)
+        .unwrap_or_else(Uuid::new_v4);
     ensure_window(app, id, true)?;
     *pending = Some(id);
+    codexbar::secure_file::write_string(
+        &pending_path()?,
+        &serde_json::to_string(&marker(id))
+            .map_err(|_| "Could not save Gemini sign-in reference")?,
+    )
+    .map_err(|_| "Could not save Gemini sign-in reference")?;
     Ok(())
 }
 
@@ -266,10 +333,47 @@ pub(super) async fn finish(app: &tauri::AppHandle) -> Result<String, String> {
     let id = PENDING
         .lock()
         .map_err(|_| "Gemini connection is unavailable")?
+        .or_else(stored_pending)
         .ok_or("Open Gemini sign-in first")?;
+    let window = ensure_window(app, id, false)?;
+    // Only the user's explicit Finish action leaves a stuck sign-in page.
+    // Reuse the same profile; an anonymous /app response still fails verification.
+    if window
+        .url()
+        .is_ok_and(|url| url.host_str() == Some("accounts.google.com"))
+    {
+        READY
+            .lock()
+            .map_err(|_| "Gemini browser is unavailable")?
+            .remove(&id);
+        window
+            .navigate("https://gemini.google.com/app".parse().unwrap())
+            .map_err(|_| "Could not return to Gemini after sign-in")?;
+        tokio::time::timeout(Duration::from_secs(20), async {
+            loop {
+                if window.url().is_ok_and(|url| default_app_route(&url))
+                    && READY.lock().is_ok_and(|ready| ready.contains(&id))
+                {
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(100)).await;
+            }
+        }).await.map_err(|_| "Google sign-in has not returned to Gemini. Reopen its window and finish signing in before retrying.")?;
+    }
     fetch(app, id)
         .await
-        .map_err(|_| "Sign in to Gemini in the dedicated window, then finish connecting.")?;
+        .map_err(|error| {
+            if let Some(host) = BLOCKED.lock().ok().and_then(|blocked| blocked.get(&id).cloned()) {
+                format!("Google sign-in could not finish because a redirect to {host} was blocked. Your previous connection has been kept.")
+            } else {
+                match error {
+                    ProviderError::AuthRequired => "Google sign-in has not completed in this browser. Your previous connection has been kept.".into(),
+                    ProviderError::Timeout => "Gemini did not finish loading. Reopen the dedicated window and retry Finish connecting.".into(),
+                    _ => "Gemini usage could not be verified. Your previous connection has been kept; retry after the page has loaded.".into(),
+                }
+            }
+        })?;
+    forget_pending()?;
     Ok(marker(id))
 }
 
@@ -283,14 +387,18 @@ pub(super) fn complete(app: &tauri::AppHandle) {
 }
 
 pub(super) fn retire(app: &tauri::AppHandle, id: Uuid) -> Result<(), String> {
+    if let Ok(mut blocked) = BLOCKED.lock() {
+        blocked.remove(&id);
+    }
     if let Ok(mut ready) = READY.lock() {
         ready.remove(&id);
     }
-    let window = ensure_window(app, id, false)?;
-    let _ = window.clear_all_browsing_data();
-    window
-        .destroy()
-        .map_err(|_| "Could not close the Gemini browser session")?;
+    if let Some(window) = app.get_webview_window(&label(id)) {
+        let _ = window.clear_all_browsing_data();
+        window
+            .destroy()
+            .map_err(|_| "Could not close the Gemini browser session")?;
+    }
     let root = codexbar::settings::config_store_dir()
         .ok_or("Gemini browser storage is unavailable")?
         .join("gemini-browser");
@@ -332,7 +440,9 @@ pub(super) fn clear(app: &tauri::AppHandle) -> Result<(), String> {
     let pending = PENDING
         .lock()
         .map_err(|_| "Gemini connection is unavailable")?
-        .take();
+        .take()
+        .or_else(stored_pending);
+    forget_pending()?;
     let mut profiles: HashSet<_> = [selected, pending].into_iter().flatten().collect();
     // Include profiles from an interrupted setup or a previously failed cleanup.
     if let Some(root) = codexbar::settings::config_store_dir()
@@ -360,13 +470,15 @@ pub(super) fn cancel(app: &tauri::AppHandle) -> Result<(), String> {
     let mut pending = PENDING
         .lock()
         .map_err(|_| "Gemini connection is unavailable")?;
-    if let Some(id) = *pending {
+    if let Some(id) = (*pending).or_else(stored_pending) {
         if selection(codexbar::settings::ManualCookies::load().get("geminiapps")) == Some(id) {
             *pending = None;
+            forget_pending()?;
             return Ok(());
         }
         retire(app, id)?;
         *pending = None;
+        forget_pending()?;
     }
     Ok(())
 }
@@ -374,6 +486,28 @@ pub(super) fn cancel(app: &tauri::AppHandle) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn only_an_uncommitted_pending_profile_can_resume() {
+        let pending = Uuid::new_v4();
+        let selected = Uuid::new_v4();
+        let root = std::env::temp_dir().join(format!("gemini-pending-test-{}", Uuid::new_v4()));
+        let profile = root.join("gemini-browser").join(pending.to_string());
+        std::fs::create_dir_all(&profile).unwrap();
+        let reference = serde_json::to_string(&marker(pending)).unwrap();
+        assert_eq!(resumable_pending(&reference, None, &root), Some(pending));
+        assert_eq!(
+            resumable_pending(&reference, Some(&marker(selected)), &root),
+            Some(pending)
+        );
+        assert!(resumable_pending(&reference, Some(&marker(pending)), &root).is_none());
+        assert!(resumable_pending("null", None, &root).is_none());
+        assert!(resumable_pending("\"../../../other\"", None, &root).is_none());
+        assert!(resumable_pending("\"SID=private\"", None, &root).is_none());
+        std::fs::remove_dir(&profile).unwrap();
+        // A stale reference surviving deletion cannot recreate a revoked scope.
+        assert!(resumable_pending(&reference, None, &root).is_none());
+        std::fs::remove_dir_all(root).unwrap();
+    }
     #[test]
     fn default_quota_never_substitutes_for_an_indexed_or_ambiguous_account() {
         for url in [
