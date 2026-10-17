@@ -50,6 +50,16 @@ fn gemini_origin(url: &tauri::Url) -> bool {
     allowed_navigation(url) && url.host_str() == Some("gemini.google.com")
 }
 
+fn default_app_route(url: &tauri::Url) -> bool {
+    let accounts: Vec<_> = url
+        .query_pairs()
+        .filter(|(key, _)| key == "authuser")
+        .collect();
+    gemini_origin(url)
+        && (url.path() == "/app" || url.path().starts_with("/app/"))
+        && (accounts.is_empty() || (accounts.len() == 1 && accounts[0].1 == "0"))
+}
+
 fn ensure_window(app: &tauri::AppHandle, id: Uuid, visible: bool) -> Result<WebviewWindow, String> {
     if std::env::var_os("WEBVIEW2_USER_DATA_FOLDER").is_some_and(|value| !value.is_empty()) {
         return Err("Gemini requires its own browser profile. Remove the WEBVIEW2_USER_DATA_FOLDER override before connecting.".into());
@@ -88,7 +98,7 @@ fn ensure_window(app: &tauri::AppHandle, id: Uuid, visible: bool) -> Result<Webv
     .on_page_load(move |_, payload| {
         if let Ok(mut ready) = READY.lock() {
             if payload.event() == tauri::webview::PageLoadEvent::Finished
-                && gemini_origin(payload.url())
+                && default_app_route(payload.url())
             {
                 ready.insert(id);
             } else {
@@ -173,10 +183,10 @@ pub(crate) async fn fetch(
     let window = ensure_window(app, id, false).map_err(ProviderError::Other)?;
     tokio::time::timeout(Duration::from_secs(20), async {
         loop {
-            if window
-                .url()
-                .is_ok_and(|url| url.host_str() == Some("accounts.google.com"))
-            {
+            if window.url().is_ok_and(|url| {
+                url.host_str() == Some("accounts.google.com")
+                    || (gemini_origin(&url) && !default_app_route(&url))
+            }) {
                 return Err(ProviderError::AuthRequired);
             }
             if READY.lock().is_ok_and(|ready| ready.contains(&id)) {
@@ -187,7 +197,7 @@ pub(crate) async fn fetch(
     })
     .await
     .map_err(|_| ProviderError::Timeout)??;
-    if !window.url().is_ok_and(|url| gemini_origin(&url)) {
+    if !window.url().is_ok_and(|url| default_app_route(&url)) {
         return Err(ProviderError::AuthRequired);
     }
     let key = format!("__codexbar_gemini_{}", Uuid::new_v4().simple());
@@ -221,7 +231,7 @@ pub(crate) async fn fetch(
             "Gemini browser response is too large.".into(),
         ));
     }
-    if !window.url().is_ok_and(|url| gemini_origin(&url)) {
+    if !window.url().is_ok_and(|url| default_app_route(&url)) {
         return Err(ProviderError::AuthRequired);
     }
     match serde_json::from_str::<Reply>(&value)
@@ -364,6 +374,24 @@ pub(super) fn cancel(app: &tauri::AppHandle) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn default_quota_never_substitutes_for_an_indexed_or_ambiguous_account() {
+        for url in [
+            "https://gemini.google.com/app",
+            "https://gemini.google.com/app/chat?authuser=0",
+        ] {
+            assert!(default_app_route(&url.parse().unwrap()));
+        }
+        for url in [
+            "https://gemini.google.com/u/1/app",
+            "https://gemini.google.com/app?authuser=1",
+            "https://gemini.google.com/app?authuser=0&authuser=1",
+            "https://gemini.google.com/app?authuser=0&authuser=0",
+            "https://gemini.google.com/app?authuser=private@example.test",
+        ] {
+            assert!(!default_app_route(&url.parse().unwrap()));
+        }
+    }
     #[test]
     fn retirement_removes_only_the_exact_owned_profile() {
         let root = std::env::temp_dir().join(format!("gemini-profile-test-{}", Uuid::new_v4()));

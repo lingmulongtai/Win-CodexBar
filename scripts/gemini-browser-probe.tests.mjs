@@ -7,6 +7,8 @@ const script = (await readFile(new URL("../apps/desktop-tauri/src-tauri/src/comm
   .replace("__CODEXBAR_REQUEST_KEY__", '"probe"');
 
 async function probe(fetch, location = { origin: "https://gemini.google.com" }) {
+  location.pathname ??= "/app";
+  location.search ??= "";
   const window = {};
   location.assign = (url) => { window.callback = url; };
   runInNewContext(script, { window, location, fetch, AbortController, URLSearchParams, TextDecoder, setTimeout, clearTimeout });
@@ -76,4 +78,23 @@ test("network diagnostics do not export request errors or credentials", async ()
   const result = await probe(async () => { throw new Error("Cookie=private-token"); });
   assert.equal(result.kind, "network");
   assert.ok(!JSON.stringify(result).includes("private-token"));
+});
+
+test("never fetches default quota for an indexed or ambiguous selected account", async () => {
+  for (const route of ["/u/1/app", "/app?authuser=1", "/app?authuser=0&authuser=1", "/app?authuser=0&authuser=0"]) {
+    const url = new URL(route, "https://gemini.google.com");
+    let calls = 0;
+    const result = await probe(async () => { calls++; return new Response("unused"); }, { origin: url.origin, pathname: url.pathname, search: url.search });
+    assert.equal(result.kind, "auth");
+    assert.equal(calls, 0);
+  }
+});
+
+test("does not issue quota after an account switch during bootstrap", async () => {
+  const location = { origin: "https://gemini.google.com", pathname: "/app", search: "" };
+  let calls = 0;
+  const result = await probe(async () => { calls++; location.search = "?authuser=1"; return new Response('{"SNlM0e":"csrf"}'); }, location);
+  assert.equal(result.kind, "auth");
+  assert.equal(calls, 1);
+  assert.equal(result.body, undefined);
 });

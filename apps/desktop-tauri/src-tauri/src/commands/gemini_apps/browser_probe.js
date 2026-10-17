@@ -6,6 +6,12 @@
   const state = { kind: "pending", abort: () => controller.abort() };
   window[key] = state;
   const timer = setTimeout(() => controller.abort(), 15000);
+  const defaultAccount = () => {
+    const accounts = new URLSearchParams(location.search).getAll("authuser");
+    return location.origin === "https://gemini.google.com"
+      && (location.pathname === "/app" || location.pathname.startsWith("/app/"))
+      && (accounts.length === 0 || (accounts.length === 1 && accounts[0] === "0"));
+  };
   const read = async (response, limit) => {
     if (!response.ok) throw { kind: response.status === 401 || response.status === 403 ? "auth" : "http" };
     const reader = response.body.getReader();
@@ -24,19 +30,20 @@
   };
   (async () => {
     try {
-      if (location.origin !== "https://gemini.google.com") throw { kind: "auth" };
+      if (!defaultAccount()) throw { kind: "auth" };
       const options = { credentials: "same-origin", redirect: "error", cache: "no-store", signal: controller.signal };
       const html = await read(await fetch("/app", options), 8 * 1024 * 1024);
       const match = html.match(/"SNlM0e"\s*:\s*("(?:\\.|[^"\\])*")/);
       if (!match) throw { kind: "auth" };
       const csrf = JSON.parse(match[1]);
       if (typeof csrf !== "string" || !csrf) throw { kind: "auth" };
+      if (!defaultAccount()) throw { kind: "auth" };
       const response = await fetch("/_/BardChatUi/data/batchexecute?rpcids=jSf9Qc&source-path=%2Fapp&rt=c", {
         ...options, method: "POST", headers: { "X-Same-Domain": "1" },
         body: new URLSearchParams({ "f.req": '[[["jSf9Qc","[]",null,"generic"]]]', at: csrf }),
       });
       const body = await read(response, 128 * 1024);
-      if (location.origin !== "https://gemini.google.com") throw { kind: "auth" };
+      if (!defaultAccount()) throw { kind: "auth" };
       state.kind = "ok";
       state.body = body;
     } catch (error) {
