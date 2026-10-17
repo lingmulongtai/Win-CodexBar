@@ -51,7 +51,7 @@ fn gemini_origin(url: &tauri::Url) -> bool {
 }
 
 fn ensure_window(app: &tauri::AppHandle, id: Uuid, visible: bool) -> Result<WebviewWindow, String> {
-    if std::env::var_os("WEBVIEW2_USER_DATA_FOLDER").is_some() {
+    if std::env::var_os("WEBVIEW2_USER_DATA_FOLDER").is_some_and(|value| !value.is_empty()) {
         return Err("Gemini requires its own browser profile. Remove the WEBVIEW2_USER_DATA_FOLDER override before connecting.".into());
     }
     if let Some(window) = app.get_webview_window(&label(id)) {
