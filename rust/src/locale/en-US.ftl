@@ -1689,7 +1689,7 @@ MobileSharingStopped = Sharing is stopped
 MobileSharingFailed = Mobile sharing failed.
 
 # Gemini Apps desktop connection
-GeminiAppsTitle = Gemini desktop connection
+GeminiAppsTitle = Gemini Apps connection
 GeminiAppsHelp = Close the official Google Gemini app, then connect here and reopen Gemini. Your session is encrypted on this Windows account and stays on the PC. Current (5-hour) and weekly limits are separate from Gemini CLI. Uses the primary Google account; multiple Google accounts are not supported yet. Reconnect if the session expires.
 GeminiAppsConnect = Connect using Gemini desktop app
 GeminiAppsDisconnect = Disconnect Gemini Apps
@@ -1753,3 +1753,19 @@ MobileSharingListeningHelp = Copy the pairing code above to connect a phone or t
 
 MobileSharingRemoteSettings = Allow settings changes from Android
 MobileSharingRemoteSettingsHelp = Paired phones and tablets can change the PC fixed refresh interval and Usage & Spend period. Selecting a fixed interval turns Adaptive off. Pairing keys and provider credentials cannot be changed remotely.
+
+GeminiAppsBrowserHelp = Sign in once in this app's dedicated Google window. Usage is read inside that persistent browser so device-bound authentication stays with its keys. No Gemini app restart or cookie copy is needed. Google can still require sign-in after revocation.
+GeminiAppsBrowserOpen = Open dedicated Google sign-in
+GeminiAppsBrowserPending = After completing Google sign-in and two-step verification, return here and choose Finish connecting. If Google keeps loading, Finish tries returning to Gemini in the same profile before verifying usage. Opening the window alone does not connect.
+GeminiAppsBrowserFinish = Finish connecting
+GeminiAppsBrowserCancel = Cancel connection
+GeminiAppsLegacyImport = Legacy cookie import (may expire after a few hours)
+GeminiAppsCookieImportHelp = Select a browser and profile already signed in to Gemini. Only that profile is read. Exported cookies may expire after a few hours.
+GeminiAppsProfile = Browser profile
+GeminiAppsBrowserImport = Connect from this browser
+GeminiAppsDedicatedLogin = Connect in a dedicated browser
+
+QuotaArchiveTitle = Usage history
+QuotaArchiveHelp = Saved on this PC for 90 days and shared with paired devices. Shows recorded observations; older data may be summarized daily. Missing periods are not estimated.
+QuotaArchiveSevenDays = 7 days
+QuotaArchiveThirtyDays = 30 days

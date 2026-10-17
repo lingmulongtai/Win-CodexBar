@@ -14,7 +14,7 @@ This fork's Windows EXE is **unsigned** and uses no upstream signing certificate
 
 ## What this fork adds
 
-v0.71.0 adds a dedicated **Mobile Connect** settings pane, encrypted shared PC quota history, Usage & Spend charts on Android/tablets and opt-in remote PC settings. **Use Android v0.10.0 or later for shared history, spend and PC controls.** [Changes, screenshots and verification](docs/releases/v0.71.0.md)
+v0.71.1 adds persistent Gemini sign-in and durable 7/30-day PC quota history. **Mobile Connect** has its own settings pane, shared PC history, Usage & Spend charts on Android/tablets and opt-in remote PC settings. **Use Android v0.10.0 or later for shared history, spend and PC controls.** [Changes, screenshots and verification](docs/releases/v0.71.0.md)
 
 ![Mobile Connect pane in the downloaded, published v0.71.0 EXE, using isolated demo settings](docs/images/mobile-connect/windows-v0.71.0-mobile-connect-ja.jpg)
 
@@ -37,13 +37,17 @@ The original collectors, tray, history, notifications, themes and provider setti
 
 ## Gemini Apps
 
-Use **v0.70.6 or later** to connect the usage limits from Google's Gemini desktop app. Current/weekly quotas and reset times are separate from Gemini CLI and Antigravity. Google session updates are retained in encrypted storage while Gemini is running; Android **v0.9.8 or later** displays the same sanitized quotas. If your older connection expired, reconnect once after updating. [Connection guide](docs/gemini-apps.md) · [v0.70.6 session renewal fix](docs/releases/v0.70.6.md)
+Current/weekly quotas and reset times from Gemini Apps are separate from Gemini CLI and Antigravity. Android **v0.9.8 or later** displays the same sanitized quotas. v0.71.1 adds a dedicated persistent-browser connection and explicit browser/profile import. Imported desktop/browser cookies can still expire after a few hours. Indefinite authentication is not guaranteed; Google may require sign-in again. [Connection guide and verification status](docs/gemini-apps.md)
 
 The following native Windows captures use the downloaded, published **v0.70.6 EXE** with an isolated demo profile.
 
 ![Published v0.70.6 Gemini Apps usage (demo data)](docs/images/mobile-connect/windows-v0.70.6-gemini-usage-ja.jpg)
 
-![Published v0.70.6 Gemini Apps connection controls](docs/images/mobile-connect/windows-v0.70.6-gemini-connection-ja.jpg)
+**v0.71.1** keeps Gemini authentication in a dedicated persistent browser, restores an explicit browser/profile import option including Vivaldi, and adds 7/30-day PC quota history to the selected-provider view. The PC archive survives restarts and supplies the same observations to paired devices. [Release changes and validation](docs/releases/v0.71.1.md)
+
+Dedicated-mode controls captured from the initial October 17 candidate's actual Windows EXE with an anonymous profile, before the browser-import controls were added:
+
+![Native Windows dedicated Gemini connection controls, local v0.71.1 candidate](docs/images/mobile-connect/windows-gemini-browser-development-ja.png)
 
 ## Connect
 

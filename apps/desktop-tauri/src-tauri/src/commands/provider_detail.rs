@@ -249,7 +249,7 @@ pub fn get_provider_detail(
 }
 
 #[tauri::command]
-pub fn revoke_provider_credentials(
+pub async fn revoke_provider_credentials(
     app: tauri::AppHandle,
     provider_id: String,
 ) -> Result<(), String> {
@@ -265,7 +265,7 @@ pub fn revoke_provider_credentials(
     keys.save().map_err(|e| e.to_string())?;
 
     if id == ProviderId::GeminiApps {
-        codexbar::providers::geminiapps::session_cache::select(None).map_err(|e| e.to_string())?;
+        super::gemini_apps::revoke(&app)?;
     } else {
         let mut cookies = ManualCookies::load();
         cookies.remove(provider_id);

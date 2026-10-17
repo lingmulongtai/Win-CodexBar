@@ -5,7 +5,13 @@ use std::collections::BTreeMap;
 use std::sync::{Mutex, OnceLock};
 
 const RETENTION: i64 = 90 * 86400;
-const MAX_SAMPLES: usize = 128;
+// Keep a time-based archive. Repeatedly halving a 128-point ring makes almost
+// every older day disappear at a normal refresh cadence.
+const BUCKET_SECONDS: i64 = 10 * 60;
+const MAX_SAMPLES: usize = 2 * 90 * 24 * 6 + 2; // Two samples per ten-minute bucket, for 90 days.
+const MAX_STORE_BYTES: u64 = 32 * 1024 * 1024;
+// DPAPI ciphertext is base64-encoded inside a JSON envelope on Windows.
+const MAX_PLAINTEXT_BYTES: u64 = MAX_STORE_BYTES / 4 * 3 - 4096;
 
 #[derive(Default, Serialize, Deserialize)]
 struct HistoryStore {
@@ -64,13 +70,26 @@ impl HistoryStore {
                 continue;
             }
             samples.retain(|sample| sample.t >= at - RETENTION);
-            samples.push(MobileHistoryPoint {
+            let point = MobileHistoryPoint {
                 t: at,
                 u: window.used_fraction,
                 r: window.resets_at_epoch_seconds,
-            });
+            };
+            // Retain the first observation and the latest real sample in each
+            // ten-minute bucket; no interpolated or fabricated observations.
+            if samples.len() > 1
+                && samples[samples.len() - 2..].iter().all(|sample| {
+                    sample.t / BUCKET_SECONDS == at / BUCKET_SECONDS
+                        && sample.r == point.r
+                        && sample.u <= point.u
+                })
+            {
+                *samples.last_mut().unwrap() = point;
+            } else {
+                samples.push(point);
+            }
             if samples.len() > MAX_SAMPLES {
-                *samples = downsample(samples, MAX_SAMPLES / 2);
+                compact_daily(samples);
             }
             changed = true;
         }
@@ -108,6 +127,42 @@ impl HistoryStore {
     }
 }
 
+impl HistoryStore {
+    fn checkpoint(&mut self) -> Option<String> {
+        let mut raw = serde_json::to_string(self).ok()?;
+        if raw.len() as u64 > MAX_STORE_BYTES / 2 {
+            // Coarsen older data rather than write a file the next launch rejects.
+            for accounts in self.providers.values_mut() {
+                for account in accounts {
+                    for samples in account.windows.values_mut() {
+                        compact_daily(samples);
+                    }
+                }
+            }
+            raw = serde_json::to_string(self).ok()?;
+        }
+        (raw.len() as u64 <= MAX_PLAINTEXT_BYTES).then_some(raw)
+    }
+}
+
+fn compact_daily(samples: &mut Vec<MobileHistoryPoint>) {
+    let recent = samples.len().saturating_sub(32);
+    let mut retained: Vec<MobileHistoryPoint> = Vec::new();
+    for (index, sample) in samples.iter().enumerate() {
+        if index > 1
+            && index < recent
+            && retained
+                .last()
+                .is_some_and(|last| last.t / 86400 == sample.t / 86400)
+        {
+            *retained.last_mut().unwrap() = sample.clone();
+        } else {
+            retained.push(sample.clone());
+        }
+    }
+    *samples = retained;
+}
+
 impl ProviderHistory {
     fn latest(&self) -> i64 {
         self.windows
@@ -136,7 +191,7 @@ fn store() -> &'static Mutex<HistoryStore> {
         Mutex::new(
             path()
                 .filter(|path| {
-                    std::fs::metadata(path).is_ok_and(|meta| meta.len() <= 32 * 1024 * 1024)
+                    std::fs::metadata(path).is_ok_and(|meta| meta.len() <= MAX_STORE_BYTES)
                 })
                 .and_then(|path| crate::secure_file::read_string(&path).ok())
                 .and_then(|raw| serde_json::from_str(&raw).ok())
@@ -153,7 +208,7 @@ pub fn record_history(provider: &str, scope: [u8; 32], at: i64, windows: &[Mobil
         return;
     }
     if let Some(path) = path()
-        && let Ok(raw) = serde_json::to_string(&*store)
+        && let Some(raw) = store.checkpoint()
         && crate::secure_file::write_string(&path, &raw).is_err()
     {
         tracing::warn!("Cannot persist Mobile Connect quota history");
@@ -228,5 +283,93 @@ mod tests {
         assert_eq!(sampled.len(), 64);
         assert_eq!(sampled[0].t, 0);
         assert_eq!(sampled[63].t, 4999);
+    }
+
+    #[test]
+    fn thirty_days_remain_available_after_restart_and_more_refreshes() {
+        let start = 1_700_000_000;
+        let mut store = HistoryStore::default();
+        for minute in (0..45 * 1440).step_by(5) {
+            store.record("codex", [1; 32], start + minute * 60, &window(0.4));
+        }
+        let raw = serde_json::to_string(&store).unwrap();
+        let mut restarted: HistoryStore = serde_json::from_str(&raw).unwrap();
+        let now = start + 45 * 86400;
+        restarted.record("codex", [1; 32], now, &window(0.5));
+        let projected = restarted.project("codex", &[1; 32], now);
+        let samples = &projected[0].samples;
+        assert!(samples[0].t <= now - 29 * 86400);
+        assert_eq!(samples.last().unwrap().t, now);
+        assert!(samples.len() <= 64);
+        for day in 1..30 {
+            assert!(samples.iter().any(|sample| (now - sample.t) / 86400 == day));
+        }
+        assert!(restarted.project("codex", &[2; 32], now).is_empty());
+    }
+
+    #[test]
+    fn encrypted_atomic_checkpoint_restores_history() {
+        let folder = tempfile::tempdir().unwrap();
+        let path = folder.path().join("history.json");
+        let mut store = HistoryStore::default();
+        store.record("geminiapps", [3; 32], 1_700_000_000, &window(0.2));
+        crate::secure_file::write_string(&path, &serde_json::to_string(&store).unwrap()).unwrap();
+        let restored: HistoryStore =
+            serde_json::from_str(&crate::secure_file::read_string(&path).unwrap()).unwrap();
+        assert_eq!(
+            restored.project("geminiapps", &[3; 32], 1_700_000_001)[0].samples[0].u,
+            0.2
+        );
+    }
+
+    #[test]
+    fn full_account_capacity_checkpoint_fits_restart_read_limit() {
+        let now = 1_800_000_000;
+        let mut store = HistoryStore::default();
+        let samples: Vec<_> = (0..600)
+            .map(|index| MobileHistoryPoint {
+                t: now - (599 - index) * 3 * 3600,
+                u: 0.12345678901234568,
+                r: Some(now + 3600),
+            })
+            .collect();
+        for provider in 0..32 {
+            let accounts = (0..8)
+                .map(|account| ProviderHistory {
+                    scope: [account; 32],
+                    windows: (0..8)
+                        .map(|window| (format!("{window}{}", "x".repeat(240)), samples.clone()))
+                        .collect(),
+                })
+                .collect();
+            store.providers.insert(provider.to_string(), accounts);
+        }
+        let raw = store.checkpoint().unwrap();
+        let folder = tempfile::tempdir().unwrap();
+        let path = folder.path().join("full-history.json");
+        crate::secure_file::write_string(&path, &raw).unwrap();
+        assert!(std::fs::metadata(&path).unwrap().len() <= MAX_STORE_BYTES);
+        let restored: HistoryStore =
+            serde_json::from_str(&crate::secure_file::read_string(&path).unwrap()).unwrap();
+        let history = restored.project("0", &[0; 32], now);
+        assert_eq!(history.len(), 8);
+        assert!(history[0].samples[0].t <= now - 29 * 86400);
+    }
+
+    #[test]
+    fn reset_boundaries_are_not_overwritten_inside_a_bucket() {
+        let at = 1_700_000_400;
+        let mut store = HistoryStore::default();
+        store.record("codex", [1; 32], at, &window(0.4));
+        store.record("codex", [1; 32], at + 1, &window(0.8));
+        let mut reset = window(0.0);
+        reset[0].resets_at_epoch_seconds = Some(1_800_100_000);
+        store.record("codex", [1; 32], at + 2, &reset);
+        reset[0].used_fraction = 0.1;
+        store.record("codex", [1; 32], at + 3, &reset);
+        let history = store.project("codex", &[1; 32], at + 4);
+        assert_eq!(history[0].samples.len(), 4);
+        assert_eq!(history[0].samples[1].u, 0.8);
+        assert_eq!(history[0].samples[2].u, 0.0);
     }
 }

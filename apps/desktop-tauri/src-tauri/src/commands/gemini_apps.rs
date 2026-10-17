@@ -1,6 +1,8 @@
 use super::*;
 use codexbar::providers::geminiapps::{GeminiAppsProvider, desktop_session};
 
+pub(super) mod browser;
+
 static MUTATION: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
 
 fn changed(app: &tauri::AppHandle, header: Option<&str>) -> Result<(), String> {
@@ -32,13 +34,124 @@ pub async fn connect_gemini_apps(app: tauri::AppHandle) -> Result<(), String> {
     let header = GeminiAppsProvider::verify_session(&header, FetchContext::default().web_timeout)
         .await
         .map_err(|error| codexbar::logging::safe_error_message(&error))?;
-    changed(&app, Some(&header))
+    replace(&app, &header)
+}
+
+#[tauri::command]
+pub fn list_gemini_browser_profiles(browser_type: String) -> Result<Vec<String>, String> {
+    use codexbar::browser::detection::{BrowserDetector, BrowserType};
+    let kind = BrowserType::all()
+        .iter()
+        .copied()
+        .find(|kind| kind.key() == browser_type && kind.is_chromium_based())
+        .ok_or("Choose a supported Chromium browser")?;
+    let browser = BrowserDetector::detect(kind).ok_or("Selected browser is unavailable")?;
+    Ok(browser
+        .profiles
+        .into_iter()
+        .map(|profile| profile.name)
+        .collect())
+}
+
+#[tauri::command]
+pub async fn connect_gemini_apps_from_browser(
+    app: tauri::AppHandle,
+    window: tauri::WebviewWindow,
+    browser_type: String,
+    profile_name: String,
+) -> Result<(), String> {
+    trusted_window(&window)?;
+    let _mutation = MUTATION
+        .try_lock()
+        .map_err(|_| "Gemini Apps connection is already in progress")?;
+    let header = tauri::async_runtime::spawn_blocking(move || {
+        desktop_session::import_browser(&browser_type, &profile_name)
+    })
+    .await
+    .map_err(|_| "Gemini browser import failed")??;
+    let header = GeminiAppsProvider::verify_session(&header, FetchContext::default().web_timeout)
+        .await
+        .map_err(|error| codexbar::logging::safe_error_message(&error))?;
+    replace(&app, &header)
 }
 
 #[tauri::command]
 pub async fn disconnect_gemini_apps(app: tauri::AppHandle) -> Result<(), String> {
+    revoke(&app)
+}
+
+pub(super) fn revoke(app: &tauri::AppHandle) -> Result<(), String> {
     let _mutation = MUTATION
         .try_lock()
         .map_err(|_| "Gemini Apps connection is already in progress")?;
-    changed(&app, None)
+    // Revoke first, even if the browser's subsequent cleanup fails.
+    changed(app, None)?;
+    browser::clear(app)
+}
+
+fn replace(app: &tauri::AppHandle, header: &str) -> Result<(), String> {
+    let old = ManualCookies::load();
+    let old = browser::selection(old.get("geminiapps"));
+    changed(app, Some(header))?;
+    // Only retire the previous profile once its replacement has been saved.
+    if let Some(old) = old.filter(|id| Some(*id) != browser::selection(Some(header)))
+        && browser::retire(app, old).is_err()
+    {
+        tracing::warn!("Could not clear the previous Gemini browser; disconnect can retry cleanup");
+    }
+    if browser::selection(Some(header)).is_none() && browser::cancel(app).is_err() {
+        tracing::warn!("Could not clear unfinished Gemini sign-in; disconnect can retry cleanup");
+    }
+    Ok(())
+}
+
+fn trusted_window(window: &tauri::WebviewWindow) -> Result<(), String> {
+    let url = window.url().map_err(|_| "Connection window unavailable")?;
+    if matches!(window.label(), "main" | "settings")
+        && (matches!(url.scheme(), "tauri" | "http" | "https")
+            && matches!(url.host_str(), Some("tauri.localhost" | "localhost")))
+    {
+        Ok(())
+    } else {
+        Err("Connection commands are available only in CodexBar settings".into())
+    }
+}
+
+#[tauri::command]
+pub async fn begin_gemini_browser(
+    app: tauri::AppHandle,
+    window: tauri::WebviewWindow,
+) -> Result<(), String> {
+    trusted_window(&window)?;
+    let _mutation = MUTATION
+        .try_lock()
+        .map_err(|_| "Gemini Apps connection is already in progress")?;
+    browser::begin(&app)
+}
+
+#[tauri::command]
+pub async fn finish_gemini_browser(
+    app: tauri::AppHandle,
+    window: tauri::WebviewWindow,
+) -> Result<(), String> {
+    trusted_window(&window)?;
+    let _mutation = MUTATION
+        .try_lock()
+        .map_err(|_| "Gemini Apps connection is already in progress")?;
+    let marker = browser::finish(&app).await?;
+    replace(&app, &marker)?;
+    browser::complete(&app);
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn cancel_gemini_browser(
+    app: tauri::AppHandle,
+    window: tauri::WebviewWindow,
+) -> Result<(), String> {
+    trusted_window(&window)?;
+    let _mutation = MUTATION
+        .try_lock()
+        .map_err(|_| "Gemini Apps connection is already in progress")?;
+    browser::cancel(&app)
 }

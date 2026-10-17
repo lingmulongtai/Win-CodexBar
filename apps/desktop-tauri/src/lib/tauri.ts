@@ -2,13 +2,19 @@ import { invoke } from "@tauri-apps/api/core";
 import type { MobileNetworkAddresses, MobileSharingStatus } from "../types/bridge";
 
 export const getMobileSharingStatus = () => invoke<MobileSharingStatus>("get_mobile_sharing_status");
+export const getProviderQuotaHistory = (providerId: string, expectedUpdatedAt: string) => invoke<import("../types/bridge").ProviderQuotaHistorySeries[]>("get_provider_quota_history", { providerId, expectedUpdatedAt });
 export const getMobileNetworkAddresses = () => invoke<MobileNetworkAddresses>("get_mobile_network_addresses");
 export const configureMobileSharing = (enabled: boolean, address: string, port: number) => invoke<MobileSharingStatus>("configure_mobile_sharing", { enabled, address, port });
 export const getMobilePairingCode = () => invoke<string>("get_mobile_pairing_code");
 export const revokeMobilePairing = () => invoke<MobileSharingStatus>("revoke_mobile_pairing");
 export const setMobileRemoteSettings = (allowed: boolean) => invoke<MobileSharingStatus>("set_mobile_remote_settings", { allowed });
 export const connectGeminiApps = () => invoke<void>("connect_gemini_apps");
+export const listGeminiBrowserProfiles = (browserType: string) => invoke<string[]>("list_gemini_browser_profiles", { browserType });
+export const connectGeminiAppsFromBrowser = (browserType: string, profileName: string) => invoke<void>("connect_gemini_apps_from_browser", { browserType, profileName });
 export const disconnectGeminiApps = () => invoke<void>("disconnect_gemini_apps");
+export const beginGeminiBrowser = () => invoke<void>("begin_gemini_browser");
+export const finishGeminiBrowser = () => invoke<void>("finish_gemini_browser");
+export const cancelGeminiBrowser = () => invoke<void>("cancel_gemini_browser");
 import type {
   HooksConfigSave,
   HooksConfigSnapshot,

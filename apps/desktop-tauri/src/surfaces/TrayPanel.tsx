@@ -12,6 +12,7 @@ import MenuSurface, { MenuEmpty } from "../components/MenuSurface";
 import UpdateBanner from "../components/UpdateBanner";
 import ProviderGrid from "../components/ProviderGrid";
 import AgentSessions from "../components/AgentSessions";
+import ProviderQuotaHistory from "../components/ProviderQuotaHistory";
 import { accentSelectionStyle } from "../lib/menuSelection";
 import { filterUsageSpendSummaryForOverview } from "../lib/usageSpendSharing";
 
@@ -100,6 +101,7 @@ export default function TrayPanel({ state }: { state: BootstrapState }) {
           accentColor={settings.providerAccentColors[p.providerId]}
           onLayoutChange={requestLayout}
         />
+        {isSelected && <ProviderQuotaHistory key={p.providerId} provider={p} t={t} onLayoutChange={requestLayout} />}
       </div>
     );
   };

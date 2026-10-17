@@ -38,6 +38,7 @@ const tauriMocks = vi.hoisted(() => ({
   openProviderStatusPage: vi.fn(),
   getProviderStatuses: vi.fn(),
   getProviderChartData: vi.fn(),
+  getProviderQuotaHistory: vi.fn().mockResolvedValue([]),
   getCurrentSurfaceState: vi.fn(),
   getLocaleStrings: vi.fn(),
   setUiLanguage: vi.fn(),
@@ -272,6 +273,7 @@ function emitEvent(event: string, payload: unknown) {
 describe("TrayPanel provider grid", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    tauriMocks.getProviderQuotaHistory.mockResolvedValue([]);
     eventMocks.listeners.clear();
     tauriMocks.claudeReconciliationState.mockResolvedValue(null);
     tauriMocks.getDeepSeekPricingStatus.mockResolvedValue(null);

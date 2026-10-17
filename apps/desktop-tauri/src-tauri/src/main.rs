@@ -9,6 +9,7 @@ mod commands;
 mod events;
 mod floatbar;
 mod geometry_store;
+mod ipc_guard;
 mod mobile_bridge;
 mod mobile_network;
 mod powertoys;
@@ -246,9 +247,10 @@ fn main() {
         }))
     };
     builder
-        .invoke_handler(tauri::generate_handler![
+        .invoke_handler(ipc_guard::guard(tauri::generate_handler![
             commands::get_bootstrap_state,
             mobile_bridge::get_mobile_sharing_status,
+            mobile_bridge::get_provider_quota_history,
             mobile_network::get_mobile_network_addresses,
             mobile_bridge::configure_mobile_sharing,
             mobile_bridge::get_mobile_pairing_code,
@@ -288,7 +290,12 @@ fn main() {
             commands::claude_account_switch,
             commands::grok_accounts_list,
             commands::connect_gemini_apps,
+            commands::list_gemini_browser_profiles,
+            commands::connect_gemini_apps_from_browser,
             commands::disconnect_gemini_apps,
+            commands::begin_gemini_browser,
+            commands::finish_gemini_browser,
+            commands::cancel_gemini_browser,
             commands::grok_account_add,
             commands::grok_account_reauthenticate,
             commands::grok_account_cancel_login,
@@ -388,7 +395,7 @@ fn main() {
             floatbar::set_float_bar_click_through,
             floatbar::resize_float_bar,
             floatbar::set_float_bar_orientation,
-        ])
+        ]))
         .setup(move |app| {
             if let Err(error) = codexbar::providers::claude::accounts::cleanup_abandoned_logins() {
                 tracing::warn!("failed to clean abandoned Claude sign-in directories: {error}");
