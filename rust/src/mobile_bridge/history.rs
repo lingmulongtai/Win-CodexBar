@@ -8,7 +8,7 @@ const RETENTION: i64 = 90 * 86400;
 // Keep a time-based archive. Repeatedly halving a 128-point ring makes almost
 // every older day disappear at a normal refresh cadence.
 const BUCKET_SECONDS: i64 = 10 * 60;
-const MAX_SAMPLES: usize = 2 * (RETENTION / BUCKET_SECONDS) as usize + 2;
+const MAX_SAMPLES: usize = 2 * 90 * 24 * 6 + 2; // Two samples per ten-minute bucket, for 90 days.
 const MAX_STORE_BYTES: u64 = 32 * 1024 * 1024;
 // DPAPI ciphertext is base64-encoded inside a JSON envelope on Windows.
 const MAX_PLAINTEXT_BYTES: u64 = MAX_STORE_BYTES / 4 * 3 - 4096;
