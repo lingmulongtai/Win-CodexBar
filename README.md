@@ -43,7 +43,9 @@ The following native Windows captures use the downloaded, published **v0.70.6 EX
 
 ![Published v0.70.6 Gemini Apps usage (demo data)](docs/images/mobile-connect/windows-v0.70.6-gemini-usage-ja.jpg)
 
-Dedicated connection controls in the local **v0.71.1 release candidate**, captured from its actual Windows EXE with an anonymous profile. Opening sign-in does not declare the connection authenticated; the multi-hour authenticated test is still pending. [Candidate checks and commits](docs/releases/v0.71.1.md)
+The original local **v0.71.1 release candidate** is now receiving authenticated quota through its dedicated browser; long-duration verification is in progress. Development changes add explicit browser/profile import, including Vivaldi, and recovery after two-step verification. Those source changes are not installed on the PC being monitored, so its working connection stays intact. [Candidate checks and commits](docs/releases/v0.71.1.md)
+
+Dedicated-mode controls captured from the initial October 17 candidate's actual Windows EXE with an anonymous profile, before the browser-import controls were added:
 
 ![Native Windows dedicated Gemini connection controls, local v0.71.1 candidate](docs/images/mobile-connect/windows-gemini-browser-development-ja.png)
 
