@@ -12,6 +12,46 @@ pub fn import() -> Result<String, String> {
     import_from(&root)
 }
 
+/// Explicitly chosen Chromium profile only; never merge Google sessions from
+/// multiple profiles or fall back to a different installed browser.
+pub fn import_browser(browser_type: &str, profile_name: &str) -> Result<String, String> {
+    use crate::browser::detection::{BrowserDetector, BrowserType};
+    let kind = BrowserType::all()
+        .iter()
+        .copied()
+        .find(|kind| kind.key() == browser_type && kind.is_chromium_based())
+        .ok_or("Choose a supported Chromium browser")?;
+    let browser = BrowserDetector::detect(kind).ok_or("Selected browser is unavailable")?;
+    import_profile(&browser, profile_name)
+}
+
+fn import_profile(
+    browser: &crate::browser::detection::DetectedBrowser,
+    profile_name: &str,
+) -> Result<String, String> {
+    let profile = browser
+        .profiles
+        .iter()
+        .find(|profile| profile.name == profile_name)
+        .ok_or("Choose a profile from the selected browser")?;
+    let connection = crate::core::open_readonly_sqlite_connection(
+        &profile.cookies_db_path(),
+        crate::core::DEFAULT_SQLITE_BUSY_TIMEOUT,
+    )
+    .map_err(
+        |_| "The selected browser's cookie database is busy. Close that browser once and retry.",
+    )?;
+    let key = CookieExtractor::get_chromium_encryption_key(
+        &profile.local_state_path(&browser.user_data_dir),
+    )
+    .ok();
+    read(&connection, key.as_deref().unwrap_or(&[])).map_err(|error| {
+        if error == UNAVAILABLE {
+            "The selected browser's Gemini cookies are unavailable. Sign in to Gemini in that profile and retry.".into()
+        } else { error }
+    })
+}
+
 fn import_from(root: &Path) -> Result<String, String> {
     let db = root.join("Network").join("Cookies");
     if !db.is_file() {
@@ -78,7 +118,9 @@ fn read(connection: &rusqlite::Connection, key: &[u8]) -> Result<String, String>
         }
     }
     if cookies.is_empty() {
-        return Err("Sign in to the Google Gemini desktop app before connecting.".into());
+        return Err(
+            "Sign in to Gemini in the selected app or browser profile before connecting.".into(),
+        );
     }
     Ok(cookies
         .into_iter()
@@ -224,5 +266,44 @@ mod tests {
         assert_eq!(read(&db, &[42; 32]).unwrap(), "SID=test-session");
         db.execute("UPDATE meta SET value = '25'", []).unwrap();
         assert!(read(&db, &[42; 32]).is_err());
+    }
+
+    #[test]
+    fn browser_import_reads_only_the_explicit_profile_and_refuses_other_names() {
+        use crate::browser::detection::{BrowserProfile, BrowserType, DetectedBrowser};
+        let root = tempfile::tempdir().unwrap();
+        let mut profiles = Vec::new();
+        for (name, value) in [
+            ("Default", "first-session"),
+            ("Profile 1", "second-session"),
+        ] {
+            let path = root.path().join(name);
+            std::fs::create_dir_all(path.join("Network")).unwrap();
+            let db = rusqlite::Connection::open(path.join("Network/Cookies")).unwrap();
+            db.execute_batch("CREATE TABLE cookies (host_key TEXT, path TEXT, name TEXT, value TEXT, encrypted_value BLOB, expires_utc INTEGER); CREATE TABLE meta (key TEXT, value TEXT); INSERT INTO meta VALUES ('version', '24');").unwrap();
+            add(&db, ".google.com", "/", "SID", value, 0);
+            profiles.push(BrowserProfile {
+                name: name.into(),
+                path,
+                is_default: name == "Default",
+            });
+        }
+        let browser = DetectedBrowser {
+            browser_type: BrowserType::Vivaldi,
+            user_data_dir: root.path().to_path_buf(),
+            profiles,
+        };
+        assert_eq!(
+            import_profile(&browser, "Default").unwrap(),
+            "SID=first-session"
+        );
+        assert_eq!(
+            import_profile(&browser, "Profile 1").unwrap(),
+            "SID=second-session"
+        );
+        assert!(import_profile(&browser, "../Other").is_err());
+        assert!(import_profile(&browser, "Unknown").is_err());
+        assert!(import_browser("unknown", "Default").is_err());
+        assert!(import_browser("firefox", "Default").is_err());
     }
 }
