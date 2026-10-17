@@ -545,8 +545,8 @@ impl ForecastScope {
 
 /// Append-only ring of session/weekly observations for burn estimation.
 ///
-/// ponytail: history is process-local and lost on restart; upgrade path = disk cache
-/// keyed by provider+account once forecast quality justifies persistence.
+/// The chart and the estimator share observations, but only the estimator's
+/// completed-window selection is limited to its short forecast sample count.
 #[derive(Debug, Default)]
 pub struct SessionEquivalentHistoryStore {
     by_scope: HashMap<ForecastScope, ProviderHistory>,
@@ -568,11 +568,11 @@ impl SessionEquivalentHistoryStore {
         scope: &ForecastScope,
         session: Option<PlanUtilizationHistoryEntry>,
         weekly: Option<PlanUtilizationHistoryEntry>,
-        sample_limit: usize,
+        _sample_limit: usize,
     ) {
-        let limit = sample_limit.max(1);
-        // Keep more raw points than completed groups so grouping still has density.
-        let ring = limit.saturating_mul(8).max(24);
+        // A refresh must not truncate history just restored from disk to 56
+        // points (~one hour at a one-minute refresh cadence).
+        let ring = quota_burndown::MAX_SERIES_SAMPLES;
         let hist = self.by_scope.entry(scope.clone()).or_default();
         if let Some(entry) = session {
             push_ring(&mut hist.session, entry, ring);
@@ -1233,8 +1233,46 @@ mod tests {
         }
         let h = store.histories(&scope);
         assert_eq!(h.len(), 1);
-        assert!(h[0].entries.len() <= 7 * 8);
+        assert_eq!(h[0].entries.len(), 30);
         assert!((h[0].entries.last().unwrap().used_percent - 29.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn refreshing_after_restart_preserves_loaded_chart_history() {
+        let scope = ForecastScope::new("codex", Some("account-a"));
+        let base = ts(1_700_500_000);
+        let entries = (0..240)
+            .map(|hour| quota_burndown::PersistedPlanEntry {
+                captured_at: (base + Duration::hours(hour)).to_rfc3339(),
+                used_percent: 10.0,
+                resets_at: None,
+            })
+            .collect();
+        let persisted = vec![quota_burndown::PersistedPlanSeries {
+            name: "session".into(),
+            window_minutes: SESSION_WINDOW_MINUTES,
+            entries,
+        }];
+        let mut restarted = SessionEquivalentHistoryStore::default();
+        restarted.adopt_persisted(&scope, &persisted);
+        restarted.record(
+            &scope,
+            Some(PlanUtilizationHistoryEntry {
+                captured_at: base + Duration::hours(240),
+                used_percent: 20.0,
+                resets_at: None,
+            }),
+            None,
+            SessionEquivalentBurnEstimator::DEFAULT_SAMPLE_LIMIT,
+        );
+        let history = restarted.histories(&scope);
+        assert_eq!(history[0].entries.len(), 241);
+        assert_eq!(history[0].entries[0].captured_at, base);
+        assert!(
+            restarted
+                .histories(&ForecastScope::new("codex", Some("account-b")))
+                .is_empty()
+        );
     }
 
     /// Two accounts on one provider must not share burn samples.
